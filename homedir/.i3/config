@@ -1,0 +1,238 @@
+# i3 config file (v4)
+#
+# JJ's i3 config
+# Copyright (c) 2011-2015 Jonas Jelten <jj@sft.mx>
+#
+# Mod1: meta Mod4: super
+set $mod Mod4
+
+# font for window titles. ISO 10646 = Unicode
+font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
+
+# start a terminal
+bindsym $mod+Return exec urxvt
+
+#bindcode 107 exec ~/bin/screenshot
+#bindcode shift+107 exec ~/bin/screenshot s
+
+#in /etc/local.d/50-setkeycodes.start:
+# setkeycodes 67 162
+# setkeycodes 6c 161
+#remapped by X to: 170 and 169 or now 162 and 161
+bindcode 162 exec sleep 0.3 && ~/bin/rscreen
+bindcode 161 exec sleep 0.3 && ~/bin/rscreen portrait  #~jj/scripts/dpms standby
+
+#bindcode 156 exec dmenu_run
+
+#bindcode 199 exec ~/scripts/touchpad
+
+bindcode shift+122 exec amixer set Capture 5%- > /dev/null
+bindcode shift+123 exec amixer set Capture 5%+ > /dev/null
+bindcode 122 exec amixer set Master 5%- > /dev/null
+bindcode 123 exec amixer set Master 5%+ > /dev/null
+bindcode control+122 exec amixer set Master 15%- > /dev/null
+bindcode control+123 exec amixer set Master 15%+ > /dev/null
+
+bindcode 232 exec xbacklight -dec 10
+bindcode 233 exec xbacklight -inc 10
+bindcode control+232 exec xbacklight -dec 5
+bindcode control+233 exec xbacklight -inc 5
+bindcode control+shift+232 exec xbacklight -dec 1
+bindcode control+shift+233 exec xbacklight -inc 1
+
+#bindcode 248 exec amixer set Capture toggle
+
+bindcode 124 exec ~/bin/i3lockjj && ~/bin/suspend-jj
+bindcode 160 exec ~/bin/i3lockjj
+
+bindcode 150 exec ~/bin/dpms off
+
+bindsym mod1+F4 kill
+
+#dbus-send --system --print-reply --dest="org.freedesktop.ConsoleKit" /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
+#dbus-send --system --print-reply --dest="org.freedesktop.ConsoleKit" /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Restart
+#dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend
+
+
+#for_window [class="urxvt"] border 1pixel
+
+#for_window [class="firefox"] border none
+#for_window [class="Steam"] floating enable
+
+################################################################
+
+# Use Mouse+$mod to drag floating windows to their wanted position
+floating_modifier $mod
+
+
+# kill focused window
+bindsym $mod+Shift+Q kill
+
+# start dmenu (a program launcher)
+bindsym $mod+d exec dmenu_run
+
+# change focus
+bindsym $mod+j focus left
+bindsym $mod+k focus down
+bindsym $mod+l focus up
+bindsym $mod+semicolon focus right
+
+# alternatively, you can use the cursor keys:
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+# move focused window
+bindsym $mod+Shift+J move left
+bindsym $mod+Shift+K move down
+bindsym $mod+Shift+L move up
+bindsym $mod+Shift+colon move right
+
+# alternatively, you can use the cursor keys:
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# split in horizontal orientation
+bindsym $mod+h split h
+
+# split in vertical orientation
+bindsym $mod+v split v
+
+# enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen
+bindsym $mod+Shift+f fullscreen global
+
+# change container layout (stacked, tabbed, default)
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout default
+
+# toggle tiling / floating
+bindsym $mod+Shift+space floating toggle
+
+# change focus between tiling / floating windows
+bindsym $mod+space focus mode_toggle
+
+# focus the parent container
+bindsym $mod+a focus parent
+
+# focus the child container
+bindsym $mod+Shift+a focus child
+
+# switch to workspace
+bindsym $mod+1 workspace 1
+bindsym $mod+2 workspace 2
+bindsym $mod+3 workspace 3
+bindsym $mod+4 workspace 4
+bindsym $mod+5 workspace 5
+bindsym $mod+6 workspace 6
+bindsym $mod+7 workspace 7
+bindsym $mod+8 workspace 8
+bindsym $mod+9 workspace 9
+bindsym $mod+0 workspace 10
+
+# move focused container to workspace
+bindsym $mod+Shift+exclam move workspace 1
+bindsym $mod+Shift+at move workspace 2
+bindsym $mod+Shift+numbersign move workspace 3
+bindsym $mod+Shift+dollar move workspace 4
+bindsym $mod+Shift+percent move workspace 5
+bindsym $mod+Shift+asciicircum move workspace 6
+bindsym $mod+Shift+ampersand move workspace 7
+bindsym $mod+Shift+asterisk move workspace 8
+bindsym $mod+Shift+parenleft move workspace 9
+bindsym $mod+Shift+parenright move workspace 10
+
+# reload the configuration file
+bindsym $mod+Shift+C reload
+# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+bindsym $mod+Shift+R restart
+# exit i3 (logs you out of your X session)
+bindsym $mod+Shift+E exit
+
+# resize window (you can also use the mouse for that)
+mode "resize" {
+	bindsym j resize shrink left 10 px or 10 ppt
+	bindsym Shift+J resize grow   left 10 px or 10 ppt
+
+	bindsym k resize shrink down 10 px or 10 ppt
+	bindsym Shift+K resize grow   down 10 px or 10 ppt
+
+	bindsym l resize shrink up 10 px or 10 ppt
+	bindsym Shift+L resize grow   up 10 px or 10 ppt
+
+	bindsym semicolon resize shrink right 10 px or 10 ppt
+	bindsym Shift+colon resize grow   right 10 px or 10 ppt
+
+	bindsym Left resize shrink left 10 px or 10 ppt
+	bindsym Shift+Left resize grow   left 10 px or 10 ppt
+
+	bindsym Down resize shrink down 10 px or 10 ppt
+	bindsym Shift+Down resize grow   down 10 px or 10 ppt
+
+	bindsym Up resize shrink up 10 px or 10 ppt
+	bindsym Shift+Up resize grow   up 10 px or 10 ppt
+
+	bindsym Right resize shrink right 10 px or 10 ppt
+	bindsym Shift+Right resize grow   right 10 px or 10 ppt
+
+	bindsym Return mode "default"
+	bindsym Escape mode "default"
+}
+
+bindsym $mod+i mode "resize"
+
+# Start i3bar to display a workspace bar (plus the system information i3status
+# finds out, if available)
+
+
+#0. bar, multiple bars possible
+bar {
+
+	output LVDS1
+	output HDMI1
+	output VGA1
+	status_command i3status
+	# position of bar: top or bottom
+	position top
+	# hide or dock the statusbar
+	mode dock
+
+	# or none
+	tray_output LVDS1
+
+	# font xcorefontname
+	# or no # show the numbered workspace buttons
+	workspace_buttons yes
+	colors {
+		background #000000
+		statusline #ffdddd
+		focused_workspace #000000 #11AA00
+		active_workspace #ffffff #444444
+		inactive_workspace #888888 #222222
+		urgent_workspace #ffffff #FF2211
+	}
+}
+
+# colorclass border background text
+client.background       "#000000"
+client.focused          "#5a5b99" "#111177" "#ffffff"
+client.focused_inactive "#333333" "#5f676a" "#ffffff"
+client.unfocused        "#333333" "#222222" "#888888"
+client.urgent           "#2f343a" "#900000" "#ffffff"
+
+
+######################
+# startup things
+######################
+# TODO: use some system-independent launcher script
+
+exec ~/bin/redshift-launch
+exec syndaemon -t -k -i 1 -d
+
+# us international
+#caps:none altwin:meta_alt lv3:rals_switch
+exec setxkbmap us altgr-intl -option ctrl:nocaps

@@ -1,0 +1,114 @@
+! .Xresources, optimized for urxvt, to make it vergil
+!
+! Copyright (c) 2011 Michael Enßlin <michael@ensslin.cc>
+! Copyright (c) 2011-2015 Jonas Jelten <jj@sft.mx>
+!
+! released under GNU GPLv3 or later
+
+
+Xcursor.theme: Simple-and-Soft
+
+
+!!!!!!!!!!!!!!!!!!!!!!
+! urxvt stuff
+!!!!!!!!!!!!!!!!!!!!!!
+
+URxvt.depth: 32
+URxvt.background: rgba:0000/0000/1800/dddd
+URxvt.foreground: White
+
+URxvt.colorIT: #87af5f
+URxvt.colorBD: #d7d7d7
+URxvt.colorUL: #87afd7
+
+! see /usr/share/fonts/misc/fonts.alias
+!URxvt.font: 8x13
+!URxvt.font: xft:terminus:size=10
+URxvt.font: xft:DejaVuSansMono:size=09:antialias=true:hinting=true
+
+! scrollbar style - rxvt (default), plain (most compact), next, or xterm
+URxvt.scrollstyle: rxvt
+URxvt.scrollBar_right: true
+
+! funny unwanted keycombo
+URxvt*iso14755: False
+URxvt*iso14755_52: False
+
+! active perl extensions (urxvt-perls)
+URxvt.perl-ext-common: default,url-select,clipboard,keyboard-select,matcher
+
+! lol transparency
+URxvt*transparent: false
+
+! 0 to 99 darkens, 101 to 200 lightens
+URxvt*shading: 20
+
+
+URxvt.keysym.S-C-U: perl:url-select:select_next
+URxvt.underlineURLs: true
+URxvt.url-select.underline: true
+URxvt.matcher.button: 1
+URxvt.url-launcher: /usr/bin/xdg-open
+
+URxvt.keysym.Shift-Control-C: perl:clipboard:copy
+URxvt.keysym.Shift-Control-V: perl:clipboard:paste
+
+URxvt.keysym.Shift-Control-S: perl:keyboard-select:search
+URxvt.keysym.Shift-Control-A: perl:keyboard-select:activate
+URxvt.keysym.M-u:             perl:url-select:select_next
+URxvt.keysym.M-Escape:        perl:keyboard-select:activate
+URxvt.keysym.M-s:             perl:keyboard-select:search
+URxvt.keysym.Shift-Up:        command:\033]720;1\007
+URxvt.keysym.Shift-Down:      command:\033]721;1\007
+
+! window bell via white flash
+URxvt.visualBell: false
+
+! better scrolling behaviour
+URxvt.scrollTtyOutput: false
+URxvt.scrollTtyKeypress: true
+URxvt.scrollWithBuffer: true
+
+! when secondary application scrolls, dont remember lines
+URxvt.secondaryScroll: false
+
+! enables secondary scrolling in e.g. man
+URxvt.secondaryWheel: true
+URxvt.secondaryScreen: true
+
+
+! delimiter chars for double click selection
+Urxvt.cutchars: ()*,<>[]{}|
+
+! scrollback buffer size
+URxvt.saveLines: 65536
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! xterm stuff
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! colors
+XTerm*background:             rgb:00/00/18
+XTerm*foreground:             rgb:ff/ff/ff
+XTerm*pointerColor:           white
+XTerm*pointerColorBackground: black
+
+! fonts
+XTerm*font: 8x13
+XTerm*faceName: DejaVuSansMono:size=10:antialias=true:hinting=true
+
+! utf8 ftw
+XTerm*utf8: true
+XTerm*locale: true
+
+! fix alt key
+XTerm*metaSendsEscape: true
+
+! scrollback
+Xterm*saveLines:        65536
+XTerm*scrollBar:        true
+XTerm*rightScrollBar:   true
+XTerm*scrollTtyOutput:  false
+XTerm*borderWidth: 0
+
