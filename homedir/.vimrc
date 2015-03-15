@@ -2,7 +2,7 @@
 " JJ's vimrc
 "
 " released under the GPLv3 or later
-" (c) 2008 - 2014 Jonas Jelten
+" (c) 2008 - 2015 Jonas Jelten
 
 
 syntax on
@@ -101,9 +101,9 @@ function! WhitespaceSpace(x)
 	setlocal expandtab
 	call WhitespaceIndentWidth(a:x)
 
-	" tab /\t/
+	" tab indent /^\t+\zs/
 	" trailing ws /\s\+\%#\@<!$/
-	:2match evilws /^\t+\|\s\+\%#\@<!$/
+	:2match evilws /^\t+\zs\|\s\+\%#\@<!$/
 endfunction
 
 " indent with tabs:
@@ -125,6 +125,7 @@ autocmd BufRead /usr/src/linux* call WhitespaceTab(8)
 
 cmap ws2 call WhitespaceSpace(2)
 cmap ws4 call WhitespaceSpace(4)
+cmap ws8 call WhitespaceSpace(8)
 cmap wt4 call WhitespaceTab(4)
 cmap wt8 call WhitespaceTab(8)
 
