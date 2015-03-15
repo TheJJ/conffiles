@@ -1,5 +1,5 @@
 # JJ's zshrc
-# Copyright (c) 2011 - 2014 Jonas Jelten
+# Copyright (c) 2011 - 2015 Jonas Jelten
 #
 # Released under GPLv3 or later.
 #
@@ -14,6 +14,9 @@
 
 # if not running interactively, don't do anything!
 [[ $- != *i* ]] && return
+
+# source system profile
+[[ -r /etc/profile ]] && source /etc/profile
 
 # home bin dir path
 homebindir="$HOME/bin"
@@ -49,6 +52,7 @@ fi
 export VISUAL="vim"
 export EDITOR=$VISUAL
 export PAGER="less -S -i"
+export GCC_COLORS="yes"
 
 # locales
 export LANG="en_US.UTF-8"
@@ -86,6 +90,7 @@ alias p3='python3'
 alias p2='python2'
 alias py3='p3'
 alias py2='p2'
+alias p='p3'
 alias dmesg='dmesg -L'
 alias youtube-dl='noglob youtube-dl'
 alias em='emacs -nw'
@@ -94,7 +99,6 @@ alias gdb='gdb -q'
 alias bc='bc -q -l'
 alias cp='cp --reflink=auto'
 alias ls='ls --color=auto'
-alias diff='colordiff'
 alias grep='grep --color=auto'
 alias grepi='grep -i'
 alias ag="ag -S"
@@ -111,6 +115,7 @@ alias vga="vg --show-leak-kinds=all"
 alias vgd="vg --vgdb-error=1"
 alias vge="vg --vgdb-error=0"
 alias gdbv="gdb -ex 'set architecture i386:x86-64:intel' -ex 'target remote | vgdb'"
+alias cmatrix="cmatrix -a -b"
 
 
 alias gschichten='fortune'
@@ -138,7 +143,10 @@ alias ls=' ls --color=auto'
 alias nemo='nemo --no-desktop'
 
 alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -delete"
+alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
+alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.argv[1]))"'
 
+hash colordiff 2>/dev/null && alias diff='colordiff'
 
 #####################################
 # git-shortcuts
@@ -233,14 +241,14 @@ alias git-die="git diff --word-diff-regex=. "
 # find by name, optionally in dir
 # fname "search" ["startdirectory"]
 function fname() {
-	if [[ $# -eq 2 ]]; then
-		dir=$2
-		what=$1
+	if [[ $# -ge 2 ]]; then
+		dir=$1
+		shift
+		what=$@
 	else
 		dir="."
 		what="$@"
 	fi
-	echo "[[ searching in $dir for $what ]]" >&2
 	find $dir -iname "*$what*"
 }
 
@@ -253,6 +261,7 @@ function glxrenderer() { glxinfo | grep -E "(version |renderer )" }
 # gentoo-package query
 function xie() { eix -e $(eix --only-names $1 | dmenu -i -l 10) }
 
+# gcc arch flags
 function gccflags() {
 	if [[ x$1 == "x" ]]; then
 		arch=native;
@@ -560,11 +569,11 @@ zstyle ':compinstall' filename '/home/jj/.zshrc'
 
 
 # init the zsh completion
-autoload -Uz compinit
+autoload -U compinit
 compinit
 
 # init the bash compatibility completion
-autoload -Uz bashcompinit
+autoload -U bashcompinit
 bashcompinit
 
 # manpages
