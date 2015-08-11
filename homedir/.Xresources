@@ -17,9 +17,14 @@ URxvt.depth: 32
 URxvt.background: rgba:0000/0000/1800/dddd
 URxvt.foreground: White
 
+! italic bold and underline colors
 URxvt.colorIT: #87af5f
 URxvt.colorBD: #d7d7d7
 URxvt.colorUL: #87afd7
+
+! more readable blue
+URxvt.color4: rgb:5c/5c/ff
+URxvt.color12: rgb:5c/5c/ff
 
 ! see /usr/share/fonts/misc/fonts.alias
 !URxvt.font: 8x13
@@ -81,7 +86,7 @@ URxvt.secondaryScreen: true
 Urxvt.cutchars: ()*,<>[]{}|
 
 ! scrollback buffer size
-URxvt.saveLines: 65536
+URxvt.saveLines: 262144
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -112,3 +117,12 @@ XTerm*rightScrollBar:   true
 XTerm*scrollTtyOutput:  false
 XTerm*borderWidth: 0
 
+! subpixel hinting
+! only for non-fontconfig-aware applications, see .config/fontconfig
+!Xft.antialias:  1
+!Xft.autohint:   0
+!Xft.dpi:        96
+!Xft.hinting:    1
+!Xft.hintstyle:  hintfull
+!Xft.lcdfilter:  lcdlight
+!Xft.rgba:       rgb

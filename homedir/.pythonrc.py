@@ -2,7 +2,7 @@
 #
 # jj's pythonrc
 #
-# Copyright (c) 2012-2014 Jonas Jelten <jj@sft.mx>
+# Copyright (c) 2012-2015 Jonas Jelten <jj@sft.mx>
 #
 # Licensed GPLv3 or later.
 

@@ -29,8 +29,10 @@ scriptencoding utf-8
 "set list listchars=tab:˫╺╴,eol:¬,trail:·,extends:→,precedes:←
 set list listchars=tab:∘۰,eol:¬,trail:·,extends:→,precedes:←
 
-colorscheme ron
 set background=dark
+colorscheme ron
+highlight SpecialKey ctermfg=darkgreen
+highlight SpecialKey guifg=#808080
 
 " Tell vim to remember certain things when we exit
 "  '10  :  marks will be remembered for up to 10 previously edited files
@@ -64,10 +66,13 @@ autocmd BufWritePost * if &diff == 1 | diffupdate | endif
 " refresh vimrc after saving
 autocmd BufWritePost ~/.vimrc source %
 
+" autosave delay, cursorhold trigger, default: 4000ms
+setl updatetime=400
 
-" highlight the word under cursor (pretty inperformant)
-"highlight WordUnderCursor cterm=underline "ctermfg=7
-"autocmd CursorMoved * exe printf('match WordUnderCursor /\V\<%s\>/', escape(expand('<cword>'), '/\'))
+" highlight the word under cursor (CursorMoved is inperformant)
+highlight WordUnderCursor cterm=underline "ctermfg=7
+autocmd CursorHold * exe printf('match WordUnderCursor /\V\<%s\>/', escape(expand('<cword>'), '/\'))
+
 
 " new navigation keys
 inoremap <M-j> <Esc>hi

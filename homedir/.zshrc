@@ -85,6 +85,7 @@ REPORTTIME=1
 # aliases for stuff
 ############################
 
+alias woman="man"
 alias python3="python3 -q"
 alias p3='python3'
 alias p2='python2'
@@ -96,6 +97,8 @@ alias youtube-dl='noglob youtube-dl'
 alias em='emacs -nw'
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
+alias gdbs='gdbserver --once localhost:8888'
+alias gdbc='gdb -q -ex "target remote localhost:8888"'
 alias bc='bc -q -l'
 alias cp='cp --reflink=auto'
 alias ls='ls --color=auto'
@@ -106,17 +109,23 @@ alias more='less'
 alias most='less'
 alias less='less -R'
 alias mkdir='mkdir -p -v'
-alias nano='nano -w -S -u -F -A'
+alias nano='nano -w -S -F -A'
 alias ..='cd ..'
+alias ../../='cd ../../'
 alias cd..='..'
+alias cmatrix="cmatrix -a -b"
 alias rd="cd $(pwd)"
+
+# valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes"
 alias vga="vg --show-leak-kinds=all"
-alias vgd="vg --vgdb-error=1"
-alias vge="vg --vgdb-error=0"
-alias gdbv="gdb -ex 'set architecture i386:x86-64:intel' -ex 'target remote | vgdb'"
-alias cmatrix="cmatrix -a -b"
-
+alias vgs="vg --vgdb-error=1"
+alias vgg="vg --vgdb-error=0 --vgdb=full"
+function gdbv() {
+	args=""
+	gdb -ex "set architecture i386:x86-64:intel" -ex "target remote | vgdb $args" $*
+}
+export vg="valgrind --leak-check=full --track-origins=yes --vgdb-error=0 --vgdb=full"
 
 alias gschichten='fortune'
 alias lol="fortune | ponysay"
@@ -242,12 +251,12 @@ alias git-die="git diff --word-diff-regex=. "
 # fname "search" ["startdirectory"]
 function fname() {
 	if [[ $# -ge 2 ]]; then
-		dir=$1
+		local dir=$1
 		shift
-		what=$@
+		local what=$@
 	else
-		dir="."
-		what="$@"
+		local dir="."
+		local what="$@"
 	fi
 	find $dir -iname "*$what*"
 }
@@ -261,20 +270,105 @@ function glxrenderer() { glxinfo | grep -E "(version |renderer )" }
 # gentoo-package query
 function xie() { eix -e $(eix --only-names $1 | dmenu -i -l 10) }
 
+# set xterm title
+function title() { print -Pn "\e]0;$1 \a" }
+
+# message dialog
+function gtkdialog() {
+	if [[ "x$1" != "x" ]]; then
+		local title=$1
+	else
+		return
+	fi
+
+	if [[ "x$2" != "x" ]]; then
+		local addition="d.format_secondary_text('$2');"
+	else
+		local addition=""
+	fi
+
+	python -c "from gi.repository import Gtk; d = Gtk.MessageDialog(None, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, '$title'); $addition d.connect('delete-event', Gtk.main_quit); d.connect('response', Gtk.main_quit); d.show_all(); Gtk.main();"
+}
+
 # gcc arch flags
 function gccflags() {
 	if [[ x$1 == "x" ]]; then
-		arch=native;
+		local arch=native;
 	else
-		arch=$1
+		local arch=$1
 		shift
 	fi
 
-	tmpfile=$(mktemp)
+	local tmpfile=$(mktemp)
 	gcc -c -Q -march=$arch $* --help=target -o $tmpfile
 	rm -f $tmpfile
 	echo "----------------------------------"
+	echo "=== expanded invocation:"
 	gcc '-###' -e -v -march=$arch $* /usr/include/stdlib.h 2>&1
+}
+
+# run shell as user, with benefits of env_keep of sudo
+function sudosh() {
+	function usage() {
+		echo "sudosh <user>"
+		echo "run the current shell as another user"
+	}
+	if [[ $# -ge 2 ]]; then
+		usage
+		return
+	elif [[ $1 == "-h" || $1 == "--help" ]]; then
+		usage
+		return
+	elif [[ x$1 != "x" ]]; then
+		user="$1"
+	else
+		user="root"
+	fi
+
+	sudo -u $user $SHELL
+}
+
+# connect to host=$1 port=$2 via tor and listen at $3
+function torcat() {
+	torhost="localhost"
+	torport=9050
+
+	listenport=0
+	remoteport=0
+	host=0
+
+	while getopts -o"l:p:h:" -l "help" -- "$@"; do
+		echo $opt
+		case $opt in
+			l)
+				listenport=$OPTARG
+				;;
+			p)
+				remoteport=$OPTARG
+				;;
+			h)
+				host=$OPTARG
+				;;
+			help)
+				echo "Use the source, luke."
+				;;
+			\?)
+				echo "Invalid option: -$OPTARG" >&2
+				return
+				;;
+			:)
+				echo "Option -$OPTARG requires an argument." >&2
+				return
+				;;
+			--)
+				shift
+				break
+		esac
+	done
+
+	echo "starting socat" >&2
+
+	socat -ddd TCP4-LISTEN:${listenport},fork SOCKS4A:${torhost}:${host}:${remoteport},socksport=${torport}
 }
 
 
@@ -303,8 +397,8 @@ alias help=run-help
 
 # command history
 HISTFILE=~/.zsh-histfile
-HISTSIZE=100000
-SAVEHIST=1000000
+HISTSIZE=10000000
+SAVEHIST=$HISTSIZE
 setopt append_history share_history extended_history histverify histignorespace histignoredups
 
 # directory history and stack
@@ -565,7 +659,7 @@ zstyle ':completion:*' select-prompt %S selection at %p%s
 zstyle ':completion:*' squeeze-slashes true
 zstyle ':completion:*' substitute 1
 zstyle ':completion:*' verbose true
-zstyle ':compinstall' filename '/home/jj/.zshrc'
+zstyle ':compinstall' filename '~/.zshrc'
 
 
 # init the zsh completion

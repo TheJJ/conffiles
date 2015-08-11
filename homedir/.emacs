@@ -1,52 +1,71 @@
 ;; JJ's emacs configuration
-;
-; designed to be portable & epic
-;
-; (c) 2011-2014 Jonas Jelten
-;
-;
-; released under GPLv3 or later
+;;
+;; designed to be portable & epic
+;;
+;; (c) 2011-2015 Jonas Jelten
+;;
+;;
+;; released under GPLv3 or later
 
 
 (setq debug-on-error nil)
+(setq confirm-kill-emacs 'yes-or-no-p)
 
-;customized variables, set by `customize`
+;;customized variables, set by `customize`
 (custom-set-variables
-  '(ansi-color-names-vector ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
-  '(backward-delete-char-untabify-method nil)
-  '(custom-enabled-themes (quote (deeper-blue)))
-  '(doc-view-continuous t)
-  '(fill-column 76)
-  '(inhibit-startup-screen t)
-  '(scroll-bar-mode (quote right))
-  '(semantic-python-dependency-system-include-path (quote ("/usr/lib64/python3.4/")))
-  '(send-mail-function (quote sendmail-send-it)))
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector
+   ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
+ '(backward-delete-char-untabify-method nil)
+ '(company-auto-complete nil)
+ '(company-auto-complete-chars (quote (32 95 40 41 46 39)))
+ '(company-clang-arguments (quote ("-std=c++14")))
+ '(company-clang-executable "/usr/bin/clang++")
+ '(company-idle-delay 0.2)
+ '(company-statistics-mode t)
+ '(company-statistics-size 2000)
+ '(custom-enabled-themes (quote (deeper-blue)))
+ '(doc-view-continuous t)
+ '(fill-column 76)
+ '(global-company-mode t)
+ '(inhibit-startup-screen t)
+ '(jit-lock-defer-time 0.01)
+ '(scroll-bar-mode (quote right))
+ '(semantic-python-dependency-system-include-path (quote ("/usr/lib64/python3.4/")))
+ '(send-mail-function (quote sendmail-send-it)))
 
-;customized font colors and sizes
+;;customized font colors and sizes
 (custom-set-faces
-  '(default ((t (:inherit nil :stipple nil :background "#14151f" :foreground "#f5f5f5" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))) nil "main font and background")
-  '(font-lock-comment-face ((t (:foreground "gray80"))))
-  '(hl-line ((t (:inherit highlight :background "midnight blue"))))
-  '(magit-item-highlight ((t (:inherit nil))))
-  '(region ((t (:background "#3030d0"))))
-  '(semantic-decoration-on-unknown-includes ((t (:background "#203030"))))
-  '(semantic-highlight-func-current-tag-face ((t (:background "gray15"))))
-  '(whitespace-indentation ((t (:foreground "#797979"))))
-  '(whitespace-space ((t (:background "default"))))
-  '(whitespace-space-after-tab ((t (:background "RoyalBlue4" :foreground "firebrick"))))
-  '(whitespace-tab ((t (:background "#292929" :foreground "#a9a9a9")))))
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:inherit nil :stipple nil :background "#14151f" :foreground "#f5f5f5" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))) nil "main font and background")
+ '(font-lock-comment-face ((t (:foreground "gray80"))))
+ '(hl-line ((t (:inherit highlight :background "midnight blue"))))
+ '(magit-item-highlight ((t (:inherit nil))))
+ '(region ((t (:background "#3030d0"))))
+ '(semantic-decoration-on-unknown-includes ((t (:background "#203030"))))
+ '(semantic-highlight-func-current-tag-face ((t (:background "gray15"))))
+ '(whitespace-indentation ((t (:foreground "#797979"))))
+ '(whitespace-space ((t (:background "default"))))
+ '(whitespace-space-after-tab ((t (:background "RoyalBlue4" :foreground "firebrick"))))
+ '(whitespace-tab ((t (:background "#292929" :foreground "#a9a9a9")))))
 
 
 (defvar senator-tag-ring (make-ring 20)
   "Ring of tags for use with cut and paste.")
 
-;(condition-case err
-;                (load-auctex)
-;                (file-error (message "auctex not found, skipping load") nil))
 
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives '("marmalade" . "https://marmalade-repo.org/packages/") t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; enable funny modes
+;; enable funny modes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (global-ede-mode t)
@@ -60,220 +79,70 @@
 
 (ede-enable-generic-projects)
 
-(setq global-auto-complete-mode t)
+;;remember last position in file
+(require 'saveplace)
+(setq-default save-place t)
+(setq save-place-file "~/.emacs.d/line-saved-places")
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; enable auto completion
+;; enable auto completion
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(when (require 'auto-complete nil 'noerror)
+(defun ac-enable-semantic ()
+  "Enable semantic auto completion for current mode"
+  (interactive)
 
-  (defun ac-enable-popups ()
-    "Enable auto-complete-mode"
-    (interactive)
+  (semantic-mode t)
 
-    ;(message "enabling auto-complete-mode")
-    (require 'auto-complete-config)
-    (ac-config-default)
-    (auto-complete-mode t)
-    (global-auto-complete-mode t)
-
-    (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict.d")
-    (setq ac-comphist-file (expand-file-name "~/.emacs.d/ac-comphist.dat"))
-
-    (setq-default ac-auto-start 3) ;start completing after n chars
-
-    ;(ac-set-trigger-key "TAB")
-
-    (add-to-list 'ac-modes 'haskell-mode)
-    (add-to-list 'ac-modes 'python-mode)
-    (add-to-list 'ac-modes 'latex-mode)
-    (add-to-list 'ac-modes 'c-mode)
-    (add-to-list 'ac-modes 'c++-mode)
-    (add-to-list 'ac-modes 'fundamental-mode)
-
-    (setq ac-use-fuzzy t)
-    (setq ac-ignore-case 'smart) ; ignore case except contains upper
-    ;(setq ac-menu-height 6) ; number of lines in completion popup
-    )
+  (require 'cedet)
+  (require 'semantic)
+  (require 'semantic/sb)
+  (require 'semantic/ia)
+  (require 'semantic/symref)
+  (require 'semantic/bovine/gcc)
+  (require 'semantic/bovine/c)
 
 
+  ;; menubar entry for detected symbols
+  (add-hook 'semantic-init-hooks (lambda ()
+                                   (imenu-add-to-menubar "Stuff")
+                                   ))
+  )
 
-    ;; (defun ac-semantic-documentation (symbol)
-    ;;   (let* ((tag (assoc symbol ac-semantic-candidates-cache))
-    ;;          (doc (semantic-documentation-for-tag tag))
-    ;;          (summary (funcall semantic-idle-summary-function tag nil t)))
-    ;;     (and (stringp doc)
-    ;;          (string-match "\n*\\(.*\\)$" doc)
-    ;;          (setq doc (match-string 1 doc)))
-    ;;     (concat (funcall semantic-idle-summary-function tag nil t)
-    ;;             (when doc
-    ;;               (if (< (+ (length doc) (length summary) 4) (window-width))
-    ;;                 " -- "
-    ;;                 "\n"))
-    ;;             doc)))
+;; semantic jumping keybindings
+(defun semantic-completion-keybinds ()
+  (interactive)
+  (global-set-key [M-S-mouse-1] 'semantic-ia-fast-mouse-jump)
+  (global-set-key (kbd "M-g d") 'semantic-ia-fast-jump)
+  (global-set-key (kbd "M-g f") 'semantic-symref)
+  (global-set-key (kbd "M-g i") 'semantic-decoration-include-visit)
+  ;;(global-set-key (kbd "M-g s") 'semantic-complete-jump)
+  (global-set-key (kbd "M-g s") 'semantic-ia-show-doc)
+  (global-set-key (kbd "M-g h") 'semantic-analyze-proto-impl-toggle)
 
-
-
-
-  ;TODO: use jedi, ropemacs, pymacs?
-
-  ; jj's attempt of epic autocompletion with cedet and auto-complete-mode
-  ; todo: adapt semantic-ia-complete-symbol for this.
-
-  ;with-no-warnings, ignore-errors
-
-  ; creates ac-semantic-ng source for auto-complete-mode
-  (defun ac-define-semantic-source ()
-
-    (defvar semantic-ac-completion-candidates nil)
-    ; prefix may be the past text for the current completion
-    ; each source is evaluated on each keypress.
-    ; most sources are only active when required > ac-start chars
-    ; semantic is active at 0, but the prefix has to be . or ->
-    ; semantic is not active any more if the prefix changes.
-    ;
-    ; the prefix c-dot-ref may be too restrictive,
-    ; as we wanna keep going after the ->
-    ;
-    ; ac-point -> starting point
-    ; ac-prefix -> prefix string of completion target
-    ; ac-limit -> max number of candidates
-    (defun ac-semantic-completion-candidates (prefix)
-      (message (format "get candidates, prefix: %s" prefix))
-      (let* ((ctx (semantic-analyze-current-context nil))
-             (syms (semantic-analyze-possible-completions ctx))
-             )
-
-        (when syms
-          (mapcar 'semantic-tag-name syms)
-          )
-        )
-      )
+  ;;(global-set-key [(control return)] 'semantic-ia-complete-symbol-menu)
+  ;;(global-set-key (kbd "C-c ?") 'semantic-ia-complete-symbol)
+  ;;(global-set-key (kbd "C-c >") 'semantic-complete-analyze-inline)
+  ;;(global-set-key "\C-c=" 'semantic-decoration-include-visit)
+  ;;
+  ;;(global-set-key "\C-cs" 'semantic-ia-show-summary)
+  )
 
 
-    ; this function returns the start of the completion position
-    ; nil means don't try semantic completion
-    (defun ac-semantic-ng-prefix ()
-      ; ?: is a non-capturing group
-      (if (re-search-backward "\\(?:\\.\\|->\\)\\([_a-zA-Z0-9]*\\)\\=" nil t)
-          (match-beginning 1) ; return first () position match
-        )
-      )
-
-
-    (ac-define-source semantic-ng
-      '((available . (require 'semantic/ia nil t))
-        (init setq ac-semantic-ng-cache nil)
-        (candidates . (ac-semantic-completion-candidates ac-prefix))
-        (prefix . ac-semantic-ng-prefix)
-        (requires . 0) ; number of chars required for completion
-        ;(document . ac-semantic-documentation)
-        (symbol . "n") ;maybe get this dynamically
-        ;(action . ac-start) ;ran when hitting enter
-        )))
-
-
-  (defun ac-enable-semantic ()
-    "Enable semantic auto completion for current mode"
-    (interactive)
-
-    (semantic-mode t)
-
-    (require 'cedet)
-    (require 'semantic)
-    (require 'semantic/sb)
-    (require 'semantic/ia)
-    (require 'semantic/symref)
-    (require 'semantic/bovine/gcc)
-    (require 'semantic/bovine/c)
-
-
-    (add-hook 'semantic-init-hooks (lambda ()
-                                     (imenu-add-to-menubar "Stuff")
-                                     ))
-
-
-    ;auto-complete-auctex.el
-
-    ;(global-semantic-idle-completions-mode t)
-    ;(global-semantic-idle-summary-mode t)
-    ;(global-semantic-idle-breadcrumbs-mode t)  ;show tag summary in header line
-    (global-semantic-decoration-mode t)
-    (global-semantic-highlight-func-mode t)
-    (global-semantic-show-unmatched-syntax-mode t)
-    ;(semantic-load-enable-code-helpers)
-
-    ;(global-srecode-minor-mode 1)
-    )
-
-  (message "setting up completion")
-  (ac-enable-semantic)        ; enable semantic mode
-  (ac-enable-popups)          ; activate auto-complete-mode popups
-  (ac-define-semantic-source) ; create semantic completion source
-
-
-  (defun ac-semantic-completion ()
-    (interactive)
-    ;(message "enabling semantic auto completion source")
-    ;(add-to-list 'ac-sources 'ac-source-semantic)    ; 'm'
-    (add-to-list 'ac-sources 'ac-source-semantic-ng) ; 'n'
-    (add-to-list 'ac-sources 'ac-source-yasnippet)
-    (add-to-list 'ac-sources 'ac-source-imenu)
-
-    ; TODO: preprocess because of preformance:
-    ;(add-to-list 'ac-sources 'ac-source-semantic-raw)
-
-    (global-set-key [M-S-mouse-1] 'semantic-ia-fast-mouse-jump)
-    (global-set-key (kbd "M-g d") 'semantic-ia-fast-jump)
-    (global-set-key (kbd "M-g f") 'semantic-symref)
-    ;(global-set-key (kbd "M-g s") 'semantic-complete-jump)
-    (global-set-key (kbd "M-g s") 'semantic-ia-show-doc)
-
-    ;(global-set-key [(control return)] 'semantic-ia-complete-symbol-menu)
-    ;(global-set-key (kbd "C-c ?") 'semantic-ia-complete-symbol)
-    ;(global-set-key (kbd "C-c >") 'semantic-complete-analyze-inline)
-    ;(global-set-key "\C-c=" 'semantic-decoration-include-visit)
-    ;
-    ;(global-set-key "\C-cs" 'semantic-ia-show-summary)
-    ;(global-set-key "\C-cp" 'semantic-analyze-proto-impl-toggle)
-    )
-
-  (defun ac-semantic-c-completion ()
-    (ac-semantic-completion)
-
-    ; jump to header/impl
-    (local-set-key (kbd "M-g h") 'semantic-analyze-proto-impl-toggle)
-
-    (add-to-list 'ac-sources 'ac-source-gtags)
-    )
-
-  (add-hook 'auto-complete-mode-hook 'ac-semantic-completion)
-
-  (add-hook 'lisp-mode-hook 'ac-semantic-completion)
-  (add-hook 'scheme-mode-hook 'ac-semantic-completion)
-  (add-hook 'emacs-lisp-mode-hook 'ac-semantic-completion)
-  (add-hook 'erlang-mode-hook 'ac-semantic-completion)
-  (add-hook 'haskell-mode-hook 'ac-semantic-completion)
-
-  (add-hook 'c-mode-common-hook 'ac-semantic-c-completion))
-
-
-
-
-;(when window-system
-;  (speedbar t))
+;;(when window-system
+;;  (speedbar t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; fight the whitespace crimes
+;; fight the whitespace crimes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'whitespace)
 (global-whitespace-mode t)
-; color-face for: spaces, tabs, lines-tail(too long):
+;; color-face for: spaces, tabs, lines-tail(too long):
 (setq whitespace-style '(face tabs trailing newline indentation space-before-tab space-after-tab space-mark tab-mark newline-mark lines-tail))
-; old options: empty
+;; old options: empty
 
 (setq whitespace-display-mappings
       '(
@@ -283,7 +152,7 @@
         (tab-mark     ?\t    [?∘ ?\t] [?> ?\t])         ; tab - ∘ symbol
         )
       )
-; see whitespace.el
+;; see whitespace.el
 
 ;;; fix whitespace display for autocomplete popups with whitespace-mode
 (set-default 'whitespace-mode-prev-status nil)
@@ -308,14 +177,61 @@
 (ad-activate 'popup-delete)
 ;;; done fixing popup
 
-; don't disable the window on pressing C-z
+;; don't disable the window on pressing C-z
 (defadvice iconify-or-deiconify-frame (around disable-xframe-suspending))
 (ad-activate 'iconify-or-deiconify-frame)
 
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; function helpers
+;; custom modes
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar kconfig-mode-font-lock-keywords
+  '(("^[\t, ]*\\_<bool\\_>" . font-lock-type-face)
+    ("^[\t, ]*\\_<int\\_>" . font-lock-type-face)
+    ("^[\t, ]*\\_<boolean\\_>" . font-lock-type-face)
+    ("^[\t, ]*\\_<tristate\\_>" . font-lock-type-face)
+    ("^[\t, ]*\\_<depends on\\_>" . font-lock-variable-name-face)
+    ("^[\t, ]*\\_<select\\_>" . font-lock-variable-name-face)
+    ("^[\t, ]*\\_<help\\_>" . font-lock-variable-name-face)
+    ("^[\t, ]*\\_<---help---\\_>" . font-lock-variable-name-face)
+    ("^[\t, ]*\\_<default\\_>" . font-lock-variable-name-face)
+    ("^[\t, ]*\\_<range\\_>" . font-lock-variable-name-face)
+    ("^\\_<config\\_>" . font-lock-constant-face)
+    ("^\\_<comment\\_>" . font-lock-constant-face)
+    ("^\\_<menu\\_>" . font-lock-constant-face)
+    ("^\\_<endmenu\\_>" . font-lock-constant-face)
+    ("^\\_<if\\_>" . font-lock-constant-face)
+    ("^\\_<endif\\_>" . font-lock-constant-face)
+    ("^\\_<menuconfig\\_>" . font-lock-constant-face)
+    ("^\\_<source\\_>" . font-lock-keyword-face)
+    ("\#.*" . font-lock-comment-face)
+    ("\".*\"$" . font-lock-string-face)))
+
+(defvar kconfig-headings
+  '("bool" "int" "boolean" "tristate" "depends on" "select" "help"
+    "---help---" "default" "range" "config" "comment" "menu" "endmenu"
+    "if" "endif" "menuconfig" "source"))
+
+(defun kconfig-outline-level ()
+  (looking-at "[\t ]*")
+  (let ((prefix (match-string 0)) (result 0))
+    (dotimes (i (length prefix) result)
+      (setq result (+ result (if (equal (elt prefix i) ?\s) 1 tab-width))))))
+
+(define-derived-mode kconfig-mode text-mode "kconfig"
+  (set (make-local-variable 'font-lock-defaults)
+       '(kconfig-mode-font-lock-keywords t))
+  (set (make-local-variable 'outline-regexp)
+       (concat "^[\t ]*" (regexp-opt kconfig-headings)))
+  (set (make-local-variable 'outline-level)
+       'kconfig-outline-level)
+  (set (make-local-variable 'tab-width) 8))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; function helpers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -447,13 +363,6 @@
   (setq watch-buffer-command nil)
   (remove-hook 'after-save-hook 'watch-buffer-run-command t))
 
-
-
-;remember last position in file
-(require 'saveplace)
-(setq-default save-place t)
-(setq save-place-file "~/.emacs.d/line-saved-places")
-
 (defun insert-tab ()
   (interactive)
   (insert-char ?\t))
@@ -474,7 +383,8 @@
 
 (defun call-pop-kill-ring (func)
   (funcall func)
-  (setq kill-ring (cdr kill-ring))
+  ; emacs 24.3 needed that:
+  ;(setq kill-ring (cdr kill-ring))
   )
 
 (defun kill-word-no-kill-ring ()
@@ -497,15 +407,25 @@
       (scroll-up linedelta)
       (smooth-scroll (- number-lines 1) linedelta))))
 
-;(defun highlight-todos (font-lock-add-keywords nil '(("\\<\\(FIXME\\|TODO\\|BUG\\):" 1 font-lock-warning-face t))))
-;(add-hook 'prog-mode-hook 'highlight-todos)
+
+(defun copy-font-face (new-face face)
+  "Define NEW-FACE from existing FACE."
+  (copy-face face new-face)
+  (eval `(defvar ,new-face nil))
+  (set new-face new-face))
+
+
+
+;;(defun highlight-todos (font-lock-add-keywords nil '(("\\<\\(FIXME\\|TODO\\|BUG\\):" 1 font-lock-warning-face t))))
+;;(add-hook 'prog-mode-hook 'highlight-todos)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; set kaschtomaisd key bindings
+;; set kaschtomaisd key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun jj-keybindings ()
+  (interactive)
 
   ;arrow key stuff
   (global-set-key (kbd "M-<left>")  'windmove-left)
@@ -546,7 +466,7 @@
   ; insert fakking tab
   (global-set-key (kbd "C-<tab>") 'insert-tab)
 
-  ;(global-set-key (kbd "RET") 'newline) ;newline-and-indent
+  (global-set-key (kbd "RET") 'electric-newline-and-maybe-indent)
   ;(global-set-key (kbd "<C-return>") 'newline)
   (global-set-key (kbd "M-a") 'beginning-of-line-text)
   (global-set-key (kbd "C-c C-a") 'mark-whole-buffer)
@@ -563,7 +483,7 @@
   (global-set-key (kbd "C-c p") 'previous-error)
 
   (global-set-key (kbd "C-x C-b") 'bs-show) ; buffer selector
-  (global-set-key (kbd "C-x M-b") 'speedbar) ; buffer selector
+  (global-set-key (kbd "C-x M-b") 'speedbar)
 
   ;align the current region to = or whatever
   (global-set-key (kbd "M-A") 'align-current)
@@ -577,6 +497,10 @@
   (global-set-key (kbd "M-p") (lambda ()
                                 (interactive)
                                 (join-line -1)))
+
+  (global-set-key (kbd "M-x") 'smex)
+  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
+  (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)  ;old M-x
 
   ;unset unneeded keys
   (global-unset-key (kbd "C-t")) ; annoying character swapping
@@ -593,18 +517,18 @@
       (magit-need-refresh)
       (shell-command "git --no-pager commit --amend --reuse-message=HEAD"))))
 
-; highlight current word with custom face
-;(run-with-idle-timer secs repeat function)
-;(symbol-at-point)
-;unhighlight previous
-;(highlight-phrase)
+;; highlight current word with custom face
+;;(run-with-idle-timer secs repeat function)
+;;(symbol-at-point)
+;;unhighlight previous
+;;(highlight-phrase)
 
-;mouse-wheel scrolling
+;;mouse-wheel scrolling
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control)))) ; one line at a time
 (setq mouse-wheel-progressive-speed 't)             ; accelerate scrolling
 (setq mouse-wheel-follow-mouse 't)                  ; scroll window under mouse
 
-;automatic scrolling
+;;automatic scrolling
 (setq scroll-margin 2)                               ; start scrolling n lines before window borders
 (setq scroll-conservatively 10)                      ; scroll up to n lines to bring pointer back on screen
 (setq scroll-step 0)                                 ; try scrolling n lines when pointer moves out
@@ -612,12 +536,12 @@
 
 (setq scroll-preserve-screen-position t)             ; keep relative column position when scrolling
 
-; push the mouse out of the way when the cursor approaches.
+;; push the mouse out of the way when the cursor approaches.
 (mouse-avoidance-mode 'cat-and-mouse)
 
-; custom smooth scrolling
-;(global-set-key [(mouse-5)] '(lambda () (interactive) (smooth-scroll 6 1)))
-;(global-set-key [(mouse-4)] '(lambda () (interactive) (smooth-scroll 6 -1)))
+;; custom smooth scrolling
+;;(global-set-key [(mouse-5)] '(lambda () (interactive) (smooth-scroll 6 1)))
+;;(global-set-key [(mouse-4)] '(lambda () (interactive) (smooth-scroll 6 -1)))
 
 (setq-default visible-bell nil            ; disable window flashing
               ring-bell-function 'ignore) ; and also disable the sound
@@ -626,14 +550,24 @@
 (setq indicate-empty-lines t
       transient-mark-mode t
       gud-tooltip-mode t
+      lazy-highlight t                 ; highlight occurrences
       lazy-highlight-cleanup nil       ; keep search term highlighted
       lazy-highlight-max-at-a-time nil ; all occurences in file
-      global-font-lock-mode t ; font coloring
+      font-lock-maximum-decoration t   ; decoration level: maximum
       auto-compression-mode t ; deal with compressed files
       blink-cursor-mode nil ; don't blink the cursor
-      mouse-yank-at-point t) ; paste as cursor instead of mouse position
+      mouse-yank-at-point t ; paste as cursor instead of mouse position
+      ;;(global-semantic-idle-completions-mode t
+      ;;(global-semantic-idle-summary-mode t
+      ;;(global-semantic-idle-breadcrumbs-mode t  ;show tag summary in header line
+      global-semantic-decoration-mode t
+      global-semantic-highlight-func-mode t
+      global-semantic-show-unmatched-syntax-mode t
+      ;;global-srecode-minor-mode 1
+      )
 
-;backup files
+
+;;backup files
 
 (setq
   make-backup-files nil
@@ -651,28 +585,28 @@
   )
 
 
-;utf-8 ftw
+;;utf-8 ftw
 (prefer-coding-system 'utf-8)
 
-;link to X primary clipboard
+;;link to X primary clipboard
 (setq x-select-enable-clipboard t)
 
-;require a ending newline
+;;require a ending newline
 (setq require-final-newline 't) ; 'query will ask
 
-;display various non-editing buffers in their own frames
+;;display various non-editing buffers in their own frames
 (setq special-display-buffer-names
       (nconc '("*Backtrace*" "*VC-log*" "*compilation*" "*grep*")
              special-display-buffer-names
              )
       )
-;no tool bar for these buffers
+;;no tool bar for these buffers
 (add-to-list 'special-display-frame-alist '(tool-bar-lines . 0))
 
-;don't echo passwords when using interactive terminal programs
+;;don't echo passwords when using interactive terminal programs
 (add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
 
-;man pages with clickable links
+;;man pages with clickable links
 (add-hook 'Man-mode-hook 'goto-address)
 
 
@@ -682,8 +616,8 @@
 (setq ido-enable-flex-matching t)
 (setq ido-case-fold t)
 (setq ido-use-virtual-buffers t)
-;(setq completion-ignored-extensions '(".pdf" ".aux" ".toc" ".tex~"))
-;(setq ido-ignore-extensions t)
+;;(setq completion-ignored-extensions '(".pdf" ".aux" ".toc" ".tex~"))
+;;(setq ido-ignore-extensions t)
 (setq ido-file-extensions-order '(".c" ".cpp" ".h" ".py" ".tex" ".bib" ".hs"))
 (add-hook 'ido-setup-hook (lambda () (
                                       define-key ido-completion-map [tab] 'ido-next-match
@@ -693,10 +627,10 @@
 (icomplete-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; spellchecking
-;
-; hunspell support for spell checking
-; adds {english,german}-hunspell dictionaries
+;; spellchecking
+;;
+;; hunspell support for spell checking
+;; adds {english,german}-hunspell dictionaries
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'ispell)
@@ -722,7 +656,7 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; org-mode stuff
+;; org-mode stuff
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'org-install)
@@ -749,7 +683,7 @@
   (find-file-existing wiki-entry-point))
 
 
-; update org [9/10] markers when deleting lines
+;; update org [9/10] markers when deleting lines
 (defun myorg-update-parent-cookie ()
   (when (equal major-mode 'org-mode)
     (save-excursion
@@ -767,7 +701,7 @@
 
 
 
-; preserve undo-region selection
+;; preserve undo-region selection
 (defadvice undo-tree-undo (around keep-region activate)
            (if (use-region-p)
              (let ((m (set-marker (make-marker) (mark)))
@@ -780,13 +714,13 @@
              ad-do-it))
 
 
-; after deleting a tag, indent properly
+;; after deleting a tag, indent properly
 (defadvice sgml-delete-tag (after reindent activate)
            (indent-region (point-min) (point-max)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; smart tabs, mix tabs and spaces (fak yea)
+;; smart tabs, mix tabs and spaces (fak yea)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defadvice align (around smart-tabs activate)
@@ -837,10 +771,10 @@
   )
 
 
-;cc-langs
+;;cc-langs
 (smart-tabs-advice c-indent-line c-basic-offset)
 (smart-tabs-advice c-indent-region c-basic-offset)
-;python-mode
+;;python-mode
 (smart-tabs-advice py-indent-line py-indent-offset)
 (smart-tabs-advice py-newline-and-indent py-indent-offset)
 (smart-tabs-advice py-indent-region py-indent-offset)
@@ -848,49 +782,52 @@
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; random stuff?
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; random stuff?
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; fak u magit
+(setq magit-last-seen-setup-instructions "1.4.0")
 
-;automatically newline on certain chars:
-;(add-hook 'c-mode-common-hook '(lambda () (c-toggle-auto-state 1)))
-;reindent line when typing {,},;,etc..
-;(setq-default c-electric-flag nil)
-;useful modes:
-;auto-newline, hungry-delete, syntactic-indentation
-;-> M-x c-toggle[-auto]-{hungry-state,syntactic-indentation}
-;(electric-indent-mode t) ;auto-indent
-;(electric-pair-mode 1)   ;auto-brackets
+;;automatically newline on certain chars:
+;;(add-hook 'c-mode-common-hook '(lambda () (c-toggle-auto-state 1)))
+;;reindent line when typing {,},;,etc..
+;;(setq-default c-electric-flag nil)
+;;useful modes:
+;;auto-newline, hungry-delete, syntactic-indentation
+;;-> M-x c-toggle[-auto]-{hungry-state,syntactic-indentation}
+;;(electric-indent-mode t) ;auto-indent
+;;(electric-pair-mode 1)   ;auto-brackets
 
-;custom key bindings:
-;(defun jj-c-initialization-hook ()
-;  (define-key c-mode-base-map "\C-m" 'c-context-line-break))
-;(add-hook 'c-initialization-hook 'jj-c-initialization-hook)
+;;custom key bindings:
+;;(defun jj-c-initialization-hook ()
+;;  (define-key c-mode-base-map "\C-m" 'c-context-line-break))
+;;(add-hook 'c-initialization-hook 'jj-c-initialization-hook)
 
-;offset customizations not in the custom c-style
-;-> precedence over any setting of the syntactic symbol made by a style
-;(setq c-offsets-alist '((member-init-intro . ++)))
+;;offset customizations not in the custom c-style
+;;-> precedence over any setting of the syntactic symbol made by a style
+;;(setq c-offsets-alist '((member-init-intro . ++)))
 
-;(when (load "flymake" t)
-; (defun flymake-pylint-init ()
-;   (interactive)
-;   (let* ((temp-file (flymake-init-create-temp-buffer-copy
-;     'flymake-create-temp-inplace))
-;     (local-file (file-relative-name
-;       temp-file
-;       (file-name-directory buffer-file-name))))
-;     (list "epylint" (list local-file))))
+;;(when (load "flymake" t)
+;; (defun flymake-pylint-init ()
+;;   (interactive)
+;;   (let* ((temp-file (flymake-init-create-temp-buffer-copy
+;;     'flymake-create-temp-inplace))
+;;     (local-file (file-relative-name
+;;       temp-file
+;;       (file-name-directory buffer-file-name))))
+;;     (list "epylint" (list local-file))))
 
-;(add-to-list 'flymake-allowed-file-name-masks
-; '("\\.py\\'" flymake-pylint-init)))
+;;(add-to-list 'flymake-allowed-file-name-masks
+;; '("\\.py\\'" flymake-pylint-init)))
 
-; reload the emacs config
+;; reload the emacs config
 (defun reload-config ()
   (interactive)
   (load-file "~/.emacs")
   )
 
+;; argument lineup by tabs only
 (defun c-lineup-arglist-tabs-only (ignored)
   "Line up argument lists by tabs, not spaces"
   (let* ((anchor (c-langelem-pos c-syntactic-element))
@@ -899,21 +836,30 @@
          (steps (floor offset c-basic-offset))
          )
     (* (max steps 1)
-       c-basic-offset
-       )
-    )
-  )
+       c-basic-offset)))
+
+
+;; try to load auctex
+;;(defun load-auctex ()
+;;  (load "auctex.el" nil t t)
+;;  (load "preview-latex.el" nil t t)
+  ;;(message "loaded auctex")
+;;)
+;;(catch 'file-error (load-auctex))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; coding style definitions
-; ------------------------
-;
-; see all the possible variables at [emacsshare]/lisp/progmodes/cc-vars.el
-; c-set-stylevar-fallback 'c-offsets-alist
+;; coding style definitions
+;; ------------------------
+;;
+;; see all the possible variables at [emacsshare]/lisp/progmodes/cc-vars.el
+;; c-set-stylevar-fallback 'c-offsets-alist
+;;
+;; get syntax/indent info by C-c C-s
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-; codestyle defaults, will be overwritten
+;; codestyle defaults, will be overwritten
 (setq-default indent-tabs-mode t)
 (setq-default indent-line-function 'insert-tab)
 (setq-default default-tab-width 4)
@@ -921,18 +867,19 @@
 
 
 
-; linux kernel indentation style
+;; linux kernel indentation style
 (defconst kernel-c-style
           '("linux" (c-offsets-alist (
                                       arglist-cont-nonempty
                                       c-lineup-gcc-asm-reg
-                                      c-lineup-arglist-tabs-only
+                                      c-lineup-arglist   ;-tabs-only
                                       )))
           )
 
-; sft coding style
+;; sft coding style
 (defconst sft-c-style
           '("linux" ; base it on linux code style
+            (indent-tabs-mode           . t)
             (c-basic-offset             . 4)
             (c-tab-always-indent        . t)
             (c-comment-only-line-offset . 4)
@@ -958,42 +905,47 @@
                                        (block-close . c-snug-do-while)
                                        (brace-entry-open)
                                        (brace-list-open)
-                                       (substatement-open before after) ;
+                                       (substatement-open before after)
                                        ))
             (c-cleanup-list . (brace-else-brace))
             (c-offsets-alist . (
-                                ; indent helper funcs: c-lineup-arglist{-tabs-only}
+                                ; arg indent helper funcs: c-lineup-{arglist[-tabs-only],argcont}
+                                ; arglist = indent to matching (|here, asdf
+                                ; argcont = indent to (asdf, |here
                                 ; absolute offset: [0]
                                 (access-label          . -)   ; public: or private:
                                 (arglist-intro         . +)   ; first arg in newline
-                                (arglist-cont          . 0)   ; wrapped function args after func(
-                                (arglist-cont-nonempty . c-lineup-arglist)   ; wrapped function args after func(arg
+                                (arglist-cont          . 0)   ; wrapped function args: func(\nthisone
+                                (arglist-cont-nonempty . c-lineup-arglist)   ; wrapped function args after func(arg,\nthisone
                                 (arglist-close         . 0)   ; intentation of ) which closes args
                                 (block-open            . 0)   ; { to open a block
                                 (block-close           . 0)   ; } after a block
+                                (brace-list-intro      . +)   ; first element in {\nthisone
+                                (brace-list-entry      . 0)   ; other elements in {\nelem\nthisone
                                 (case-label            . 0)   ; case 1337:
                                 (statement-case-open   . 0)   ; { after case 1337:
                                 (statement-case-intro  . +)   ; code after case 1337:
                                 (defun-block-intro     . +)   ; beginning of keyword (...) { stuff  }
                                 (inclass               . +)   ; members of struct or class
+                                (inher-cont            . c-lineup-multi-inher)   ; inheritance-continuation
                                 (inline-open           . +)
-                                (innamespace           . 0)   ; members of a namespace
+                                (innamespace           . 0)   ; namespace lol {\nthisstatement
                                 (knr-argdecl-intro     . -)
                                 (knr-argdecl-intro     . 0)
                                 (label                 . 0)   ; gotolabel:
                                 (statement             . 0)
-                                (statement-block-intro . +)   ; first line of a block
+                                (statement-block-intro . +)   ; line in if () {\nthisline
                                 (statement-case-open   . +)
-                                (statement-cont        . 0)
+                                (statement-cont        . (max c-lineup-assignments c-lineup-cascaded-calls c-lineup-string-cont))
                                 (substatement          . +)
                                 (substatement-label    . 0)
                                 (substatement-open     . 0)
                                 (substatement-open     . 0)
                                 (topmost-intro         . 0)   ; indentation of file start
-                                (topmost-intro-cont    . 0)
-                                (cpp-macro             . 0)   ; #define, etcetc
+                                (topmost-intro-cont    . c-lineup-topmost-intro-cont)
+                                (cpp-macro             . [0])   ; #define, etcetc
                                 (member-init-intro     . +)   ; member initializing for class lol : var(val)
-                                (member-init-cont      . 0)   ; further members
+                                (member-init-cont      . c-lineup-multi-inher)   ; further members
                                 ))
 
             ;information about indent parsing on TAB
@@ -1005,7 +957,7 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; hooks
+;; hooks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (add-hook 'LaTeX-mode-hook (lambda ()
@@ -1028,11 +980,11 @@
                                (set-selection-coding-system 'utf-8)
                                ))
 
-; correct zsh coloring in shell:
+;; correct zsh coloring in shell:
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
 
-; press ~ for reaching home directly in ido-mode
+;; press ~ for reaching home directly in ido-mode
 (add-hook 'ido-setup-hook
           (lambda ()
             (define-key ido-file-completion-map
@@ -1043,76 +995,106 @@
                             (insert "~/")
                             (call-interactively 'self-insert-command))))))
 
-; amend a commit
+;; amend a commit
 (add-hook 'magit-mode-hook (lambda ()
                              (define-key magit-status-mode-map (kbd "C-c C-a") 'magit-just-amend)))
 
+;; c++11 improvements
+
+(add-hook
+ 'c++-mode-hook
+ '(lambda()
+
+    ;; useful faces: font-lock-warning-face
+
+    ;; placing regexes into `c-mode-common-hook' may work but their
+    ;; evaluation order matters.
+    (font-lock-add-keywords
+     nil '(("\\<\\(void\\|unsigned\\|signed\\|char\\|short\\|bool\\|int\\|long\\|float\\|double\\)\\>" . font-lock-keyword-face)
+           ;; C++11 keywords
+           ("\\<\\(alignof\\|alignas\\|constexpr\\|decltype\\|noexcept\\|nullptr\\|static_assert\\|thread_local\\|override\\|final\\)\\>" . font-lock-keyword-face)
+           ;; hex numbers
+           ("\\<0[xX][0-9A-Fa-f]+\\>" . font-lock-constant-face)
+           ;; hex/integer/float numbers
+           ("\\<[-+]*[0-9]*\\.?[0-9]+\\([ulUL]+\\|[eE][-+]?[0-9]+\\)?[fFlL]?\\>" . font-lock-constant-face)
+
+           ;; custom defined types
+           ("\\<[A-Za-z_]+[A-Za-z_0-9]*_\\(type\\|ptr\\|t\\)\\>" . font-lock-type-face)
+           ))
+    ) t)
 
 
-
-; default c-coding-style
+;; default c-coding-style
 (setq-default c-default-style "linux" c-basic-offset 4)
 
-; hook for all c-like languages
+;; hook for all c-like languages
 (defun jj-cstyle-hook ()
   (c-add-style "sftstyle"     sft-c-style)
   (c-add-style "linux-kernel" kernel-c-style)
 
-  (message "setting C coding style...")
+  ;(message "setting C coding style...")
 
   ; default to sft style
   (c-set-style "sftstyle")
 
+  (setq tab-width 4
+        indent-tabs-mode t)
+
+  (c-toggle-auto-newline nil) ; no automatic
+  (c-toggle-auto-state nil)   ; newlines
+
   (when ; kernel code style
     (and buffer-file-name
          (string-match
-           (expand-file-name "/usr/src/linux-git") buffer-file-name))
-    (setq indent-tabs-mode t)
-    (c-set-style "linux-kernel"))
+           (expand-file-name "/usr/src/linux") buffer-file-name))
+    (c-set-style "linux-kernel")
 
-  (setq tab-width 4
-        indent-tabs-mode t)
-  (c-toggle-auto-newline nil) ; no automatic
-  (c-toggle-auto-state nil)   ; newlines
-  )
+    (setq tab-width 8
+          indent-tabs-mode t)
+  ))
 
-; main coding configuration function
+;; main coding configuration function
 (defun jj-coding-hook ()
-  (local-set-key (kbd "RET") 'newline-and-indent)
+  ;(local-set-key (kbd "RET") 'newline-and-indent)
   (jj-keybindings)
   (ruler-mode t)
   (auto-revert-mode t)
+  ;(ac-enable-semantic)  ; semantic mode
+  (semantic-completion-keybinds)
   (eldoc-mode t))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; special language-specific hooks
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; special language-specific hooks
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; c, c++
+;; c, c++
 (defun jj-c-coding-hook ()
   (jj-cstyle-hook)
   (jj-coding-hook))
 
-; py
+;; py
 (defun jj-python-coding-hook ()
   (setq python-indent 4)
   (setq indent-tabs-mode nil)
   (setq tab-width 4)
   (setq-default whitespace-line-column 79)
+  (anaconda-mode)  ; anaconda-jedi-completion
   (jj-coding-hook))
 
-; elisp
+;; elisp
 (defun jj-lisp-coding-hook ()
   (setq indent-tabs-mode nil)
   (setq tab-width 8)
+  (prettify-symbols-mode)
   ;(setq lisp-indent-offset 4)
   ;(setq lisp-body-indent 4)
   (jj-coding-hook))
 
-; javascript / ecmascript
+;; javascript / ecmascript
 (defun jj-javascript-coding-hook ()
   (jj-coding-hook))
 
-; TeX
+;; TeX
 (defun jj-latex-coding-hook ()
   ; set latex indent offset so it doesn't fuck up
   ; (i.e. use values != n*tab-width)
@@ -1122,80 +1104,84 @@
   (setq indent-tabs-mode nil)
   (jj-coding-hook))
 
-; html
+;; html
 (defun jj-html-coding-hook ()
   (setq sgml-basic-offset 4)
   (setq indent-tabs-mode t))
 
-; haskell
+;; haskell
 (defun jj-haskell-coding-hook ()
   ; haskell interpreter: C-c C-z or C-c C-l
-  (turn-on-haskell-indentation)
-  (turn-on-haskell-doc-mode))
+  (haskell-indentation-mode)
+  (haskell-doc-mode))
 
 
 (add-hook 'python-mode-hook     'jj-python-coding-hook)
 (add-hook 'lisp-mode-hook       'jj-lisp-coding-hook)
+(add-hook 'emacs-lisp-mode-hook 'jj-lisp-coding-hook)
 (add-hook 'javascript-mode-hook 'jj-javascript-coding-hook)
 (add-hook 'html-mode-hook       'jj-html-coding-hook)
 (add-hook 'haskell-mode-hook    'jj-haskell-coding-hook)
 (add-hook 'c-mode-common-hook   'jj-c-coding-hook)
 
-; enable commands that may "confuse" the user
+;; enable commands that may "confuse" the user
 (put 'scroll-left 'disabled nil)
 (put 'upcase-region 'disabled nil)
 
 (defun window-setup ()
   (message "running in windowed mode")
-  (global-linum-mode)
+  ;(global-linum-mode)   ;; linum: MASSIVE slowdown!
   (global-hl-line-mode))
 
 (defun terminal-setup ()
   (message "running in terminal mode")
   (custom-set-faces
     '(default ((t (:background "#000000"))))
-    '(semantic-highlight-func-current-tag-face ((t (:background "gray15"))))))
+    '(semantic-highlight-func-current-tag-face ((t (:background "gray15")))))
+  (setq confirm-kill-emacs nil))
 
-;switch for X and console window
+;;switch for X and console window
 (if window-system
   (window-setup)
   (terminal-setup))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; custom fileextension -> mode assignments
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; auctex
-(autoload 'latex-mode "auctex" "Major mode for editing LaTeX files" t)
+;; auctex
+;;(autoload 'latex-mode "latex" "Major mode for editing LaTeX files" t)
 (add-to-list 'auto-mode-alist '("\\.tex\\'" . latex-mode))
 
-; markdown text mode
+;; markdown text mode
 (autoload 'markdown-mode "markdown-mode" "Major mode for editing Markdown files" t)
 (add-to-list 'auto-mode-alist '("\\.text\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
-; cmake config mode
+;; cmake config mode
 (autoload 'cmake-mode "cmake-mode" "Major Mode for cmake configuration editing" t)
 (add-to-list 'load-path (expand-file-name "/usr/share/cmake/editors/emacs/"))
 (add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-mode))
 (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode))
 
-; use c++ for header files, does no harm to c-headers.
+;; use c++ for header files, does no harm to c-headers.
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
-; opengl shaders
+;; opengl shaders
 (add-to-list 'auto-mode-alist '("\\.glsl\\'" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.vert\\'" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.frag\\'" . c++-mode))
 
-; org-mode
+;; org-mode
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 
+;; kernel config
+(add-to-list 'auto-mode-alist '("Kconfig" . kconfig-mode))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; random init stuff
+;; random init stuff
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -1255,9 +1241,13 @@
 
 (defun jj-emacs-init ()
   (try-kill-buffer "*scratch*")
-  ;(try-kill-buffer "*CEDET Global*")
 
-  ;(emacs-reloaded)
+  (semantic-mode t)
+  (global-company-mode)
+
+
+  ;;welcome animation:
+  ;;(emacs-reloaded)
   )
 
 (add-hook 'after-init-hook 'jj-emacs-init)

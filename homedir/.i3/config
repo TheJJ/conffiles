@@ -20,11 +20,11 @@ bindsym $mod+Return exec urxvt
 # setkeycodes 6c 161
 #remapped by X to: 170 and 169 or now 162 and 161
 bindcode 162 exec sleep 0.3 && ~/bin/rscreen
-bindcode 161 exec sleep 0.3 && ~/bin/rscreen portrait  #~jj/scripts/dpms standby
+bindcode 161 exec sleep 0.3 && ~/bin/rscreen portrait
 
 #bindcode 156 exec dmenu_run
 
-#bindcode 199 exec ~/scripts/touchpad
+#bindcode 199 exec ~/bin/touchpad
 
 bindcode shift+122 exec amixer set Capture 5%- > /dev/null
 bindcode shift+123 exec amixer set Capture 5%+ > /dev/null
@@ -32,6 +32,9 @@ bindcode 122 exec amixer set Master 5%- > /dev/null
 bindcode 123 exec amixer set Master 5%+ > /dev/null
 bindcode control+122 exec amixer set Master 15%- > /dev/null
 bindcode control+123 exec amixer set Master 15%+ > /dev/null
+
+bindcode 121 exec amixer set Master toggle > /dev/null
+bindcode 198 exec amixer set Capture toggle > /dev/null
 
 bindcode 232 exec xbacklight -dec 10
 bindcode 233 exec xbacklight -inc 10
@@ -45,7 +48,7 @@ bindcode control+shift+233 exec xbacklight -inc 1
 bindcode 124 exec ~/bin/i3lockjj && ~/bin/suspend-jj
 bindcode 160 exec ~/bin/i3lockjj
 
-bindcode 150 exec ~/bin/dpms off
+bindcode 150 exec dpms off
 
 bindsym mod1+F4 kill
 
@@ -236,3 +239,6 @@ exec syndaemon -t -k -i 1 -d
 # us international
 #caps:none altwin:meta_alt lv3:rals_switch
 exec setxkbmap us altgr-intl -option ctrl:nocaps
+
+exec xset -b
+exec r rate 170 50

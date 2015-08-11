@@ -15,13 +15,6 @@ fi
 [[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources
 [[ -f ~/.Xmodmap ]] && xmodmap ~/.Xmodmap
 
-# disable bell
-xset -b
-
-# faster key repetition and shorter delay
-# default is 600ms, 25Hz
-xset r rate 180 45
-
 echo "Parameters are: $@"
 cmd=$1
 if [[ $1 == "xterm" ]]; then
