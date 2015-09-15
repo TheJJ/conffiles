@@ -13,36 +13,28 @@
 
 ;;customized variables, set by `customize`
 (custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
  '(backward-delete-char-untabify-method nil)
  '(company-auto-complete nil)
- '(company-auto-complete-chars (quote (32 95 40 41 46 39)))
+ '(company-auto-complete-chars (quote (32 95 40 41 119 46 39)))
  '(company-clang-arguments (quote ("-std=c++14")))
  '(company-clang-executable "/usr/bin/clang++")
- '(company-idle-delay 0.2)
- '(company-statistics-mode t)
- '(company-statistics-size 2000)
+ '(company-ghc-show-info (quote oneline))
+ '(company-idle-delay 0.15)
+ '(company-minimum-prefix-length 2)
  '(custom-enabled-themes (quote (deeper-blue)))
  '(doc-view-continuous t)
  '(fill-column 76)
- '(global-company-mode t)
  '(inhibit-startup-screen t)
  '(jit-lock-defer-time 0.01)
+ '(nxml-child-indent 1)
  '(scroll-bar-mode (quote right))
  '(semantic-python-dependency-system-include-path (quote ("/usr/lib64/python3.4/")))
  '(send-mail-function (quote sendmail-send-it)))
 
 ;;customized font colors and sizes
 (custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :background "#14151f" :foreground "#f5f5f5" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))) nil "main font and background")
  '(font-lock-comment-face ((t (:foreground "gray80"))))
  '(hl-line ((t (:inherit highlight :background "midnight blue"))))
@@ -60,9 +52,25 @@
   "Ring of tags for use with cut and paste.")
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; additional repos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 (add-to-list 'package-archives '("marmalade" . "https://marmalade-repo.org/packages/") t)
+(package-initialize)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; conditional package settings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro with-library (symbol &rest body)
+  "when the library is available, do things with it."
+  `(condition-case nil
+       (progn (require ',symbol) ,@body)
+     (message (format "package unavailable: %s." ',symbol))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; enable funny modes
@@ -76,6 +84,16 @@
 (delete-selection-mode t)
 (display-battery-mode t)
 (xterm-mouse-mode t)
+(electric-pair-mode t)
+(yas-global-mode t)
+
+(with-library zlc
+   (zlc-mode t))
+
+(with-library company-statistics
+ (company-statistics-mode t)
+ (company-statistics-size 2000))
+
 
 (ede-enable-generic-projects)
 
@@ -83,7 +101,6 @@
 (require 'saveplace)
 (setq-default save-place t)
 (setq save-place-file "~/.emacs.d/line-saved-places")
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; enable auto completion
@@ -107,9 +124,7 @@
 
   ;; menubar entry for detected symbols
   (add-hook 'semantic-init-hooks (lambda ()
-                                   (imenu-add-to-menubar "Stuff")
-                                   ))
-  )
+                                   (imenu-add-to-menubar "Stuff"))))
 
 ;; semantic jumping keybindings
 (defun semantic-completion-keybinds ()
@@ -253,10 +268,7 @@
   (let ((command (read-string "Command: ")))
     (shell-command
       (concat command " &")
-      (concat "*" command "*")
-      )
-    )
-  )
+      (concat "*" command "*"))))
 
 (defun mpv ()
   "play media file"
@@ -415,6 +427,14 @@
   (set new-face new-face))
 
 
+;; git amend without any prompt
+(defun magit-just-amend ()
+  (interactive)
+  (save-window-excursion
+    (magit-with-refresh
+      (magit-need-refresh)
+      (shell-command "git --no-pager commit --amend --reuse-message=HEAD"))))
+
 
 ;;(defun highlight-todos (font-lock-add-keywords nil '(("\\<\\(FIXME\\|TODO\\|BUG\\):" 1 font-lock-warning-face t))))
 ;;(add-hook 'prog-mode-hook 'highlight-todos)
@@ -427,7 +447,7 @@
 (defun jj-keybindings ()
   (interactive)
 
-  ;arrow key stuff
+  ; arrow key stuff
   (global-set-key (kbd "M-<left>")  'windmove-left)
   (global-set-key (kbd "M-<right>") 'windmove-right)
   (global-set-key (kbd "M-<up>")    'windmove-up)
@@ -438,7 +458,7 @@
   (global-set-key (kbd "C-<up>")    'backward-paragraph)
   (global-set-key (kbd "C-<down>")  'forward-paragraph)
 
-  ;jlk; stuff
+  ; jlk; stuff
   (global-set-key (kbd "M-j") 'backward-char)
   (global-set-key (kbd "M-;") 'forward-char)
   (global-set-key (kbd "M-l") 'previous-line)
@@ -453,11 +473,11 @@
   (global-set-key (kbd "C-l") 'recenter-top-bottom)
   (global-set-key (kbd "C-j") 'nowrap-newline-and-indent)
 
-  ;word deletion
+  ; word deletion
   (global-set-key (kbd "C-<delete>")    'kill-word-no-kill-ring)
   (global-set-key (kbd "C-<backspace>") 'backward-kill-word-no-kill-ring)
 
-  ;terminal fu
+  ; terminal fu
   (global-set-key (kbd "M-[ d") 'left-word)  ;backward-word
   (global-set-key (kbd "M-[ c") 'right-word) ;forward-word
   (global-set-key (kbd "M-[ a") 'backward-paragraph)
@@ -466,6 +486,10 @@
   ; insert fakking tab
   (global-set-key (kbd "C-<tab>") 'insert-tab)
 
+  ; force company completion
+  (global-set-key (kbd "S-<tab>") 'company-complete)
+
+  ; newline magic
   (global-set-key (kbd "RET") 'electric-newline-and-maybe-indent)
   ;(global-set-key (kbd "<C-return>") 'newline)
   (global-set-key (kbd "M-a") 'beginning-of-line-text)
@@ -485,7 +509,7 @@
   (global-set-key (kbd "C-x C-b") 'bs-show) ; buffer selector
   (global-set-key (kbd "C-x M-b") 'speedbar)
 
-  ;align the current region to = or whatever
+  ; align the current region to = or whatever
   (global-set-key (kbd "M-A") 'align-current)
 
   (global-set-key (kbd "C-c r") 'remember) ;remember-mode
@@ -506,16 +530,25 @@
   (global-unset-key (kbd "C-t")) ; annoying character swapping
 
   (fset 'yes-or-no-p 'y-or-n-p) ; yes/no answering without <RET>
+
+
+  (with-library zlc
+   (let ((map minibuffer-local-map))
+     (define-key map (kbd "<down>")  'zlc-select-next-vertical)
+     (define-key map (kbd "<up>")    'zlc-select-previous-vertical)
+     (define-key map (kbd "<right>") 'zlc-select-next)
+     (define-key map (kbd "<left>")  'zlc-select-previous)
+
+     ;; reset selection
+     (define-key map (kbd "C-c") 'zlc-reset)))
   )
 
 
-;; git amend without any prompt
-(defun magit-just-amend ()
-  (interactive)
-  (save-window-excursion
-    (magit-with-refresh
-      (magit-need-refresh)
-      (shell-command "git --no-pager commit --amend --reuse-message=HEAD"))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; general settings and behavior customizations
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;; highlight current word with custom face
 ;;(run-with-idle-timer secs repeat function)
@@ -610,6 +643,9 @@
 (add-hook 'Man-mode-hook 'goto-address)
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; minibuffer convenience stuff
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'ido)
 (ido-everywhere t)
@@ -636,21 +672,21 @@
 (require 'ispell)
 
 (setq-default ispell-program-name "hunspell")
-(add-to-list 'ispell-local-dictionary-alist '(
-                                              "german-hunspell" "[[:alpha:]]" "[^[:alpha:]]" "[']"
-                                              t
-                                              ("-d" "de_DE")
-                                              nil
-                                              utf-8
-                                              ))
+(add-to-list 'ispell-local-dictionary-alist
+             '("german-hunspell" "[[:alpha:]]" "[^[:alpha:]]" "[']"
+               t
+               ("-d" "de_DE")
+               nil
+               utf-8
+               ))
 
-(add-to-list 'ispell-local-dictionary-alist '(
-                                              "english-hunspell" "[[:alpha:]]" "[^[:alpha:]]" "[']"
-                                              t
-                                              ("-d" "en_US")
-                                              nil
-                                              utf-8
-                                              ))
+(add-to-list 'ispell-local-dictionary-alist
+             '("english-hunspell" "[[:alpha:]]" "[^[:alpha:]]" "[']"
+               t
+               ("-d" "en_US")
+               nil
+               utf-8
+               ))
 
 (setq ispell-dictionary "english-hunspell")
 
@@ -696,9 +732,6 @@
 
 (defadvice kill-whole-line (after fix-cookies activate)
            (myorg-update-parent-cookie))
-
-
-
 
 
 ;; preserve undo-region selection
@@ -796,8 +829,6 @@
 ;;useful modes:
 ;;auto-newline, hungry-delete, syntactic-indentation
 ;;-> M-x c-toggle[-auto]-{hungry-state,syntactic-indentation}
-;;(electric-indent-mode t) ;auto-indent
-;;(electric-pair-mode 1)   ;auto-brackets
 
 ;;custom key bindings:
 ;;(defun jj-c-initialization-hook ()
@@ -837,15 +868,6 @@
          )
     (* (max steps 1)
        c-basic-offset)))
-
-
-;; try to load auctex
-;;(defun load-auctex ()
-;;  (load "auctex.el" nil t t)
-;;  (load "preview-latex.el" nil t t)
-  ;;(message "loaded auctex")
-;;)
-;;(catch 'file-error (load-auctex))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -957,7 +979,7 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; hooks
+;; mode hooks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (add-hook 'LaTeX-mode-hook (lambda ()
@@ -999,11 +1021,11 @@
 (add-hook 'magit-mode-hook (lambda ()
                              (define-key magit-status-mode-map (kbd "C-c C-a") 'magit-just-amend)))
 
-;; c++11 improvements
+;; some c++11 improvements
 
 (add-hook
  'c++-mode-hook
- '(lambda()
+ '(lambda ()
 
     ;; useful faces: font-lock-warning-face
 
@@ -1043,6 +1065,10 @@
   (c-toggle-auto-newline nil) ; no automatic
   (c-toggle-auto-state nil)   ; newlines
 
+  (with-library company
+   ;; snippet expansion
+   (push '(company-semantic :with company-yasnippet) company-backends))
+
   (when ; kernel code style
     (and buffer-file-name
          (string-match
@@ -1079,6 +1105,8 @@
   (setq tab-width 4)
   (setq-default whitespace-line-column 79)
   (anaconda-mode)  ; anaconda-jedi-completion
+  ;(add-to-list 'company-backends 'company-anaconda)
+  (push '(company-anaconda :with company-yasnippet) company-backends)
   (jj-coding-hook))
 
 ;; elisp
@@ -1102,6 +1130,8 @@
   (setq LaTeX-indent-level 4)
   (setq LaTeX-item-indent -4)
   (setq indent-tabs-mode nil)
+  (with-library company-auctex
+   (company-auctex-init))
   (jj-coding-hook))
 
 ;; html
@@ -1111,9 +1141,15 @@
 
 ;; haskell
 (defun jj-haskell-coding-hook ()
-  ; haskell interpreter: C-c C-z or C-c C-l
-  (haskell-indentation-mode)
-  (haskell-doc-mode))
+  (with-library haskell-mode
+   ; haskell interpreter: C-c C-z or C-c C-l
+   (haskell-indentation-mode)
+   (with-library ghc
+    (ghc-init) ; = ghc-mod
+   )
+   (haskell-doc-mode)
+   (with-library company-ghc
+    (add-to-list 'company-backends '(company-ghc :with company-dabbrev-code)))))
 
 
 (add-hook 'python-mode-hook     'jj-python-coding-hook)
@@ -1123,6 +1159,7 @@
 (add-hook 'html-mode-hook       'jj-html-coding-hook)
 (add-hook 'haskell-mode-hook    'jj-haskell-coding-hook)
 (add-hook 'c-mode-common-hook   'jj-c-coding-hook)
+(add-hook 'LaTeX-mode-hook      'jj-latex-coding-hook)
 
 ;; enable commands that may "confuse" the user
 (put 'scroll-left 'disabled nil)
@@ -1131,6 +1168,9 @@
 (defun window-setup ()
   (message "running in windowed mode")
   ;(global-linum-mode)   ;; linum: MASSIVE slowdown!
+
+  (with-library nlinum
+   (global-nlinum-mode))
   (global-hl-line-mode))
 
 (defun terminal-setup ()
@@ -1243,7 +1283,9 @@
   (try-kill-buffer "*scratch*")
 
   (semantic-mode t)
-  (global-company-mode)
+
+  (with-library company-mode
+   (global-company-mode))
 
 
   ;;welcome animation:

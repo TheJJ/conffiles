@@ -91,7 +91,8 @@ alias p3='python3'
 alias p2='python2'
 alias py3='p3'
 alias py2='p2'
-alias p='p3'
+alias py='p3'
+alias p='py'
 alias dmesg='dmesg -L'
 alias youtube-dl='noglob youtube-dl'
 alias em='emacs -nw'
@@ -154,6 +155,8 @@ alias nemo='nemo --no-desktop'
 alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -delete"
 alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
 alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.argv[1]))"'
+
+alias getip="dig +short"
 
 hash colordiff 2>/dev/null && alias diff='colordiff'
 
@@ -273,8 +276,11 @@ function xie() { eix -e $(eix --only-names $1 | dmenu -i -l 10) }
 # set xterm title
 function title() { print -Pn "\e]0;$1 \a" }
 
-# message dialog
-function gtkdialog() {
+# get pid of a x window
+function xpid() { xprop | grep PID | cut -d" " -f3 }
+
+# message dialog in gtk
+function popup() {
 	if [[ "x$1" != "x" ]]; then
 		local title=$1
 	else
@@ -621,6 +627,7 @@ export LS_COLORS="rs=00:no=00:di=01;36:ln=01;04;33:mh=04:pi=40;33:so=01;35:do=01
 
 ##########################################
 # termcap colors for man page highlights
+# also done in .Xresources to color italic and bold
 ##########################################
 
 # man 5 termcap

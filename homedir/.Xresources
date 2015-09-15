@@ -22,9 +22,16 @@ URxvt.colorIT: #87af5f
 URxvt.colorBD: #d7d7d7
 URxvt.colorUL: #87afd7
 
-! more readable blue
+! more readable colors
+! blue:
 URxvt.color4: rgb:5c/5c/ff
 URxvt.color12: rgb:5c/5c/ff
+! pink:
+URxvt.color5: rgb:88/02/88
+URxvt.color13: rgb:ff/00/ff
+! red:
+URxvt.color1: rgb:cd/00/00
+URxvt.color9: #E73131
 
 ! see /usr/share/fonts/misc/fonts.alias
 !URxvt.font: 8x13
