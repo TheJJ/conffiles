@@ -51,7 +51,8 @@ fi
 # environment variables
 export VISUAL="vim"
 export EDITOR=$VISUAL
-export PAGER="less -S -i"
+export LESS="-S -i -R -M --shift 5"
+export PAGER="less"
 export GCC_COLORS="yes"
 
 # locales
@@ -99,7 +100,7 @@ alias em='emacs -nw'
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
 alias gdbs='gdbserver --once localhost:8888'
-alias gdbc='gdb -q -ex "target remote localhost:8888"'
+alias gdbc='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remote localhost:8888"'
 alias bc='bc -q -l'
 alias cp='cp --reflink=auto'
 alias ls='ls --color=auto'
@@ -135,13 +136,14 @@ alias psc='ps xawf -eo pid,user,cgroup,args'
 
 alias l='ls'
 alias la='ls -A'
-alias ll='ls -l'
+alias lll='ls -l'
 alias lal='ls -la'
 alias lla='ls -la'
 alias lr='ls -R'                    # recursive ls
 alias lx='ll -BX'                   # sort by extension
 alias lz='ll -rS'                   # sort by size
 alias lt='ll -rt'                   # sort by date
+alias ll='ls -alhtr'                # magic
 alias lrandom="ls | sort -R | head -n 1"
 
 alias rm='rm -I --one-file-system'
@@ -155,8 +157,6 @@ alias nemo='nemo --no-desktop'
 alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -delete"
 alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
 alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.argv[1]))"'
-
-alias getip="dig +short"
 
 hash colordiff 2>/dev/null && alias diff='colordiff'
 
@@ -333,6 +333,36 @@ function sudosh() {
 
 	sudo -u $user $SHELL
 }
+
+# just return the fucking ip address
+function getip() {
+	local ip=$(dig +short "$1" | tail -n1)
+	if [ -n $ip ]; then
+		echo $ip
+	fi
+}
+
+
+# try pinging the host until it's reachable.
+function tryping() {
+	local timeout=1
+	local interval=1
+	local srv="$1"
+
+	local i=0
+	while true; do
+		ping -q -W "$timeout" -c1 "$srv" > /dev/null
+		if [ $? -eq 0 ]; then
+			popup "$srv is back!"
+			echo -e "\r$srv is back!"
+			break;
+		fi
+		echo -en "\rtry $i "
+		sleep "$interval"
+		i=$((i + 1))
+	done
+}
+
 
 # connect to host=$1 port=$2 via tor and listen at $3
 function torcat() {

@@ -47,7 +47,7 @@ URxvt*iso14755: False
 URxvt*iso14755_52: False
 
 ! active perl extensions (urxvt-perls)
-URxvt.perl-ext-common: default,url-select,clipboard,keyboard-select,matcher
+URxvt.perl-ext-common: default,url-select,clipboard,keyboard-select,matcher,font-size
 
 ! lol transparency
 URxvt*transparent: false
@@ -72,6 +72,10 @@ URxvt.keysym.M-Escape:        perl:keyboard-select:activate
 URxvt.keysym.M-s:             perl:keyboard-select:search
 URxvt.keysym.Shift-Up:        command:\033]720;1\007
 URxvt.keysym.Shift-Down:      command:\033]721;1\007
+
+! font size updating
+URxvt.keysym.M-Up:     perl:font-size:increase
+URxvt.keysym.M-Down:   perl:font-size:decrease
 
 ! window bell via white flash
 URxvt.visualBell: false

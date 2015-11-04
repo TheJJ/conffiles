@@ -13,6 +13,10 @@
 
 ;;customized variables, set by `customize`
 (custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
  '(backward-delete-char-untabify-method nil)
@@ -23,6 +27,11 @@
  '(company-ghc-show-info (quote oneline))
  '(company-idle-delay 0.15)
  '(company-minimum-prefix-length 2)
+ '(company-statistics-mode t)
+ '(company-statistics-size 2000)
+ '(cua-auto-tabify-rectangles nil)
+ '(cua-enable-cua-keys nil)
+ '(cua-mode t nil (cua-base))
  '(custom-enabled-themes (quote (deeper-blue)))
  '(doc-view-continuous t)
  '(fill-column 76)
@@ -35,6 +44,10 @@
 
 ;;customized font colors and sizes
 (custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :background "#14151f" :foreground "#f5f5f5" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))) nil "main font and background")
  '(font-lock-comment-face ((t (:foreground "gray80"))))
  '(hl-line ((t (:inherit highlight :background "midnight blue"))))
@@ -44,7 +57,7 @@
  '(semantic-highlight-func-current-tag-face ((t (:background "gray15"))))
  '(whitespace-indentation ((t (:foreground "#797979"))))
  '(whitespace-space ((t (:background "default"))))
- '(whitespace-space-after-tab ((t (:background "RoyalBlue4" :foreground "firebrick"))))
+ '(whitespace-space-after-tab ((t (:background "#202030" :foreground "firebrick"))))
  '(whitespace-tab ((t (:background "#292929" :foreground "#a9a9a9")))))
 
 
@@ -69,7 +82,8 @@
   "when the library is available, do things with it."
   `(condition-case nil
        (progn (require ',symbol) ,@body)
-     (message (format "package unavailable: %s." ',symbol))))
+                (error (message (format "package unavailable: %s" ',symbol))
+                nil)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -84,47 +98,29 @@
 (delete-selection-mode t)
 (display-battery-mode t)
 (xterm-mouse-mode t)
-(electric-pair-mode t)
-(yas-global-mode t)
+;(electric-pair-mode t)
 
-(with-library zlc
-   (zlc-mode t))
-
-(with-library company-statistics
- (company-statistics-mode t)
- (company-statistics-size 2000))
-
+; snippet expansion
+;(with-library yasnippet
+; (yas-global-mode t))
 
 (ede-enable-generic-projects)
 
-;;remember last position in file
+;; enable commands that may "confuse" the user
+(put 'scroll-left 'disabled nil)
+(put 'upcase-region 'disabled nil)
+
+
+
+;;remember last cursor position in a file
 (require 'saveplace)
 (setq-default save-place t)
 (setq save-place-file "~/.emacs.d/line-saved-places")
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; enable auto completion
+;; semantic symbol jumping
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-(defun ac-enable-semantic ()
-  "Enable semantic auto completion for current mode"
-  (interactive)
-
-  (semantic-mode t)
-
-  (require 'cedet)
-  (require 'semantic)
-  (require 'semantic/sb)
-  (require 'semantic/ia)
-  (require 'semantic/symref)
-  (require 'semantic/bovine/gcc)
-  (require 'semantic/bovine/c)
-
-
-  ;; menubar entry for detected symbols
-  (add-hook 'semantic-init-hooks (lambda ()
-                                   (imenu-add-to-menubar "Stuff"))))
 
 ;; semantic jumping keybindings
 (defun semantic-completion-keybinds ()
@@ -143,11 +139,10 @@
   ;;(global-set-key "\C-c=" 'semantic-decoration-include-visit)
   ;;
   ;;(global-set-key "\C-cs" 'semantic-ia-show-summary)
-  )
 
-
-;;(when window-system
-;;  (speedbar t))
+  ;; menubar entry for detected symbols
+  (add-hook 'semantic-init-hooks (lambda ()
+                                   (imenu-add-to-menubar "Stuff"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fight the whitespace crimes
@@ -256,11 +251,12 @@
   (if indent-tabs-mode
     (progn
       (message "using space indentation...")
-      (setq indent-tabs-mode nil))
+      (setq-local indent-tabs-mode nil))
     ;else
     (progn
       (message "using tab indentation...")
-      (setq indent-tabs-mode t))))
+      (setq-local indent-tabs-mode t))))
+
 
 (defun run-command ()
   "Run a shell command."
@@ -483,12 +479,6 @@
   (global-set-key (kbd "M-[ a") 'backward-paragraph)
   (global-set-key (kbd "M-[ b") 'forward-paragraph)
 
-  ; insert fakking tab
-  (global-set-key (kbd "C-<tab>") 'insert-tab)
-
-  ; force company completion
-  (global-set-key (kbd "S-<tab>") 'company-complete)
-
   ; newline magic
   (global-set-key (kbd "RET") 'electric-newline-and-maybe-indent)
   ;(global-set-key (kbd "<C-return>") 'newline)
@@ -522,26 +512,32 @@
                                 (interactive)
                                 (join-line -1)))
 
-  (global-set-key (kbd "M-x") 'smex)
-  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
-  (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)  ;old M-x
+  (with-library smex
+   (global-set-key (kbd "M-x") 'smex)
+   (global-set-key (kbd "M-X") 'smex-major-mode-commands)
+   (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command))  ;old M-x
+
+  (with-library srefactor
+   (global-set-key (kbd "M-r") 'srefactor-refactor-at-point))
+
+  ; really insert a fucking tab
+  (global-set-key (kbd "C-<tab>") 'insert-tab)
+
+  (with-library company
+   ; force company completion
+   (global-set-key (kbd "S-<tab>") 'company-complete))
+
+  (with-library clang-format
+   ; magic region formatting
+   (global-set-key (kbd "C-M-<tab>") 'clang-format-region))
+
+
 
   ;unset unneeded keys
   (global-unset-key (kbd "C-t")) ; annoying character swapping
 
   (fset 'yes-or-no-p 'y-or-n-p) ; yes/no answering without <RET>
-
-
-  (with-library zlc
-   (let ((map minibuffer-local-map))
-     (define-key map (kbd "<down>")  'zlc-select-next-vertical)
-     (define-key map (kbd "<up>")    'zlc-select-previous-vertical)
-     (define-key map (kbd "<right>") 'zlc-select-next)
-     (define-key map (kbd "<left>")  'zlc-select-previous)
-
-     ;; reset selection
-     (define-key map (kbd "C-c") 'zlc-reset)))
-  )
+)
 
 
 
@@ -804,17 +800,6 @@
   )
 
 
-;;cc-langs
-(smart-tabs-advice c-indent-line c-basic-offset)
-(smart-tabs-advice c-indent-region c-basic-offset)
-;;python-mode
-(smart-tabs-advice py-indent-line py-indent-offset)
-(smart-tabs-advice py-newline-and-indent py-indent-offset)
-(smart-tabs-advice py-indent-region py-indent-offset)
-
-
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; random stuff?
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1051,10 +1036,9 @@
 
 ;; hook for all c-like languages
 (defun jj-cstyle-hook ()
+
   (c-add-style "sftstyle"     sft-c-style)
   (c-add-style "linux-kernel" kernel-c-style)
-
-  ;(message "setting C coding style...")
 
   ; default to sft style
   (c-set-style "sftstyle")
@@ -1066,8 +1050,16 @@
   (c-toggle-auto-state nil)   ; newlines
 
   (with-library company
-   ;; snippet expansion
-   (push '(company-semantic :with company-yasnippet) company-backends))
+   ;(add-to-list 'company-backends '(company-semantic :with company-yasnippet)))
+   (add-to-list 'company-backends '(company-semantic)))
+
+  (with-library function-args
+   (fa-config-default)
+
+   (define-key c-mode-map (kbd "M-p") 'moo-complete)
+   (define-key c++-mode-map (kbd "M-p") 'moo-complete)
+   (define-key c-mode-map (kbd "M-o") 'fa-show)
+   (define-key c++-mode-map (kbd "M-o") 'fa-show))
 
   (when ; kernel code style
     (and buffer-file-name
@@ -1077,7 +1069,12 @@
 
     (setq tab-width 8
           indent-tabs-mode t)
-  ))
+  )
+
+  ; smart tabs
+  (smart-tabs-advice c-indent-line c-basic-offset)
+  (smart-tabs-advice c-indent-region c-basic-offset)
+  )
 
 ;; main coding configuration function
 (defun jj-coding-hook ()
@@ -1085,9 +1082,9 @@
   (jj-keybindings)
   (ruler-mode t)
   (auto-revert-mode t)
-  ;(ac-enable-semantic)  ; semantic mode
   (semantic-completion-keybinds)
-  (eldoc-mode t))
+  (eldoc-mode t)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; special language-specific hooks
@@ -1105,8 +1102,13 @@
   (setq tab-width 4)
   (setq-default whitespace-line-column 79)
   (anaconda-mode)  ; anaconda-jedi-completion
-  ;(add-to-list 'company-backends 'company-anaconda)
-  (push '(company-anaconda :with company-yasnippet) company-backends)
+  (add-to-list 'company-backends '(company-anaconda :with company-yasnippet))
+
+  ; smart tabs
+  (smart-tabs-advice py-indent-line py-indent-offset)
+  (smart-tabs-advice py-newline-and-indent py-indent-offset)
+  (smart-tabs-advice py-indent-region py-indent-offset)
+
   (jj-coding-hook))
 
 ;; elisp
@@ -1151,6 +1153,12 @@
    (with-library company-ghc
     (add-to-list 'company-backends '(company-ghc :with company-dabbrev-code)))))
 
+;; vhdl
+(defun jj-vhdl-coding-hook ()
+  (setq indent-tabs-mode nil)
+  (smart-tabs-advice vhdl-indent-line vhdl-basic-offset)
+  (setq vhdl-indent-tabs-mode t))
+
 
 (add-hook 'python-mode-hook     'jj-python-coding-hook)
 (add-hook 'lisp-mode-hook       'jj-lisp-coding-hook)
@@ -1160,10 +1168,7 @@
 (add-hook 'haskell-mode-hook    'jj-haskell-coding-hook)
 (add-hook 'c-mode-common-hook   'jj-c-coding-hook)
 (add-hook 'LaTeX-mode-hook      'jj-latex-coding-hook)
-
-;; enable commands that may "confuse" the user
-(put 'scroll-left 'disabled nil)
-(put 'upcase-region 'disabled nil)
+(add-hook 'vhdl-mode-hook       'jj-vhdl-coding-hook)
 
 (defun window-setup ()
   (message "running in windowed mode")
@@ -1284,9 +1289,9 @@
 
   (semantic-mode t)
 
-  (with-library company-mode
+  (with-library company
+   ;(make-local-variable 'company-backends)
    (global-company-mode))
-
 
   ;;welcome animation:
   ;;(emacs-reloaded)
