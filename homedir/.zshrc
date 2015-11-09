@@ -86,6 +86,11 @@ REPORTTIME=1
 # aliases for stuff
 ############################
 
+# wrap vim to support file:linenumner
+if [[ -x $homebindir/viml ]]; then
+	alias vim=viml
+fi
+
 alias woman="man"
 alias python3="python3 -q"
 alias p3='python3'
@@ -293,7 +298,7 @@ function popup() {
 		local addition=""
 	fi
 
-	python -c "from gi.repository import Gtk; d = Gtk.MessageDialog(None, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, '$title'); $addition d.connect('delete-event', Gtk.main_quit); d.connect('response', Gtk.main_quit); d.show_all(); Gtk.main();"
+	python3 -c "from gi.repository import Gtk; d = Gtk.MessageDialog(None, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, '$title'); $addition d.connect('delete-event', Gtk.main_quit); d.connect('response', Gtk.main_quit); d.show_all(); Gtk.main();"
 }
 
 # gcc arch flags

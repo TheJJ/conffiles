@@ -90,6 +90,8 @@
 ;; enable funny modes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(setq-default major-mode 'text-mode)
+
 (global-ede-mode t)
 (column-number-mode t)
 (show-paren-mode t)
@@ -432,8 +434,26 @@
       (shell-command "git --no-pager commit --amend --reuse-message=HEAD"))))
 
 
-;;(defun highlight-todos (font-lock-add-keywords nil '(("\\<\\(FIXME\\|TODO\\|BUG\\):" 1 font-lock-warning-face t))))
-;;(add-hook 'prog-mode-hook 'highlight-todos)
+(defun shift-text (distance)
+  (if (use-region-p)
+    (let ((mark (mark)))
+      (save-excursion
+        (indent-rigidly (region-beginning)
+                        (region-end)
+                        distance)
+        (push-mark mark t t)
+        (setq deactivate-mark nil)))
+    (indent-rigidly (line-beginning-position)
+                    (line-end-position)
+                    distance)))
+
+(defun shift-right (count)
+  (interactive "p")
+  (shift-text count))
+
+(defun shift-left (count)
+  (interactive "p")
+  (shift-text (- count)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -511,6 +531,13 @@
   (global-set-key (kbd "M-p") (lambda ()
                                 (interactive)
                                 (join-line -1)))
+
+  (global-set-key (kbd "M->") (lambda ()
+                                (interactive)
+                                (shift-right 4)))
+  (global-set-key (kbd "M-<") (lambda ()
+                                (interactive)
+                                (shift-left 4)))
 
   (with-library smex
    (global-set-key (kbd "M-x") 'smex)
@@ -1078,12 +1105,12 @@
 
 ;; main coding configuration function
 (defun jj-coding-hook ()
-  ;(local-set-key (kbd "RET") 'newline-and-indent)
   (jj-keybindings)
   (ruler-mode t)
   (auto-revert-mode t)
   (semantic-completion-keybinds)
   (eldoc-mode t)
+  (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1092,8 +1119,7 @@
 
 ;; c, c++
 (defun jj-c-coding-hook ()
-  (jj-cstyle-hook)
-  (jj-coding-hook))
+  (jj-cstyle-hook))
 
 ;; py
 (defun jj-python-coding-hook ()
@@ -1101,15 +1127,15 @@
   (setq indent-tabs-mode nil)
   (setq tab-width 4)
   (setq-default whitespace-line-column 79)
-  (anaconda-mode)  ; anaconda-jedi-completion
-  (add-to-list 'company-backends '(company-anaconda :with company-yasnippet))
+  (with-library anaconda-mode
+   (anaconda-mode)
+   (with-library company-anaconda
+    (add-to-list 'company-backends '(company-anaconda :with company-yasnippet))))
 
   ; smart tabs
   (smart-tabs-advice py-indent-line py-indent-offset)
   (smart-tabs-advice py-newline-and-indent py-indent-offset)
-  (smart-tabs-advice py-indent-region py-indent-offset)
-
-  (jj-coding-hook))
+  (smart-tabs-advice py-indent-region py-indent-offset))
 
 ;; elisp
 (defun jj-lisp-coding-hook ()
@@ -1118,11 +1144,11 @@
   (prettify-symbols-mode)
   ;(setq lisp-indent-offset 4)
   ;(setq lisp-body-indent 4)
-  (jj-coding-hook))
+  )
 
 ;; javascript / ecmascript
 (defun jj-javascript-coding-hook ()
-  (jj-coding-hook))
+  (setq indent-tabs-mode nil))
 
 ;; TeX
 (defun jj-latex-coding-hook ()
@@ -1133,8 +1159,7 @@
   (setq LaTeX-item-indent -4)
   (setq indent-tabs-mode nil)
   (with-library company-auctex
-   (company-auctex-init))
-  (jj-coding-hook))
+   (company-auctex-init)))
 
 ;; html
 (defun jj-html-coding-hook ()
@@ -1158,8 +1183,22 @@
   (setq indent-tabs-mode nil)
   (smart-tabs-advice vhdl-indent-line vhdl-basic-offset)
   (setq vhdl-indent-tabs-mode t))
+:
+;; org-mode
+(defun jj-org-mode-hook ()
+  (setq indent-tabs-mode nil))
 
+;; add a function to multiple hooks
+(defun multi-hook-add (function hooks)
+  (mapc (lambda (hook)
+          (add-hook hook function))
+        hooks))
 
+;; hooks to be inherited:
+(add-hook 'text-mode-hook       'jj-keybindings)
+(add-hook 'prog-mode-hook       'jj-coding-hook)
+
+;; language-specific hooks:
 (add-hook 'python-mode-hook     'jj-python-coding-hook)
 (add-hook 'lisp-mode-hook       'jj-lisp-coding-hook)
 (add-hook 'emacs-lisp-mode-hook 'jj-lisp-coding-hook)
@@ -1169,7 +1208,17 @@
 (add-hook 'c-mode-common-hook   'jj-c-coding-hook)
 (add-hook 'LaTeX-mode-hook      'jj-latex-coding-hook)
 (add-hook 'vhdl-mode-hook       'jj-vhdl-coding-hook)
+(add-hook 'org-mode-hook        'jj-org-mode-hook)
 
+;; some modes don't inherit from prog-mode...
+(multi-hook-add
+ (lambda ()
+   ;TODO: (put 'something-mode 'derived-mode-parent 'prog-mode)
+   (run-hooks 'prog-mode-hook))
+ '(python-mode-hook
+   haskell-mode-hook))
+
+;; we have a graphical window
 (defun window-setup ()
   (message "running in windowed mode")
   ;(global-linum-mode)   ;; linum: MASSIVE slowdown!
@@ -1178,6 +1227,7 @@
    (global-nlinum-mode))
   (global-hl-line-mode))
 
+;; we're running on tty
 (defun terminal-setup ()
   (message "running in terminal mode")
   (custom-set-faces
@@ -1185,7 +1235,6 @@
     '(semantic-highlight-func-current-tag-face ((t (:background "gray15")))))
   (setq confirm-kill-emacs nil))
 
-;;switch for X and console window
 (if window-system
   (window-setup)
   (terminal-setup))
