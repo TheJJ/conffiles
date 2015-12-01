@@ -222,3 +222,5 @@ exec setxkbmap us altgr-intl -option ctrl:nocaps
 
 exec xset -b
 exec xset r rate 170 50
+
+exec xsetroot -solid black
