@@ -1188,11 +1188,9 @@
 (defun jj-org-mode-hook ()
   (setq indent-tabs-mode nil))
 
-;; add a function to multiple hooks
-(defun multi-hook-add (function hooks)
-  (mapc (lambda (hook)
-          (add-hook hook function))
-        hooks))
+;; markdown-mode
+(defun jj-markdown-mode-hook ()
+  (setq indent-tabs-mode nil))
 
 ;; hooks to be inherited:
 (add-hook 'text-mode-hook       'jj-keybindings)
@@ -1209,6 +1207,14 @@
 (add-hook 'LaTeX-mode-hook      'jj-latex-coding-hook)
 (add-hook 'vhdl-mode-hook       'jj-vhdl-coding-hook)
 (add-hook 'org-mode-hook        'jj-org-mode-hook)
+(add-hook 'markdown-mode-hook   'jj-markdown-mode-hook)
+
+
+;; add a function to multiple hooks
+(defun multi-hook-add (function hooks)
+  (mapc (lambda (hook)
+          (add-hook hook function))
+        hooks))
 
 ;; some modes don't inherit from prog-mode...
 (multi-hook-add
