@@ -20,12 +20,14 @@
  '(ansi-color-names-vector
    ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
  '(backward-delete-char-untabify-method nil)
+ '(blink-cursor-mode nil)
+ '(column-number-mode t)
  '(company-auto-complete nil)
  '(company-auto-complete-chars (quote (32 95 40 41 119 46 39)))
  '(company-clang-arguments (quote ("-std=c++14")))
  '(company-clang-executable "/usr/bin/clang++")
  '(company-ghc-show-info (quote oneline))
- '(company-idle-delay 0.15)
+ '(company-idle-delay 0.12)
  '(company-minimum-prefix-length 2)
  '(company-statistics-mode t)
  '(company-statistics-size 2000)
@@ -33,14 +35,16 @@
  '(cua-enable-cua-keys nil)
  '(cua-mode t nil (cua-base))
  '(custom-enabled-themes (quote (deeper-blue)))
+ '(display-battery-mode t)
  '(doc-view-continuous t)
  '(fill-column 76)
  '(inhibit-startup-screen t)
  '(jit-lock-defer-time 0.01)
  '(nxml-child-indent 1)
  '(scroll-bar-mode (quote right))
- '(semantic-python-dependency-system-include-path (quote ("/usr/lib64/python3.4/")))
- '(send-mail-function (quote sendmail-send-it)))
+ '(send-mail-function (quote sendmail-send-it))
+ '(show-paren-mode t)
+ '(size-indication-mode t))
 
 ;;customized font colors and sizes
 (custom-set-faces
@@ -1088,7 +1092,7 @@
    (define-key c-mode-map (kbd "M-o") 'fa-show)
    (define-key c++-mode-map (kbd "M-o") 'fa-show))
 
-  (when ; kernel code style
+  (when ; kernel code style: tabwidth=8, kernelstyle
     (and buffer-file-name
          (string-match
            (expand-file-name "/usr/src/linux") buffer-file-name))
@@ -1119,7 +1123,30 @@
 
 ;; c, c++
 (defun jj-c-coding-hook ()
-  (jj-cstyle-hook))
+  (jj-cstyle-hook)
+
+  ;; irony mode: clang/llvm magic
+  (with-library irony
+   (add-hook 'c++-mode-hook 'irony-mode)
+   (add-hook 'c-mode-hook 'irony-mode)
+   (add-hook 'objc-mode-hook 'irony-mode)
+
+   ;; replace the `completion-at-point' and `complete-symbol' bindings in
+   ;; irony-mode's buffers by irony-mode's function
+   (defun jj-irony-mode-hook ()
+     (define-key irony-mode-map [remap completion-at-point]
+       'irony-completion-at-point-async)
+     (define-key irony-mode-map [remap complete-symbol]
+       'irony-completion-at-point-async))
+
+   ;; irony hook:
+   (add-hook 'irony-mode-hook 'jj-irony-mode-hook)
+   (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+
+   ;; company-irony-completion
+   (with-library company
+    (with-library company-irony
+      (add-to-list 'company-backends '(company-irony))))))
 
 ;; py
 (defun jj-python-coding-hook ()
@@ -1158,8 +1185,23 @@
   (setq LaTeX-indent-level 4)
   (setq LaTeX-item-indent -4)
   (setq indent-tabs-mode nil)
+  (setq TeX-parse-self t)
+  (setq TeX-auto-save t)
+
+  ; minted codehighlighting needs shell execution for pygments
+  (add-to-list 'TeX-command-list
+               '("LaTeX-shellescape" "%`%l -shell-escape %(mode) %(extraopts) %' %t" TeX-run-TeX nil
+                 (latex-mode doctex-mode) :help "Run LaTeX -shell-escape") t)
+
   (with-library company-auctex
    (company-auctex-init)))
+
+;; BibTeX
+(defun jj-bibtex-coding-hook ()
+  (setq tab-width 2)
+  (setq indent-tabs-mode nil)
+  (setq bibtex-comma-after-last-field t)
+  (setq bibtex-align-at-equal-sign t))
 
 ;; html
 (defun jj-html-coding-hook ()
@@ -1205,6 +1247,7 @@
 (add-hook 'haskell-mode-hook    'jj-haskell-coding-hook)
 (add-hook 'c-mode-common-hook   'jj-c-coding-hook)
 (add-hook 'LaTeX-mode-hook      'jj-latex-coding-hook)
+(add-hook 'bibtex-mode-hook     'jj-bibtex-coding-hook)
 (add-hook 'vhdl-mode-hook       'jj-vhdl-coding-hook)
 (add-hook 'org-mode-hook        'jj-org-mode-hook)
 (add-hook 'markdown-mode-hook   'jj-markdown-mode-hook)
