@@ -122,6 +122,7 @@ alias ../../='cd ../../'
 alias cd..='..'
 alias cmatrix="cmatrix -a -b"
 alias rd="cd $(pwd)"
+alias chmod="chmod -c"
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes"
@@ -545,7 +546,7 @@ fi
 
 # get keys combos by "cat" or ctrl-v key
 bindkey "^R"    history-incremental-pattern-search-backward
-bindkey "^S"    history-incremental-pattern-search-forward
+bindkey "^T"    history-incremental-pattern-search-forward
 
 #special keys for several terminals
 bindkey "\e[1~"         beginning-of-line     # Home
