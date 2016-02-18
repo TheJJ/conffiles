@@ -12,8 +12,8 @@ font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 # start a terminal
 bindsym $mod+Return exec urxvt
 
-#bindcode 107 exec ~/bin/screenshot
-#bindcode shift+107 exec ~/bin/screenshot s
+bindcode 107 exec ~/bin/screenshot
+bindcode shift+107 exec ~/bin/screenshot s
 
 #in /etc/local.d/50-setkeycodes.start:
 # setkeycodes 67 162
@@ -51,7 +51,6 @@ bindcode 160 exec ~/bin/i3lockjj
 
 bindcode 150 exec dpms off
 
-bindsym mod1+F4 kill
 
 #dbus-send --system --print-reply --dest="org.freedesktop.ConsoleKit" /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
 #dbus-send --system --print-reply --dest="org.freedesktop.ConsoleKit" /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Restart
@@ -69,6 +68,10 @@ floating_modifier $mod
 
 
 bindsym $mod+Shift+Q kill
+bindsym mod1+F4 kill
+
+# jump to latest urgent window
+bindsym $mod+x [urgent=latest] focus
 
 bindsym $mod+d exec dmenu_run
 
