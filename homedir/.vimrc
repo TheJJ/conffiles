@@ -2,7 +2,7 @@
 " JJ's vimrc
 "
 " released under the GPLv3 or later
-" (c) 2008 - 2015 Jonas Jelten
+" (c) 2008 - 2016 Jonas Jelten
 
 
 syntax on
@@ -19,8 +19,32 @@ set encoding=utf-8                 "utf-8 encoding
 set showmatch                      "matching parentheses
 set incsearch                      "incremental search
 set mouse=a                        "enable mouse
+set nocursorline                   "underline current cursor position with line
+set wildmenu                       "visual autocomplete for command menu
+set lazyredraw                     "redraw only when we need to.
+set hidden                         "hide modified buffers and don't warn
+set nowrapscan                     "don't wrap the search
+set nostartofline                  "don't move to first non-space char in line
+set endofline                      "make sure last line ends with \n
+set backspace=indent,eol,start     "expected backspace behavior
+
 filetype plugin on                 "per-filetype settings
 filetype indent on                 "per-filetype indentation
+
+set wildignorecase
+set wildmode=longest:full,full
+set wildignore+=*~
+set wildignore+=*.swp
+
+if has("gui_running")
+	set mouse=a
+	set nomh              " don't hide the mouse
+	set guioptions+=imgT  " icon, menu bar, grey invalid items, show toolbar
+	set linespace=0       " no extra pixels between lines
+	set mouses=i-r:beam,s:updown,sd:udsizing,vs:leftright,vd:lrsizing,m:no,ml:up-arrow,v:rightup-arrow
+else
+	set t_Co=256
+endif
 
 autocmd GUIEnter * set visualbell t_vb=
 
@@ -58,12 +82,12 @@ augroup END
 cmap w!! w !sudo tee > /dev/null %
 
 " :diffw for current diff
-cmap diffw exec 'w !git diff --no-index -- - ' . shellescape(expand('%'))
+cmap diffw exec 'w !git diff -R --no-index -- - ' . shellescape(expand('%'))
 
 " diff refresh on write
 autocmd BufWritePost * if &diff == 1 | diffupdate | endif
 
-" refresh vimrc after saving
+" refresh vimrc (this file) after saving
 autocmd BufWritePost ~/.vimrc source %
 
 " autosave delay, cursorhold trigger, default: 4000ms
@@ -85,6 +109,16 @@ cnoremap <M-l> j
 cnoremap <M-;> l
 
 inoremap <C-Tab> <Tab>
+
+" x clipboard
+vmap <M-w> "+y
+vmap <C-x> "+c
+vmap <C-y> c<ESC>"+p
+imap <C-y> "+pA
+
+" no deselect when shifting
+vnoremap < <gv
+vnoremap > >gv
 
 " font face for bad whitespace
 highlight evilws ctermbg=red
