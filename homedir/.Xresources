@@ -39,7 +39,7 @@ URxvt.color9: #E73131
 URxvt.font: xft:DejaVuSansMono:size=09:antialias=true:hinting=true
 
 ! scrollbar style - rxvt (default), plain (most compact), next, or xterm
-URxvt.scrollstyle: rxvt
+URxvt.scrollstyle: plain
 URxvt.scrollBar_right: true
 
 ! funny unwanted keycombo
