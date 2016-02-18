@@ -20,31 +20,27 @@
  '(ansi-color-names-vector
    ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
  '(backward-delete-char-untabify-method nil)
- '(blink-cursor-mode nil)
- '(column-number-mode t)
  '(company-auto-complete nil)
  '(company-auto-complete-chars (quote (32 95 40 41 119 46 39)))
  '(company-clang-arguments (quote ("-std=c++14")))
  '(company-clang-executable "/usr/bin/clang++")
  '(company-ghc-show-info (quote oneline))
- '(company-idle-delay 0.12)
+ '(company-idle-delay 0.15)
  '(company-minimum-prefix-length 2)
- '(company-statistics-mode t)
- '(company-statistics-size 2000)
  '(cua-auto-tabify-rectangles nil)
  '(cua-enable-cua-keys nil)
  '(cua-mode t nil (cua-base))
  '(custom-enabled-themes (quote (deeper-blue)))
- '(display-battery-mode t)
  '(doc-view-continuous t)
  '(fill-column 76)
  '(inhibit-startup-screen t)
  '(jit-lock-defer-time 0.01)
  '(nxml-child-indent 1)
+ '(python-check-command "pylint --reports=n --disable=locally-disabled,fixme ")
+ '(python-fill-docstring-style (quote symmetric))
  '(scroll-bar-mode (quote right))
- '(send-mail-function (quote sendmail-send-it))
- '(show-paren-mode t)
- '(size-indication-mode t))
+ '(semantic-python-dependency-system-include-path nil)
+ '(send-mail-function (quote sendmail-send-it)))
 
 ;;customized font colors and sizes
 (custom-set-faces
@@ -115,6 +111,7 @@
 ;; enable commands that may "confuse" the user
 (put 'scroll-left 'disabled nil)
 (put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
 
 
 
@@ -723,28 +720,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'org-install)
-(define-key global-map "\C-cl" 'org-store-link)
-(define-key global-map "\C-ca" 'org-agenda)
-(setq org-return-follows-link t)
-(setq org-log-done nil)
-(setq org-server "~/org/")
+(define-key global-map (kbd "C-c l") 'org-store-link)
+(define-key global-map (kbd "C-c a") 'org-agenda)
+(define-key global-map (kbd "C-c c") 'org-capture)
+
 (setq org-tag-alist '(("read" . ?r) ("work" . ?w) ("code" . ?c)))
 (setq org-remember-templates '(
                                ("Todo" ?t "* TODO %^{Brief Description} %^g\n%?\nAdded: %U" (car org-agenda-files) "UNFILED")
                                ("Note" ?n "* %^{Brief Description} %^g\n%?\nAdded: %U" org-default-notes-file "UNFILED")
                                ))
-
-(setq org-agenda-files (mapcar (lambda (x) (concat org-server x)) '("org/todo.org")))
-(defun todo ()
-  (interactive)
-  (find-file-existing (car org-agenda-files)))
-
-(setq wiki-entry-point (concat org-server "org/wiki.org"))
-(setq org-default-notes-file wiki-entry-point)
-(defun wiki ()
-  (interactive)
-  (find-file-existing wiki-entry-point))
-
 
 ;; update org [9/10] markers when deleting lines
 (defun myorg-update-parent-cookie ()
@@ -755,10 +739,10 @@
         (org-update-parent-todo-statistics)))))
 
 (defadvice org-kill-line (after fix-cookies activate)
-           (myorg-update-parent-cookie))
+  (myorg-update-parent-cookie))
 
 (defadvice kill-whole-line (after fix-cookies activate)
-           (myorg-update-parent-cookie))
+  (myorg-update-parent-cookie))
 
 
 ;; preserve undo-region selection
@@ -1157,7 +1141,7 @@
   (with-library anaconda-mode
    (anaconda-mode)
    (with-library company-anaconda
-    (add-to-list 'company-backends '(company-anaconda :with company-yasnippet))))
+    (add-to-list 'company-backends 'company-anaconda)))
 
   ; smart tabs
   (smart-tabs-advice py-indent-line py-indent-offset)
@@ -1175,6 +1159,8 @@
 
 ;; javascript / ecmascript
 (defun jj-javascript-coding-hook ()
+  (setq js-indent-level 2)
+  (setq tab-width 2)
   (setq indent-tabs-mode nil))
 
 ;; TeX
@@ -1234,6 +1220,9 @@
 (defun jj-markdown-mode-hook ()
   (setq indent-tabs-mode nil))
 
+(defun jj-cmake-mode-hook ()
+  (setq cmake-tab-width 4))
+
 ;; hooks to be inherited:
 (add-hook 'text-mode-hook       'jj-keybindings)
 (add-hook 'prog-mode-hook       'jj-coding-hook)
@@ -1242,7 +1231,7 @@
 (add-hook 'python-mode-hook     'jj-python-coding-hook)
 (add-hook 'lisp-mode-hook       'jj-lisp-coding-hook)
 (add-hook 'emacs-lisp-mode-hook 'jj-lisp-coding-hook)
-(add-hook 'javascript-mode-hook 'jj-javascript-coding-hook)
+(add-hook 'js-mode-hook         'jj-javascript-coding-hook)
 (add-hook 'html-mode-hook       'jj-html-coding-hook)
 (add-hook 'haskell-mode-hook    'jj-haskell-coding-hook)
 (add-hook 'c-mode-common-hook   'jj-c-coding-hook)
@@ -1251,6 +1240,8 @@
 (add-hook 'vhdl-mode-hook       'jj-vhdl-coding-hook)
 (add-hook 'org-mode-hook        'jj-org-mode-hook)
 (add-hook 'markdown-mode-hook   'jj-markdown-mode-hook)
+(with-library cmake-mode
+ (add-hook 'cmake-mode-hook     'jj-cmake-mode-hook))
 
 
 ;; add a function to multiple hooks
@@ -1389,10 +1380,15 @@
 
   (with-library company
    ;(make-local-variable 'company-backends)
-   (global-company-mode))
+   (global-company-mode)
+
+   (with-library company-statistics
+    (company-statistics-mode t)
+    (company-statistics-size 2000)))
 
   ;;welcome animation:
   ;;(emacs-reloaded)
+  (message "jj emacs config initialized.")
   )
 
 (add-hook 'after-init-hook 'jj-emacs-init)
