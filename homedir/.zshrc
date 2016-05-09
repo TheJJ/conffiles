@@ -1,5 +1,5 @@
 # JJ's zshrc
-# Copyright (c) 2011 - 2015 Jonas Jelten
+# Copyright (c) 2011 - 2016 Jonas Jelten
 #
 # Released under GPLv3 or later.
 #
@@ -100,7 +100,6 @@ alias py2='p2'
 alias py='p3'
 alias p='py'
 alias dmesg='dmesg -L'
-alias youtube-dl='noglob youtube-dl'
 alias em='emacs -nw'
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
@@ -123,6 +122,7 @@ alias cd..='..'
 alias cmatrix="cmatrix -a -b"
 alias rd="cd $(pwd)"
 alias chmod="chmod -c"
+alias dd="dd status=progress"
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes"
@@ -149,6 +149,7 @@ alias lr='ls -R'                    # recursive ls
 alias lx='ll -BX'                   # sort by extension
 alias lz='ll -rS'                   # sort by size
 alias lt='ll -rt'                   # sort by date
+alias lZ='ll -Z'                    # selinux
 alias ll='ls -alhtr'                # magic
 alias lrandom="ls | sort -R | head -n 1"
 
@@ -268,6 +269,12 @@ function fname() {
 		local what="$@"
 	fi
 	find $dir -iname "*$what*"
+}
+
+# ag for two strings in one line
+# -> better than ag lol | ag rofl
+function agl() {
+	ag "(($1.*$2)|($2.*$1))"
 }
 
 # mkdir and cd to it

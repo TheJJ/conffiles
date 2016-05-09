@@ -1,5 +1,6 @@
 # JJ's gdb config
-# Copyright (c) 2012-2015 Jonas Jelten <jj@sft.mx>
+# Copyright (c) 2012-2016 Jonas Jelten <jj@sft.mx>
+# Licensed GNU GPLv3 or later
 
 #set architecture i386:x86-64:intel
 set history save
@@ -15,19 +16,37 @@ set auto-load python-scripts on
 set trace-commands off
 set width 0
 set pagination on
-
 #set detach-on-fork off
 
+set $COLOREDPROMPT = 1
+
+
 # custom prompt \o/
-set prompt \001\033[0m\002\001\033[32m\002gdb>> \001\033[0m\002
+#set prompt \001\033[0m\002\001\033[32m\002gdb>>\001\033[0m\002 
+
+if $COLOREDPROMPT == 1
+	set prompt \033[0;32mgdb>>\033[0m 
+end
+
+# defining it here doesn't get the space #$#$%"#!
+define disablecolorprompt
+	set prompt gdb>> 
+end
+document disablecolorprompt
+| Remove color from prompt
+end
+
+define enablecolorprompt
+	set prompt \033[0;32mgdb>>\033[0m 
+end
+document enablecolorprompt
+| Enable color prompt
+end
 
 # don't confirm the exit
 define hook-quit
 	set confirm off
 end
-
-# is pretty nice but very intrusive
-#source ~/peda/peda.py
 
 define hook-stop
 	status-info

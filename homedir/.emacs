@@ -1041,7 +1041,7 @@
            ("\\<[-+]*[0-9]*\\.?[0-9]+\\([ulUL]+\\|[eE][-+]?[0-9]+\\)?[fFlL]?\\>" . font-lock-constant-face)
 
            ;; custom defined types
-           ("\\<[A-Za-z_]+[A-Za-z_0-9]*_\\(type\\|ptr\\|t\\)\\>" . font-lock-type-face)
+           ("\\<[A-Za-z_]+[A-Za-z_0-9]*_\\(t\\)\\>" . font-lock-type-face)
            ))
     ) t)
 

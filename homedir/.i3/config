@@ -12,6 +12,9 @@ font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 # start a terminal
 bindsym $mod+Return exec urxvt
 
+# start something in PATH
+bindsym $mod+d exec ~/bin/dmenu_exec
+
 bindcode 107 exec ~/bin/screenshot
 bindcode shift+107 exec ~/bin/screenshot s
 
@@ -21,8 +24,6 @@ bindcode shift+107 exec ~/bin/screenshot s
 #remapped by X to: 170 and 169 or now 162 and 161
 bindcode 162 exec sleep 0.3 && ~/bin/rscreen
 bindcode 161 exec sleep 0.3 && ~/bin/rscreen portrait
-
-#bindcode 156 exec dmenu_run
 
 #bindcode 199 exec ~/bin/touchpad
 
@@ -72,8 +73,6 @@ bindsym mod1+F4 kill
 
 # jump to latest urgent window
 bindsym $mod+x [urgent=latest] focus
-
-bindsym $mod+d exec dmenu_run
 
 bindsym $mod+j focus left
 bindsym $mod+k focus down

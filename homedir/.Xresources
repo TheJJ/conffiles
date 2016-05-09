@@ -47,7 +47,8 @@ URxvt*iso14755: False
 URxvt*iso14755_52: False
 
 ! active perl extensions (urxvt-perls)
-URxvt.perl-ext-common: default,url-select,clipboard,keyboard-select,matcher,font-size
+URxvt.perl-ext-common: default,url-select,clipboard,keyboard-select,matcher
+!,font-size
 
 ! lol transparency
 URxvt*transparent: false
