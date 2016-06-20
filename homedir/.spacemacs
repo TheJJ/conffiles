@@ -64,6 +64,7 @@ values."
    '(
      nlinum
      bison-mode
+     ag
      )
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages
@@ -984,6 +985,7 @@ values."
     (setq indent-tabs-mode nil))
 
   (defun jj/cmake-mode-hook ()
+    (setq indent-tabs-mode t)
     (setq cmake-tab-width 4))
 
   ;; hooks to be inherited:
@@ -1134,6 +1136,7 @@ you should place you code here."
  '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil))))
  '(evil-search-highlight-persist-highlight-face ((t (:inherit region :background "#4040d0"))))
  '(font-lock-comment-face ((t (:foreground "gray80"))))
+ '(font-lock-doc-face ((t (:foreground "#cca522"))))
  '(font-lock-function-name-face ((t (:foreground "goldenrod"))))
  '(font-lock-keyword-face ((t (:foreground "deep sky blue" :weight normal))))
  '(font-lock-string-face ((t (:foreground "burlywood"))))
