@@ -25,7 +25,7 @@ set $COLOREDPROMPT = 1
 #set prompt \001\033[0m\002\001\033[32m\002gdb>>\001\033[0m\002 
 
 if $COLOREDPROMPT == 1
-	set prompt \033[0;32mgdb>>\033[0m 
+	set prompt \033[0;32mgdb>> \033[0m
 end
 
 # defining it here doesn't get the space #$#$%"#!
@@ -87,9 +87,11 @@ define status-info
 		printf "\n"
 		printf "rdi%16lx rsi%16lx rdx%16lx rcx%16lx\n", $rdi, $rsi, $rdx, $rcx
 		printf "rax%16lx rbx%16lx r8 %16lx r9 %16lx\n", $rax, $rbx, $r8,  $r9
-		printf "rbp%16lx rsp%16lx ", $rbp, $rsp
+		printf "r10%16lx r11%16lx r12%16lx r13%16lx\n", $r10, $r11, $r12, $r13
+		printf "rbp%16lx rsp%16lx r14%16lx r15%16lx\n", $rbp, $rsp, $r14, $r15
 		info registers eflags
 		printf "\n"
+		printf "  %#018lx %#018lx %#018lx %#018lx\n", *((long*)$sp - 8),  *((long*)$sp - 7),  *((long*)$sp - 6),  *((long*)$sp - 5)
 		printf "  %#018lx %#018lx %#018lx %#018lx\n", *((long*)$sp - 4),  *((long*)$sp - 3),  *((long*)$sp - 2),  *((long*)$sp - 1)
 		printf "=>%#018lx %#018lx %#018lx %#018lx\n", *((long*)$sp + 0),  *((long*)$sp + 1),  *((long*)$sp + 2),  *((long*)$sp + 3)
 		printf "  %#018lx %#018lx %#018lx %#018lx\n", *((long*)$sp + 4),  *((long*)$sp + 5),  *((long*)$sp + 6),  *((long*)$sp + 7)
