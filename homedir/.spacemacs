@@ -297,6 +297,10 @@ values."
         (set-marker m nil))
     ad-do-it))
 
+;; don't disable the window on pressing C-z
+(defadvice iconify-or-deiconify-frame (around disable-xframe-suspending))
+(ad-activate 'iconify-or-deiconify-frame)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; smart tabs, mix tabs and spaces (fak yea)
