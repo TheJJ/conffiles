@@ -392,6 +392,10 @@ values."
         mouse-yank-at-point t            ; paste as cursor instead of mouse position
         )
 
+  ;; default mode for new buffers
+  (setq-default major-mode 'text-mode)
+  (setq initial-major-mode 'text-mode)
+
   ;; indentation defaults
   ;;(setq-default indent-tabs-mode t)
   (setq-default indent-line-function 'insert-tab)
@@ -998,19 +1002,19 @@ values."
 
 
   ;; language-specific hooks:
-  (add-hook 'python-mode-hook     'jj/python-coding-hook)
-  (add-hook 'lisp-mode-hook       'jj/lisp-coding-hook)
-  (add-hook 'emacs-lisp-mode-hook 'jj/lisp-coding-hook)
-  (add-hook 'js-mode-hook         'jj/javascript-coding-hook)
-  (add-hook 'html-mode-hook       'jj/html-coding-hook)
-  (add-hook 'haskell-mode-hook    'jj/haskell-coding-hook)
-  (add-hook 'c-mode-common-hook   'jj/c-coding-hook)
-  (add-hook 'LaTeX-mode-hook      'jj/latex-coding-hook)
-  (add-hook 'bibtex-mode-hook     'jj/bibtex-coding-hook)
-  (add-hook 'vhdl-mode-hook       'jj/vhdl-coding-hook)
-  (add-hook 'org-mode-hook        'jj/org-mode-hook)
-  (add-hook 'markdown-mode-hook   'jj/markdown-mode-hook)
-  (add-hook 'cmake-mode-hook      'jj/cmake-mode-hook)
+  (add-hook 'python-mode-hook            'jj/python-coding-hook)
+  (add-hook 'lisp-mode-hook              'jj/lisp-coding-hook)
+  (add-hook 'emacs-lisp-mode-hook        'jj/lisp-coding-hook)
+  (add-hook 'js-mode-hook                'jj/javascript-coding-hook)
+  (add-hook 'html-mode-hook              'jj/html-coding-hook)
+  (add-hook 'haskell-mode-hook           'jj/haskell-coding-hook)
+  (add-hook 'c-mode-common-hook          'jj/c-coding-hook)
+  (add-hook 'LaTeX-mode-hook             'jj/latex-coding-hook)
+  (add-hook 'bibtex-mode-hook            'jj/bibtex-coding-hook)
+  (add-hook 'vhdl-mode-hook              'jj/vhdl-coding-hook)
+  (add-hook 'org-mode-hook               'jj/org-mode-hook)
+  (add-hook 'markdown-mode-hook          'jj/markdown-mode-hook)
+  (add-hook 'cmake-mode-hook             'jj/cmake-mode-hook)
 
 
   ;; add a function to multiple hooks
