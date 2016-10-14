@@ -56,7 +56,9 @@ URxvt*transparent: false
 ! 0 to 99 darkens, 101 to 200 lightens
 URxvt*shading: 20
 
-
+! select the last url with C-S-u.
+! j:down, k:up, ret:open, o:open and keep url selected,
+! y:copy url
 URxvt.keysym.S-C-U: perl:url-select:select_next
 URxvt.underlineURLs: true
 URxvt.url-select.underline: true
@@ -80,6 +82,9 @@ URxvt.keysym.M-Down:   perl:font-size:decrease
 
 ! window bell via white flash
 URxvt.visualBell: false
+
+! set urgent hint when bell rings
+URxvt.urgentOnBell: True
 
 ! better scrolling behaviour
 URxvt.scrollTtyOutput: false
