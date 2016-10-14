@@ -366,7 +366,8 @@ function tryping() {
 	while true; do
 		ping -q -W "$timeout" -c1 "$srv" > /dev/null
 		if [ $? -eq 0 ]; then
-			popup "$srv is back!"
+			notify-send "$srv is back!"
+			tput bel
 			echo -e "\r$srv is back!"
 			break;
 		fi
