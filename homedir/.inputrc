@@ -1,0 +1,9 @@
+# jj's .inputrc
+# Copyright (c) 2014-2016 Jonas Jelten <jj@stusta.net>
+#
+# used by all readline-enabled programs (e.g. python, bash)
+
+# enable partial history search using the arrow keys
+
+"\e[A": history-search-backward
+"\e[B": history-search-forward
