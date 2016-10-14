@@ -14,7 +14,6 @@ set print array on
 set print symbol-filename on
 set auto-load python-scripts on
 set trace-commands off
-set width 0
 set pagination on
 #set detach-on-fork off
 
