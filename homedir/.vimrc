@@ -166,6 +166,7 @@ autocmd BufRead /usr/src/linux* call WhitespaceTab(8)
 cmap ws2 call WhitespaceSpace(2)
 cmap ws4 call WhitespaceSpace(4)
 cmap ws8 call WhitespaceSpace(8)
+cmap wt2 call WhitespaceTab(2)
 cmap wt4 call WhitespaceTab(4)
 cmap wt8 call WhitespaceTab(8)
 
