@@ -57,12 +57,14 @@ values."
      nlinum
      org
      python
+     rust
      semantic
      shell
      shell-scripts
      smex
      ;;spell-checking
      sql
+     systemd
      (syntax-checking :variables
                       syntax-checking-enable-by-default nil)
      version-control
@@ -1184,7 +1186,7 @@ you should place your code here."
                    [36 10])
      (tab-mark 9
                [8728 9]
-               [62 9]))))
+               [62 9]))) t)
  '(whitespace-style
    (quote
     (face tabs trailing newline indentation space-before-tab space-after-tab space-mark tab-mark newline-mark lines-tail))))
