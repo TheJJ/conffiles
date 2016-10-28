@@ -127,7 +127,7 @@ alias dd="dd status=progress"
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes"
 alias vga="vg --show-leak-kinds=all"
-alias vgs="vg --vgdb-error=1"
+alias vgf="vg --vgdb-error=1"
 alias vgg="vg --vgdb-error=0 --vgdb=full"
 function gdbv() {
 	args=""
