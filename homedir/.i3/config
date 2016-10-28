@@ -217,10 +217,6 @@ client.background       #000000
 ######################
 # startup things
 ######################
-# TODO: use some system-independent launcher script
-
-exec ~/bin/redshift-launch
-exec syndaemon -t -k -i 1 -d
 
 # us international
 #caps:none altwin:meta_alt lv3:rals_switch
