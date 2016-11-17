@@ -41,10 +41,12 @@ values."
      (auto-completion :variables
                       auto-completion-enable-sort-by-usage t)
      better-defaults
+     bibtex
      (c-c++ :variables
             c-c++-default-mode-for-headers 'c++-mode
             c-c++-enable-clang-support t)
      emacs-lisp
+     extra-langs
      git
      gtags
      haskell
