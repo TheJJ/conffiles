@@ -5,5 +5,10 @@
 
 # enable partial history search using the arrow keys
 
+"\C-x\C-r": re-read-init-file
+"\C-xd": dump-functions
+
 "\e[A": history-search-backward
 "\e[B": history-search-forward
+"\e[C": forward-char
+"\e[D": backward-char
