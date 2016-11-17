@@ -5,6 +5,9 @@
 #set architecture i386:x86-64:intel
 set history save
 set history filename ~/.gdb_history
+set history save on
+set history size 10000
+set history expansion on
 set disassembly-flavor intel
 #set disassemble-next-line auto
 set print demangle on
@@ -17,30 +20,12 @@ set trace-commands off
 set pagination on
 #set detach-on-fork off
 
-set $COLOREDPROMPT = 1
+# gdb/readline doesn't support prompt colors.
+# the length of the whole string is used for the
+# partial history mapping with history-search-backward
+# so the `pos 0` of the cursor is way too much to the right.
+set prompt gdb>> 
 
-
-# custom prompt \o/
-#set prompt \001\033[0m\002\001\033[32m\002gdb>>\001\033[0m\002 
-
-if $COLOREDPROMPT == 1
-	set prompt \033[0;32mgdb>> \033[0m
-end
-
-# defining it here doesn't get the space #$#$%"#!
-define disablecolorprompt
-	set prompt gdb>> 
-end
-document disablecolorprompt
-| Remove color from prompt
-end
-
-define enablecolorprompt
-	set prompt \033[0;32mgdb>>\033[0m 
-end
-document enablecolorprompt
-| Enable color prompt
-end
 
 # don't confirm the exit
 define hook-quit
