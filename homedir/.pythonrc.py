@@ -2,7 +2,7 @@
 #
 # jj's pythonrc
 #
-# Copyright (c) 2012-2015 Jonas Jelten <jj@sft.mx>
+# Copyright (c) 2012-2016 Jonas Jelten <jj@sft.mx>
 #
 # Licensed GPLv3 or later.
 
@@ -10,17 +10,18 @@ import inspect
 import os
 import sys
 
-sys.ps1 = '\x01\x1b[36m\x02>>>\x01\x1b[m\x02 '
-sys.ps2 = '\x01\x1b[36m\x02...\x01\x1b[m\x02 '
+if 'bpython' not in sys.modules:
+    # fancy prompt. bpython doesn't like nor need this
+    # the \x01 and \x02 tell readline to ignore the chars
+    sys.ps1 = '\x01\x1b[36m\x02>>>\x01\x1b[m\x02 '
+    sys.ps2 = '\x01\x1b[36m\x02...\x01\x1b[m\x02 '
 
-python_histfile = ".py_history"
+    # bpython has its own history management
+    python_histfile = ".py_history"
 
-if "PAGER" in os.environ:
-    pager_proc = os.environ["PAGER"]
-else:
-    pager_proc = "less -R -S"
+pager_proc = os.environ.get("PAGER", "less -R -S")
 
-use_pygments = False
+use_pygments = True
 has_pygments = False
 
 
@@ -31,7 +32,7 @@ if use_pygments:
         import pygments.lexers
         has_pygments = True
     except ImportError:
-        sys.stderr.write("pygments not found.\n")
+        pass
 
 
 def __pager_launch(txt):
@@ -87,11 +88,13 @@ def _completion():
     atexit.register(readline.write_history_file, history_file)
 
 
-try:
-    _completion()
-    del _completion
-except Exception as e:
-    sys.stderr.write("failed history and completion init: %s\n" % e)
+# bpython has its own completion stuff
+if 'bpython' not in sys.modules:
+    try:
+        _completion()
+        del _completion
+    except Exception as e:
+        sys.stderr.write("failed history and completion init: %s\n" % e)
 
 
 try:
@@ -99,3 +102,7 @@ try:
     from see import see
 except ImportError:
     pass
+
+
+# helpful imports
+from math import *

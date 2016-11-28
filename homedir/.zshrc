@@ -99,6 +99,8 @@ alias py3='p3'
 alias py2='p2'
 alias py='p3'
 alias p='py'
+alias bpy='bpython'
+alias b='bpy'
 alias dmesg='dmesg -L'
 alias ema='emacs -nw'
 alias objdump='objdump -M intel-mnemonic -C'
@@ -123,6 +125,7 @@ alias cmatrix="cmatrix -a -b"
 alias rd="cd $(pwd)"
 alias chmod="chmod -c"
 alias dd="dd status=progress"
+alias file='file -L'
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes"
