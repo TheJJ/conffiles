@@ -20,11 +20,9 @@ set trace-commands off
 set pagination on
 #set detach-on-fork off
 
-# gdb/readline doesn't support prompt colors.
-# the length of the whole string is used for the
-# partial history mapping with history-search-backward
-# so the `pos 0` of the cursor is way too much to the right.
-set prompt gdb>> 
+#set prompt = gdb>> 
+#set extended-prompt \e[1;32m= gdb>>\e[0m 
+set prompt \001\033[1;32m\002= gdb>>\001\033[0m\002 
 
 
 # don't confirm the exit
@@ -32,9 +30,10 @@ define hook-quit
 	set confirm off
 end
 
-define hook-stop
-	status-info
-end
+# executed, whenever execution was stopped:
+#define hook-stop
+#	status-info
+#end
 
 ##########################
 # utility functions
