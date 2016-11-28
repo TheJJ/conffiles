@@ -5,6 +5,32 @@
 
 # enable partial history search using the arrow keys
 
+$include /etc/inputrc
+
+set editing-mode emacs
+
+set colored-completion-prefix on
+set colored-stats on
+set completion-ignore-case on
+set completion-prefix-display-length 10
+set completion-query-items 100
+set convert-meta off
+set input-meta on
+set mark-symlinked-directories on
+set menu-complete-display-prefix Off
+set output-meta on
+set show-all-if-ambiguous on
+set show-all-if-unmodified off
+set skip-completed-text on
+set visible-stats on
+
+Tab: complete
+# <S-Tab>, <C-L>, <C-D>
+"\e[Z":   menu-complete-backward
+"\e\C-d": possible-completions
+"\e\C-l": menu-complete
+
+
 "\C-x\C-r": re-read-init-file
 "\C-xd": dump-functions
 
@@ -12,3 +38,9 @@
 "\e[B": history-search-forward
 "\e[C": forward-char
 "\e[D": backward-char
+
+"\eOd": backward-word
+"\eOc": forward-word
+
+"\e[3^": kill-word
+"\C-h": backward-kill-word
