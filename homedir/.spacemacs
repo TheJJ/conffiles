@@ -39,7 +39,8 @@ values."
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
      (auto-completion :variables
-                      auto-completion-enable-sort-by-usage t)
+                      auto-completion-enable-sort-by-usage t
+                      auto-completion-enable-help-tooltip t)
      better-defaults
      bibtex
      (c-c++ :variables
@@ -55,10 +56,12 @@ values."
      javascript
      latex
      lua
-     markdown
+     (markdown :variables
+               markdown-live-preview-engine 'vmd)
      nlinum
      org
      python
+     ranger
      rust
      semantic
      shell
@@ -68,7 +71,8 @@ values."
      sql
      systemd
      (syntax-checking :variables
-                      syntax-checking-enable-by-default nil)
+                      syntax-checking-enable-by-default nil
+                      syntax-checking-enable-tooltips t)
      version-control
      yaml
      (shell :variables
@@ -929,7 +933,6 @@ values."
   (defun jj/coding-hook ()
     (jj/c-codestyle)
     (jj/semantic-completion-keybinds)
-    (ruler-mode t)
     (auto-revert-mode t)
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
     (jj/whitespace-highlight)
@@ -985,6 +988,9 @@ values."
     (setq indent-tabs-mode nil)
     (setq tab-width 4)
     (setq-default whitespace-line-column 79)
+
+    (setq flycheck-checker 'python-pylint
+          flycheck-checker-error-threshold 300)
 
     ;; smart tabs
     (smart-tabs-advice py-indent-line py-indent-offset)
