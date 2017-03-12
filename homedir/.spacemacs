@@ -34,10 +34,9 @@ values."
    dotspacemacs-configuration-layers
    '(
      ;; ----------------------------------------------------------------
-     ;; Example of useful layers you may want to use right away.
-     ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
-     ;; <M-m f e R> (Emacs style) to install them.
-     ;; ----------------------------------------------------------------
+     ;; active layers select which of the magic of spacemacs
+     ;; shall be activated.
+
      (auto-completion :variables
                       auto-completion-enable-sort-by-usage t
                       auto-completion-enable-help-tooltip t)
@@ -50,7 +49,8 @@ values."
      extra-langs
      git
      gtags
-     haskell
+     (haskell :variables
+              haskell-completion-backend 'intero)
      helm
      html
      javascript
@@ -153,11 +153,10 @@ values."
    ;; the form `(list-type . list-size)`. If nil then it is disabled.
    ;; Possible values for list-type are:
    ;; `recents' `bookmarks' `projects' `agenda' `todos'."
-   ;; Example for 5 recent files and 7 projects: '((recents . 5) (projects . 7))
    ;; List sizes may be nil, in which case
    ;; `spacemacs-buffer-startup-lists-length' takes effect.
-   ;; (default nil)
-   dotspacemacs-startup-lists '(recents projects)
+   dotspacemacs-startup-lists '((recents . 5)
+                                (projects . 7))
    ;; True if the home buffer should respond to resize events.
    dotspacemacs-startup-buffer-responsive t
    ;; Default major mode of the scratch buffer (default `text-mode')
@@ -196,7 +195,7 @@ values."
    ;; pressing `<leader> m`. Set it to `nil` to disable it. (default ",")
    dotspacemacs-major-mode-leader-key ","
    ;; Major mode leader key accessible in `emacs state' and `insert state'.
-   ;; (default "C-M-m)
+   ;; (default "C-M-m")
    dotspacemacs-major-mode-emacs-leader-key "C-M-m"
    ;; These variables control whether separate commands are bound in the GUI to
    ;; the key pairs C-i, TAB and C-m, RET.
@@ -236,7 +235,7 @@ values."
    ;; Maximum number of rollback slots to keep in the cache. (default 5)
    dotspacemacs-max-rollback-slots 5
    ;; If non nil, `helm' will try to minimize the space it uses. (default nil)
-   dotspacemacs-helm-resize t
+   dotspacemacs-helm-resize nil
    ;; if non nil, the helm header is hidden when there is only one source.
    ;; (default nil)
    dotspacemacs-helm-no-header nil
@@ -703,8 +702,6 @@ values."
   ;; newline magic
   ;(global-set-key (kbd "RET") 'electric-newline-and-maybe-indent)
   (global-set-key (kbd "<C-return>") 'newline)
-  (global-set-key (kbd "M-a") 'spacemacs/smart-move-beginning-of-line)
-  (global-set-key (kbd "C-a") 'beginning-of-line)
   (global-set-key (kbd "C-c C-a") 'mark-whole-buffer)
 
   (global-set-key (kbd "C-x B") 'bury-buffer)
@@ -773,16 +770,17 @@ values."
 
   ;; linux kernel indentation style
   (defconst kernel-c-style
-    '("linux" (c-offsets-alist (
-                                arglist-cont-nonempty
-                                c-lineup-gcc-asm-reg
-                                c-lineup-arglist   ;-tabs-only
-                                )))
-    )
+    '("linux" ;; based on the builtin linux style
+      (c-offsets-alist . (
+                          (arglist-cont-nonempty c-lineup-gcc-asm-reg c-lineup-arglist)
+                          (arglist-close . 0)
+                          ))
+      ))
 
   ;; sft coding style
   (defconst sft-c-style
-    '("linux" ; base it on linux code style
+    '("linux"  ;; base it on linux code style
+      (c-doc-comment-style        . javadoc)
       (indent-tabs-mode           . t)
       (c-basic-offset             . 4)
       (c-tab-always-indent        . t)
@@ -813,15 +811,19 @@ values."
                                  ))
       (c-cleanup-list . (brace-else-brace))
       (c-offsets-alist . (
-                                        ; arg indent helper funcs: c-lineup-{arglist[-tabs-only],argcont}
-                                        ; arglist = indent to matching (|here, asdf
-                                        ; argcont = indent to (asdf, |here
-                                        ; absolute offset: [0]
+                          ; arg indent helper funcs: c-lineup-*
+                          ; arglist = indent to matching (|here, asdf
+                          ; argcont = indent to (asdf, |here
+                          ; casecaded calls = ->lol\n->stuff
+                          ; absolute offset: [0]
                           (access-label          . -)   ; public: or private:
                           (arglist-intro         . +)   ; first arg in newline
                           (arglist-cont          . 0)   ; wrapped function args: func(\nthisone
-                          (arglist-cont-nonempty . c-lineup-arglist)   ; wrapped function args after func(arg,\nthisone
-                          (arglist-close         . 0)   ; intentation of ) which closes args
+                                                        ; wrapped function args after func(arg,\nthisone:
+                          (arglist-cont-nonempty . (max c-lineup-arglist
+                                                        c-lineup-string-cont
+                                                        c-lineup-cascaded-calls))
+                          (arglist-close         . 0)   ; intentation of ) which closes tabbed args
                           (block-open            . 0)   ; { to open a block
                           (block-close           . 0)   ; } after a block
                           (brace-list-intro      . +)   ; first element in {\nthisone
@@ -831,12 +833,15 @@ values."
                           (statement-case-intro  . +)   ; code after case 1337:
                           (defun-block-intro     . +)   ; beginning of keyword (...) { stuff  }
                           (inclass               . +)   ; members of struct or class
-                          (inher-cont            . c-lineup-multi-inher)   ; inheritance-continuation
+                          (inher-intro           . +)   ; beginning of inheritance def
+                          (inher-cont            . c-lineup-multi-inher)   ; inheritance continuation
                           (inline-open           . +)
                           (innamespace           . 0)   ; namespace lol {\nthisstatement
                           (knr-argdecl-intro     . -)
                           (knr-argdecl-intro     . 0)
                           (label                 . 0)   ; gotolabel:
+                          (member-init-intro     . +)   ; member initializing for class lol : var(val)
+                          (member-init-cont      . c-lineup-multi-inher)   ; further members
                           (statement             . 0)
                           (statement-block-intro . +)   ; line in if () {\nthisline
                           (statement-case-open   . +)
@@ -845,11 +850,10 @@ values."
                           (substatement-label    . 0)
                           (substatement-open     . 0)
                           (substatement-open     . 0)
+                          (template-args-cont    . c-lineup-template-args)
                           (topmost-intro         . 0)   ; indentation of file start
                           (topmost-intro-cont    . c-lineup-topmost-intro-cont)
                           (cpp-macro             . [0])   ; #define, etcetc
-                          (member-init-intro     . +)   ; member initializing for class lol : var(val)
-                          (member-init-cont      . c-lineup-multi-inher)   ; further members
                           ))
 
       ;; information about indent parsing on TAB
@@ -901,33 +905,24 @@ values."
                     (call-interactively 'self-insert-command))))))
 
 
-  ;; some c++11 improvements, at least visually
-  (add-hook
-   'c++-mode-hook
+  ;; comment parsing and word highlinging
+  (add-hook 'c++-mode-hook
    '(lambda ()
 
-      ;; useful faces: font-lock-warning-face
+      ;; javadoc-style comments in c++
+      (add-to-list 'c-doc-comment-style '(c++-mode . javadoc))
 
       ;; placing regexes into `c-mode-common-hook' may work but their
       ;; evaluation order matters.
       (font-lock-add-keywords
-       nil '(("\\<\\(void\\|unsigned\\|signed\\|char\\|short\\|bool\\|int\\|long\\|float\\|double\\)\\>" . font-lock-keyword-face)
-             ;; C++11 keywords
-             ("\\<\\(alignof\\|alignas\\|constexpr\\|decltype\\|noexcept\\|nullptr\\|static_assert\\|thread_local\\|override\\|final\\)\\>" . font-lock-keyword-face)
-             ;; hex numbers
-             ("\\<0[xX][0-9A-Fa-f]+\\>" . font-lock-constant-face)
-             ;; hex/integer/float numbers
-             ("\\<[-+]*[0-9]*\\.?[0-9]+\\([ulUL]+\\|[eE][-+]?[0-9]+\\)?[fFlL]?\\>" . font-lock-constant-face)
+       nil '(
+             ;; missing C++11 keywords
+             ("\\<\\(static_assert\\)\\>" . font-lock-keyword-face)
 
              ;; custom defined types
              ("\\<[A-Za-z_]+[A-Za-z_0-9]*_\\(t\\)\\>" . font-lock-type-face)
              ))
       ) t)
-
-
-  ;; default c-coding-style
-  (setq-default c-default-style "linux" c-basic-offset 4)
-
 
   ;; main coding configuration function
   (defun jj/coding-hook ()
@@ -1194,7 +1189,7 @@ you should place your code here."
                    [36 10])
      (tab-mark 9
                [8728 9]
-               [62 9]))) t)
+               [62 9]))))
  '(whitespace-style
    (quote
     (face tabs trailing newline indentation space-before-tab space-after-tab space-mark tab-mark newline-mark lines-tail))))
@@ -1222,6 +1217,7 @@ you should place your code here."
  '(semantic-highlight-func-current-tag-face ((t (:background "gray15"))))
  '(whitespace-indentation ((t (:foreground "#797979"))))
  '(whitespace-space ((t (:background "default"))))
- '(whitespace-space-after-tab ((t (:background "#202030" :foreground "RoyalBlue4" :inverse-video t :weight bold))))
- '(whitespace-tab ((t (:background "#292929" :foreground "#a9a9a9")))))
+ '(whitespace-space-after-tab ((t (:foreground "#101540"))))
+ '(whitespace-tab ((t (:background "#292929" :foreground "#a9a9a9"))))
+ '(widget-field ((t (:background "gray25")))))
 
