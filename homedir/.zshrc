@@ -126,17 +126,19 @@ alias rd="cd $(pwd)"
 alias chmod="chmod -c"
 alias dd="dd status=progress"
 alias file='file -L'
+alias xseltoclip="xclip -o | xclip -i -selection clipboard; xclip -o"
+alias xcliptosel="xclip -selection clipboard -o | xclip -i; xclip -selection clipboard -o"
 
 # valgrind awesomeness
-alias vg="valgrind --leak-check=full --track-origins=yes"
-alias vga="vg --show-leak-kinds=all"
-alias vgf="vg --vgdb-error=1"
-alias vgg="vg --vgdb-error=0 --vgdb=full"
+alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
+alias vga="vg --show-leak-kinds=all"                    # analyze all
+alias vgf="vg --vgdb-error=1 --vgdb=full"               # gdb+errors
+alias vge="vg --vgdb-error=0 --vgdb=full"               # gdb+halt+errors
+alias vgg="vg --vgdb=full --vgdb-stop-at=startup"       # gdb+halt
 function gdbv() {
 	args=""
 	gdb -ex "set architecture i386:x86-64:intel" -ex "target remote | vgdb $args" $*
 }
-export vg="valgrind --leak-check=full --track-origins=yes --vgdb-error=0 --vgdb=full"
 
 alias gschichten='fortune'
 alias lol="fortune | ponysay"
