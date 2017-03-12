@@ -9,15 +9,17 @@ set history save on
 set history size 10000
 set history expansion on
 set disassembly-flavor intel
-#set disassemble-next-line auto
 set print demangle on
 set print asm-demangle off
 set print pretty on
 set print array on
-set print symbol-filename on
+set print object on
+set print vtbl on
 set auto-load python-scripts on
 set trace-commands off
 set pagination on
+set disassemble-next-line auto
+set print symbol-filename off
 #set detach-on-fork off
 
 #set prompt = gdb>> 
@@ -31,9 +33,9 @@ define hook-quit
 end
 
 # executed, whenever execution was stopped:
-#define hook-stop
-#	status-info
-#end
+define hook-stop
+	#x /1i $pc
+end
 
 ##########################
 # utility functions
@@ -43,13 +45,22 @@ define nip
 	x /10i $rip
 end
 
+define sip
+	si
+	x /10i $rip
+end
+
+define ip
+	x /10i $rip
+end
+
 define xxd
 	if $argc != 2
 		help xxd
 	else
 		set pagination off
 		dump binary memory /tmp/gdbdump.bin $arg0 $arg0+$arg1
-		shell xxd /tmp/gdbdump.bin
+		shell xxd -g 4 /tmp/gdbdump.bin
 		shell rm -f /tmp/gdbdump.bin
 		set pagination on
 	end
@@ -135,7 +146,7 @@ define dump_hextet
 	if $argc != 1
 		help dump_hextet
 	else
-		printf "%02X%02X %02X%02X %02X%02X %02X%02X  %02X%02X %02X%02X %02X%02X %02X%02X", \
+		printf "%02X%02X%02X%02X %02X%02X%02X%02X  %02X%02X%02X%02X %02X%02X%02X%02X", \
 			*(unsigned char*) ($arg0),     *(unsigned char*) ($arg0 + 1), \
 			*(unsigned char*) ($arg0 + 2), *(unsigned char*) ($arg0 + 3), \
 			*(unsigned char*) ($arg0 + 4), *(unsigned char*) ($arg0 + 5), \
