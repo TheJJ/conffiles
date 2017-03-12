@@ -13,7 +13,9 @@ font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 bindsym $mod+Return exec urxvt
 
 # start something in PATH
-bindsym $mod+d exec ~/bin/dmenu_exec
+bindsym $mod+d exec rofi -show run
+# run .desktop files
+bindsym $mod+shift+d exec rofi -show drun
 
 bindcode 107 exec ~/bin/screenshot
 bindcode shift+107 exec ~/bin/screenshot s
