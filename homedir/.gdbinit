@@ -20,6 +20,7 @@ set trace-commands off
 set pagination on
 set disassemble-next-line auto
 set print symbol-filename off
+set python print-stack full
 #set detach-on-fork off
 
 #set prompt = gdb>> 
@@ -43,6 +44,11 @@ end
 define nip
 	ni
 	x /10i $rip
+end
+
+define nips
+	ni
+	status-info
 end
 
 define sip
