@@ -88,6 +88,11 @@ cmap diffw exec 'w !git diff -R --no-index -- - ' . shellescape(expand('%'))
 " diff refresh on write
 autocmd BufWritePost * if &diff == 1 | diffupdate | endif
 
+" different colorscheme for diff
+if &diff
+	colorscheme slate
+endif
+
 " refresh vimrc (this file) after saving
 autocmd BufWritePost ~/.vimrc source %
 
