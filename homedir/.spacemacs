@@ -1,6 +1,6 @@
 ;; -*- mode: emacs-lisp -*-
 ;; jj's spacemacs configuration
-;; Copyright (c) 2016-2016 Jonas Jelten <jj@stusta.net>
+;; Copyright (c) 2016-2017 Jonas Jelten <jj@stusta.net>
 ;; Licensed GPLv3 or later
 
 
@@ -45,6 +45,7 @@ values."
      (c-c++ :variables
             c-c++-default-mode-for-headers 'c++-mode
             c-c++-enable-clang-support t)
+     csv
      emacs-lisp
      extra-langs
      git
@@ -290,8 +291,18 @@ values."
    ;; scrolling overrides the default behavior of Emacs which recenters point
    ;; when it reaches the top or bottom of the screen. (default t)
    dotspacemacs-smooth-scrolling t
-   ;; If non nil line numbers are turned on in all `prog-mode' and `text-mode'
-   ;; derivatives. If set to `relative', also turns on relative line numbers.
+   ;; Control line numbers activation.
+   ;; If set to `t' or `relative' line numbers are turned on in all `prog-mode' and
+   ;; `text-mode' derivatives. If set to `relative', line numbers are relative.
+   ;; This variable can also be set to a property list for finer control:
+   ;; '(:relative nil
+   ;;   :disabled-for-modes dired-mode
+   ;;                       doc-view-mode
+   ;;                       markdown-mode
+   ;;                       org-mode
+   ;;                       pdf-view-mode
+   ;;                       text-mode
+   ;;   :size-limit-kb 1000)
    ;; (default nil)
    dotspacemacs-line-numbers t
    ;; Code folding method. Possible values are `evil' and `origami'.
@@ -929,7 +940,7 @@ values."
     (jj/c-codestyle)
     (jj/semantic-completion-keybinds)
     (auto-revert-mode t)
-    (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
+    (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
     (jj/whitespace-highlight)
     )
 
@@ -986,6 +997,10 @@ values."
 
     (setq flycheck-checker 'python-pylint
           flycheck-checker-error-threshold 300)
+
+    ;; don't show anaconda mode error popup gaaarrhhgh
+    (remove-hook 'anaconda-mode-response-read-fail-hook
+                 'anaconda-mode-show-unreadable-response)
 
     ;; smart tabs
     (smart-tabs-advice py-indent-line py-indent-offset)
@@ -1049,7 +1064,8 @@ values."
 
   ;; org-mode
   (defun jj/org-mode-hook ()
-    (setq indent-tabs-mode nil))
+    (setq org-log-done nil
+          indent-tabs-mode nil))
 
   ;; markdown-mode
   (defun jj/markdown-mode-hook ()
@@ -1098,6 +1114,7 @@ values."
 ;; we have a graphical window
 (defun jj/window-setup ()
   (message "running in windowed mode")
+  (setq confirm-kill-emacs 'y-or-n-p)
   )
 
 ;; we're running on tty
@@ -1211,6 +1228,7 @@ you should place your code here."
  '(font-lock-string-face ((t (:foreground "burlywood"))))
  '(font-lock-variable-name-face ((t (:foreground "SeaGreen2"))))
  '(hl-line ((t (:inherit highlight :background "midnight blue"))))
+ '(isearch ((t (:inherit region :background "#A6E22E" :foreground "black"))))
  '(magit-item-highlight ((t (:inherit nil))))
  '(region ((t (:background "#3030d0"))))
  '(semantic-decoration-on-unknown-includes ((t (:background "#203030"))))
