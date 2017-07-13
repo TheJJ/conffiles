@@ -1,7 +1,7 @@
 ! .Xresources, optimized for urxvt, to make it vergil
 !
 ! Copyright (c) 2011 Michael Enßlin <michael@ensslin.cc>
-! Copyright (c) 2011-2015 Jonas Jelten <jj@sft.mx>
+! Copyright (c) 2011-2017 Jonas Jelten <jj@sft.mx>
 !
 ! released under GNU GPLv3 or later
 
@@ -36,7 +36,7 @@ URxvt.color9: #E73131
 ! see /usr/share/fonts/misc/fonts.alias
 !URxvt.font: 8x13
 !URxvt.font: xft:terminus:size=10
-URxvt.font: xft:DejaVuSansMono:size=09:antialias=true:hinting=true
+URxvt.font: xft:DejaVuSansMono:size=10:antialias=true:hinting=true
 
 ! scrollbar style - rxvt (default), plain (most compact), next, or xterm
 URxvt.scrollstyle: plain
@@ -136,10 +136,10 @@ XTerm*borderWidth: 0
 
 ! subpixel hinting
 ! only for non-fontconfig-aware applications, see .config/fontconfig
-!Xft.antialias:  1
-!Xft.autohint:   0
-!Xft.dpi:        96
-!Xft.hinting:    1
-!Xft.hintstyle:  hintfull
-!Xft.lcdfilter:  lcdlight
-!Xft.rgba:       rgb
+Xft.dpi:        96
+Xft.antialias:  true
+Xft.rgba:       rgb
+Xft.hinting:    true
+Xft.hintstyle:  hintslight
+Xft.autohint:   false
+Xft.lcdfilter:  lcddefault
