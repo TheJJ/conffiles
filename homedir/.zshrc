@@ -92,6 +92,7 @@ alias p='py'
 alias bpy='bpython'
 alias b='bpy'
 alias dmesg='dmesg -L'
+alias watch='watch -c'
 alias ema='emacs -nw'
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
@@ -118,6 +119,7 @@ alias dd="dd status=progress"
 alias file='file -L'
 alias xseltoclip="xclip -o | xclip -i -selection clipboard; xclip -o"
 alias xcliptosel="xclip -selection clipboard -o | xclip -i; xclip -selection clipboard -o"
+alias cls="echo -e \\\\033c"
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
@@ -323,7 +325,7 @@ function gccflags() {
 
 # run shell as user, with benefits of env_keep of sudo
 function sudosh() {
-	function usage() {
+	local function usage() {
 		echo "sudosh <user>"
 		echo "run the current shell as another user"
 	}
@@ -334,12 +336,12 @@ function sudosh() {
 		usage
 		return
 	elif [[ x$1 != "x" ]]; then
-		user="$1"
+		local user="$1"
 	else
-		user="root"
+		local user="root"
 	fi
 
-	sudo -u $user $SHELL
+	exec sudo -u $user $SHELL
 }
 
 # just return the fucking ip address
@@ -363,7 +365,7 @@ function tryping() {
 		if [ $? -eq 0 ]; then
 			notify-send "$srv is back!"
 			tput bel
-			echo -e "\r$srv is back!"
+			echo -e "$srv is back!"
 			break;
 		fi
 		echo -en "\rtry $i "
@@ -375,12 +377,12 @@ function tryping() {
 
 # connect to host=$1 port=$2 via tor and listen at $3
 function torcat() {
-	torhost="localhost"
-	torport=9050
+	local torhost="localhost"
+	local torport=9050
 
-	listenport=0
-	remoteport=0
-	host=0
+	local listenport=0
+	local remoteport=0
+	local host=0
 
 	while getopts -o"l:p:h:" -l "help" -- "$@"; do
 		echo $opt
@@ -414,6 +416,30 @@ function torcat() {
 	echo "starting socat" >&2
 
 	socat -ddd TCP4-LISTEN:${listenport},fork SOCKS4A:${torhost}:${host}:${remoteport},socksport=${torport}
+}
+
+# cat all files in current folder or matching pattern
+function catall() {
+	if [[ $# -ge 1 ]]; then
+		local list=($@)
+	else
+		setopt nullglob
+		local list=(./*)
+	fi
+
+	printf "\x1b\x5b\x34\x31m${#list[@]} files\x1b\x5bm\n\n"
+
+	for f in "${list[@]}"; do
+		if [[ ! -f $f ]]; then
+			continue
+		fi
+
+		printf "\x1b\x5b\x33\x32;10m${f}\n"
+		printf "\x1b\x5bm"
+
+		cat $f;
+		printf "\n"
+	done
 }
 
 
