@@ -36,16 +36,6 @@ fi
 sshagentsocket="$XDG_RUNTIME_DIR/ssh-agent.socket"
 if [[ -r $sshagentsocket ]]; then
 	export SSH_AUTH_SOCK=$sshagentsocket
-
-	sshkey="$HOME/.ssh/id_rsa"
-
-	# if no key was added yet
-	ssh-add -l > /dev/null
-	if [[ ! $? -eq 0 ]]; then
-		echo "no ssh"
-		# alias ssh to agent-add, delete the alias when password was entered.
-		alias ssh="ssh-add -l > /dev/null || ssh-add $sshkey && unalias ssh; ssh"
-	fi > /dev/null
 fi
 
 # environment variables
