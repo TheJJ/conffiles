@@ -10,7 +10,7 @@ set $mod Mod4
 font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 
 # start a terminal
-bindsym $mod+Return exec urxvt
+bindsym $mod+Return exec --no-startup-id urxvt
 
 # start something in PATH
 bindsym $mod+d exec rofi -show run
@@ -235,7 +235,8 @@ client.background       #000000
 # us international
 #caps:none altwin:meta_alt lv3:rals_switch
 exec setxkbmap us altgr-intl -option ctrl:nocaps
-
+# xmodmap -e "keycode 166 = Home"
+# xmodmap -e "keycode 167 = End"
 exec xset -b
 exec xset r rate 170 55
 
