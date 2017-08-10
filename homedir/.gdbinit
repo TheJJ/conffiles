@@ -33,6 +33,7 @@ define hook-quit
 	set confirm off
 end
 
+
 # executed, whenever execution was stopped:
 define hook-stop
 	#x /1i $pc
@@ -272,4 +273,18 @@ define pyg
 end
 document pyg
 	Print _PyGC_Dump(arg), arg must me a PyObject *.
+end
+
+
+# enable voltron if found
+python
+try:
+    import voltron
+    from path import Path
+
+    entryfile = Path(voltron.__file__).dirname() / 'entry.py'
+    gdb.execute('source {}'.format(entryfile))
+
+except ImportError:
+    pass
 end
