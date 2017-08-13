@@ -1,5 +1,5 @@
 # JJ's zshrc
-# Copyright (c) 2011 - 2016 Jonas Jelten
+# Copyright (c) 2011 - 2017 Jonas Jelten
 #
 # Released under GPLv3 or later.
 #
@@ -14,9 +14,6 @@
 
 # if not running interactively, don't do anything!
 [[ $- != *i* ]] && return
-
-# source system profile
-[[ -r /etc/profile ]] && source /etc/profile
 
 # home bin dir path
 homebindir="$HOME/bin"
@@ -72,6 +69,17 @@ fi
 # see man zsh, reports cpu/system/etc usage if running longer then n secs
 REPORTTIME=1
 
+########################################
+# init the zsh completion
+autoload -U compinit
+compinit
+
+# init the bash compatibility completion
+autoload -U bashcompinit
+bashcompinit
+########################################
+
+
 ############################
 # aliases for stuff
 ############################
@@ -119,7 +127,7 @@ alias dd="dd status=progress"
 alias file='file -L'
 alias xseltoclip="xclip -o | xclip -i -selection clipboard; xclip -o"
 alias xcliptosel="xclip -selection clipboard -o | xclip -i; xclip -selection clipboard -o"
-alias cls="echo -e \\\\033c"
+alias cls="echo -en \\\\033c"
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
@@ -254,6 +262,7 @@ alias git-die="git diff --word-diff-regex=. "
 # random functions
 #####################################
 
+
 # find by name, optionally in dir
 # fname "search" ["startdirectory"]
 function fname() {
@@ -266,6 +275,12 @@ function fname() {
 		local what="$@"
 	fi
 	find $dir -iname "*$what*"
+}
+
+# find with gnu global tag search
+# init in project root with `gtags`
+function ftag() {
+	global -ix --result=grep --color=always --path-style=shorter $@
 }
 
 # ag for two strings in one line
@@ -442,6 +457,22 @@ function catall() {
 	done
 }
 
+# show the zsh completion file origin
+function completionfile() {
+	if [[ $# -ne 1 ]]; then
+		echo "enter command name"; return 1;
+	elif [[ $1 = "--help" ]]; then
+		echo "usage: $0 command_name"; return 1;
+	fi
+
+	print -l ${^fpath}/_$1(N)
+}
+
+function _completionfile() {
+	_arguments '1:command: _command_names -e'
+}
+compdef _completionfile completionfile
+
 
 ####################
 # shell setup
@@ -468,7 +499,7 @@ alias help=run-help
 
 # command history
 HISTFILE=~/.zsh-histfile
-HISTSIZE=10000000
+HISTSIZE=10000
 SAVEHIST=$HISTSIZE
 setopt append_history share_history extended_history histverify histignorespace histignoredups
 
@@ -711,6 +742,8 @@ export TERMCAP_us=$'\E[04;38;5;146m' # begin underline
 #############################
 
 zstyle ':completion::complete:*' use-cache=1
+#zstyle ':completion::complete:*' cache-path ~/.zshcompcache
+
 zstyle ':completion:*' auto-description '%d'
 zstyle ':completion:*' completer _expand _complete _ignored
 zstyle ':completion:*' completions 1
@@ -723,7 +756,7 @@ zstyle ':completion:*' insert-unambiguous true
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
 zstyle ':completion:*' list-suffixes true
-zstyle ':completion:*' matcher-list '' '' '' ''
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*' menu select=1
 zstyle ':completion:*' original true
 zstyle ':completion:*' preserve-prefix '//[^/]##/'
@@ -731,16 +764,17 @@ zstyle ':completion:*' select-prompt %S selection at %p%s
 zstyle ':completion:*' squeeze-slashes true
 zstyle ':completion:*' substitute 1
 zstyle ':completion:*' verbose true
+
+zstyle ':completion:*:descriptions' format "%{$fg[yellow]%}%B--- %d%b"
+zstyle ':completion:*:messages' format '%d'
+zstyle ':completion:*:warnings' format "%{$fg[red]%}No matches for:%{$reset_color%} %d"
+zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
+
 zstyle ':compinstall' filename '~/.zshrc'
 
-
-# init the zsh completion
-autoload -U compinit
-compinit
-
-# init the bash compatibility completion
-autoload -U bashcompinit
-bashcompinit
+# automatic rehash on completion
+# has some performance impact of course
+#zstyle ':completion:*:commands' rehash true
 
 # manpages
 zstyle ':completion:*:manuals'    separate-sections true
@@ -748,8 +782,16 @@ zstyle ':completion:*:manuals.*'  insert-sections   true
 zstyle ':completion:*:man:*'      menu yes select
 
 # processes
-zstyle ':completion:*:processes'  command 'ps -au$USER'
-zstyle ':completion:*:processes-names' command 'ps c -u ${USER} -o command | uniq'
+# unfortunately the _pgrep and _pkill impl doesn't use those yet...
+zstyle ':completion:*:processes' force-list always
+zstyle ':completion:*:processes' command 'ps -a -u $USER -o pid,user,cmd'
+zstyle ':completion:*:processes' list-colors "=(#b) #([0-9]#)*=0=${color[green]}"
+zstyle ':completion:*:processes-names' command 'ps c -u ${USER} -o command | sort | uniq'
+
+# process killing
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+zstyle ':completion:*:*:kill:*:processes' command 'ps -e --forest -o pid,user,tty,cmd | grep -v "]\$"'   # no kernel threads
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 
 # urls
 zstyle ':completion:*:urls' local 'www' 'public_html' '/srv/http'
@@ -757,18 +799,17 @@ zstyle ':completion:*:urls' local 'www' 'public_html' '/srv/http'
 # host completion, guttenberg'd from grml config
 test -r ~/.ssh/known_hosts && _ssh_hosts=(${${${${(f)"$(<$HOME/.ssh/known_hosts)"}:#[\|]*}%%\ *}%%,*}) || _ssh_hosts=()
 test -r /etc/hosts && : ${(A)_etc_hosts:=${(s: :)${(ps:\t:)${${(f)~~"$(</etc/hosts)"}%%\#*}##[:blank:]#[^[:blank:]]#}}} || _etc_hosts=()
-hosts=(
+_hosts=(
 	$(hostname)
 	"$_ssh_hosts[@]"
 	"$_etc_hosts[@]"
 	8.8.8.8
-	2001:4860:4860::8888
-	google.com
 	127.0.0.1
 	::1
 	localhost
 )
-zstyle ':completion:*:hosts' hosts $hosts
+zstyle ':completion:*:hosts' hosts $_hosts
+
 
 DONTSETRPROMPT=1
 setopt prompt_subst
