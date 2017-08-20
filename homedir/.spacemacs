@@ -49,7 +49,8 @@ values."
      emacs-lisp
      extra-langs
      git
-     gtags
+     (gtags :variables
+            gtags-enable-by-default nil)
      (haskell :variables
               haskell-completion-backend 'intero)
      helm
@@ -88,6 +89,11 @@ values."
    '(
      bison-mode
      ag
+     realgud
+     cmake-ide
+     ;rtags
+     ;company-rtags
+     ;flycheck-rtags
      )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -262,7 +268,7 @@ values."
    ;; If non nil a progress bar is displayed when spacemacs is loading. This
    ;; may increase the boot time on some systems and emacs builds, set it to
    ;; nil to boost the loading time. (default t)
-   dotspacemacs-loading-progress-bar t
+   dotspacemacs-loading-progress-bar nil
    ;; If non nil the frame is fullscreen when Emacs starts up. (default nil)
    ;; (Emacs 24.4+ only)
    dotspacemacs-fullscreen-at-startup nil
@@ -450,8 +456,6 @@ values."
   (setq ido-enable-flex-matching t
         ido-case-fold t
         ido-use-virtual-buffers t
-        ;;completion-ignored-extensions '(".pdf" ".aux" ".toc" ".tex~")
-        ;;ido-ignore-extensions t
         ido-file-extensions-order '(".c" ".cpp" ".h" ".py" ".tex" ".bib" ".hs"))
 
   (setq nlinum-relative-redisplay-delay 0.2) ; relative number redisplay
@@ -579,6 +583,46 @@ values."
   ;; menubar entry for detected symbols
   (add-hook 'semantic-init-hooks (lambda ()
                                    (imenu-add-to-menubar "Stuff"))))
+
+;; rtags c++ completion setup
+(defun jj/rtags-setup ()
+  (local-set-key (kbd "M-g d") 'rtags-find-symbol-at-point)
+  (local-set-key (kbd "M-g D") 'rtags-find-symbol)
+  (local-set-key (kbd "M-g f") 'rtags-find-references-at-point)
+  (local-set-key (kbd "M-g F") 'rtags-find-references)
+  (local-set-key (kbd "M-g t") 'rtags-symbol-type)
+  (evil-leader/set-key-for-mode 'c++-mode "oo" 'rtags-find-symbol-at-point)
+  (evil-leader/set-key-for-mode 'c++-mode "os" 'rtags-find-symbol)
+  (evil-leader/set-key-for-mode 'c++-mode "or" 'rtags-rename-symbol)
+  (evil-leader/set-key-for-mode 'c++-mode "of" 'rtags-find-references-at-point)
+  (evil-leader/set-key-for-mode 'c++-mode "oF" 'rtags-find-references)
+  (evil-leader/set-key-for-mode 'c++-mode "ov" 'rtags-find-virtuals-at-point)
+  (evil-leader/set-key-for-mode 'c++-mode "ot" 'rtags-symbol-type)
+  (evil-leader/set-key-for-mode 'c++-mode "o," 'rtags-location-stack-back)
+  (evil-leader/set-key-for-mode 'c++-mode "o." 'rtags-location-stack-forward)
+
+  ;; company
+  (require 'rtags)
+  (require 'company)
+  (setq rtags-autostart-diagnostics t)
+  (setq rtags-completions-enabled t)
+  (push 'company-rtags company-backends-c-mode-common)
+
+  ;; flycheck
+  (require 'flycheck-rtags)
+  (flycheck-select-checker 'rtags)
+  (setq-local flycheck-highlighting-mode nil)
+  (setq-local flycheck-check-syntax-automatically nil)
+
+  ;; helm
+  (setq rtags-use-helm t)
+  (setq rtags-display-result-backend 'helm)
+
+  ;; evil
+  (add-hook 'rtags-jump-hook 'evil-set-jump)
+
+  (rtags-start-process-unless-running))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; funny functions
@@ -765,6 +809,12 @@ values."
   )
 
 
+(defun jj/cstyle-keybinds ()
+  (interactive)
+
+  (local-set-key (kbd "C-c C-c") 'projectile-compile-project))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; coding style definitions
 ;; ------------------------
@@ -776,8 +826,8 @@ values."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defun jj/c-codestyle ()
-  ;; codestyle defaults, will be overwritten
+(defun jj/create-codestyles ()
+  ;; codestyle definitions
 
   ;; linux kernel indentation style
   (defconst kernel-c-style
@@ -796,31 +846,37 @@ values."
       (c-basic-offset             . 4)
       (c-tab-always-indent        . t)
       (c-comment-only-line-offset . 4)
-      (c-hanging-braces-alist     . (
-                                     (brace-list-open)
-                                     (substatement-open after)
-                                     ))
-      (c-hanging-colons-alist     . (
-                                     (access-label after)
+      (c-hanging-colons-alist     . ((access-label after)
                                      (case-label after)
                                      (inher-intro)
                                      (label after)
-                                     (member-init-intro before)
-                                     ))
-      (c-cleanup-list             . (
-                                     scope-operator
+                                     (member-init-intro before)))
+      (c-cleanup-list             . (brace-else-brace
+                                     brace-elseif-brace
+                                     brace-catch-brace
                                      empty-defun-braces
                                      defun-close-semi
-                                     ))
+                                     list-close-comma
+                                     scope-operator))
       (c-comment-only-line-offset . 0)
-      (c-hanging-braces-alist . (
-                                 (arglist-cont-nonempty)
+      (c-hanging-braces-alist . ((arglist-cont-nonempty)
                                  (block-close . c-snug-do-while)
                                  (brace-entry-open)
                                  (brace-list-open)
-                                 (substatement-open before after)
-                                 ))
-      (c-cleanup-list . (brace-else-brace))
+                                 (substatement-open after)
+                                 (defun-open after)
+                                 (defun-close before after)
+                                 (class-open after)
+                                 (class-close before after)
+                                 (inexpr-class-open after)
+                                 (inexpr-class-close before)
+                                 (namespace-open after)
+                                 (inline-open after)
+                                 (inline-close before after)
+                                 (block-open after)
+                                 (extern-lang-open after)
+                                 (extern-lang-close after)
+                                 (statement-case-open after)))
       (c-offsets-alist . (
                           ; arg indent helper funcs: c-lineup-*
                           ; arglist = indent to matching (|here, asdf
@@ -848,7 +904,6 @@ values."
                           (inher-cont            . c-lineup-multi-inher)   ; inheritance continuation
                           (inline-open           . +)
                           (innamespace           . 0)   ; namespace lol {\nthisstatement
-                          (knr-argdecl-intro     . -)
                           (knr-argdecl-intro     . 0)
                           (label                 . 0)   ; gotolabel:
                           (member-init-intro     . +)   ; member initializing for class lol : var(val)
@@ -856,10 +911,11 @@ values."
                           (statement             . 0)
                           (statement-block-intro . +)   ; line in if () {\nthisline
                           (statement-case-open   . +)
-                          (statement-cont        . (max c-lineup-assignments c-lineup-cascaded-calls c-lineup-string-cont))
+                          (statement-cont        . (max c-lineup-assignments
+                                                        c-lineup-cascaded-calls
+                                                        c-lineup-string-cont))
                           (substatement          . +)
                           (substatement-label    . 0)
-                          (substatement-open     . 0)
                           (substatement-open     . 0)
                           (template-args-cont    . c-lineup-template-args)
                           (topmost-intro         . 0)   ; indentation of file start
@@ -880,65 +936,8 @@ values."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun jj/mode-hooks ()
-  (add-hook 'LaTeX-mode-hook (lambda ()
-                               (setq TeX-PDF-mode t
-                                     TeX-auto-save t
-                                     TeX-parse-self t
-                                     reftex-plug-into-AUCTeX t)
-                               (setq-default TeX-master nil) ; query for master file
-                               (visual-line-mode t)
-                               (LaTeX-math-mode t)
-                               (turn-on-reftex)
-                               (turn-off-auto-fill)))
-
-  (add-hook 'doc-view-mode-hook 'auto-revert-mode)
-
-  (add-hook 'server-visit-hook (lambda ()
-                                 (prefer-coding-system 'utf-8)
-                                 (setq locale-coding-system 'utf-8)
-                                 (set-terminal-coding-system 'utf-8)
-                                 (set-keyboard-coding-system 'utf-8)
-                                 (set-selection-coding-system 'utf-8)))
-
-  ;; correct zsh coloring in shell:
-  (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-
-
-  ;; press ~ for reaching home directly in ido-mode
-  (add-hook 'ido-setup-hook
-            (lambda ()
-              (define-key ido-file-completion-map
-                (kbd "~")
-                (lambda ()
-                  (interactive)
-                  (if (looking-back "/")
-                      (insert "~/")
-                    (call-interactively 'self-insert-command))))))
-
-
-  ;; comment parsing and word highlinging
-  (add-hook 'c++-mode-hook
-   '(lambda ()
-
-      ;; javadoc-style comments in c++
-      (add-to-list 'c-doc-comment-style '(c++-mode . javadoc))
-
-      ;; placing regexes into `c-mode-common-hook' may work but their
-      ;; evaluation order matters.
-      (font-lock-add-keywords
-       nil '(
-             ;; missing C++11 keywords
-             ("\\<\\(static_assert\\)\\>" . font-lock-keyword-face)
-
-             ;; custom defined types
-             ("\\<[A-Za-z_]+[A-Za-z_0-9]*_\\(t\\)\\>" . font-lock-type-face)
-             ))
-      ) t)
-
   ;; main coding configuration function
   (defun jj/coding-hook ()
-    (jj/c-codestyle)
-    (jj/semantic-completion-keybinds)
     (auto-revert-mode t)
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
     (jj/whitespace-highlight)
@@ -950,6 +949,14 @@ values."
 
   ;; hook for all c-like languages
   (defun jj/cstyle-hook ()
+    ;; create codestyle
+    (jj/create-codestyles)
+
+    ;; semantic-mode jumping
+    (jj/semantic-completion-keybinds)
+
+    ;; keybindings for clike languages
+    (jj/cstyle-keybinds)
 
     ;; magic region formatting
     (with-library
@@ -983,10 +990,43 @@ values."
     (smart-tabs-advice c-indent-region c-basic-offset)
     )
 
+
   ;; c, c++
-  (defun jj/c-coding-hook ()
+  (defun jj/c-base-hook ()
     (setq flycheck-gcc-language-standard "c++14")
-    (jj/cstyle-hook))
+
+    ;; c-codingstyle
+    (jj/cstyle-hook)
+
+    ;; c++-completion with rtags
+    (with-library rtags
+     (jj/rtags-setup)
+     (setq cmake-ide-build-pool-use-persistent-naming t)
+     ;; add cmake-ide hooks to c/c++ mode hooks
+     (cmake-ide-setup)
+
+     ;; semantic modeline summary conflicts with rtags
+     (semantic-idle-summary-mode 0)))
+
+
+  ;; c++ special stuff
+  (defun jj/c++-coding-hook ()
+
+    ;; comment parsing and word highlighting
+
+    ;; javadoc-style comments in c++
+    (add-to-list 'c-doc-comment-style '(c++-mode . javadoc))
+
+    ;; placing regexes into `c-mode-common-hook' may work but their
+    ;; evaluation order matters.
+    (font-lock-add-keywords
+      nil '(
+            ;; missing C++11 keywords
+            ("\\<\\(static_assert\\)\\>" . font-lock-keyword-face)
+
+            ;; custom defined types
+            ("\\<[A-Za-z_]+[A-Za-z_0-9]*_\\(t\\)\\>" . font-lock-type-face)
+            )))
 
   ;; py
   (defun jj/python-coding-hook ()
@@ -1026,12 +1066,22 @@ values."
   (defun jj/latex-coding-hook ()
     ;; set latex indent offset so it doesn't fuck up
     ;; (i.e. use values != n*tab-width)
-    (setq tab-width 4)
-    (setq LaTeX-indent-level 4)
-    (setq LaTeX-item-indent -4)
-    (setq indent-tabs-mode nil)
-    (setq TeX-parse-self t)
-    (setq TeX-auto-save t)
+    (setq tab-width 4
+          LaTeX-indent-level 4
+          LaTeX-item-indent -4
+          indent-tabs-mode nil
+          TeX-parse-self t
+          TeX-auto-save t
+          TeX-PDF-mode t
+          TeX-auto-save t
+          TeX-parse-self t
+          reftex-plug-into-AUCTeX t)
+
+    (setq-default TeX-master nil) ; query for master file
+    (visual-line-mode t)
+    (LaTeX-math-mode t)
+    (turn-on-reftex)
+    (turn-off-auto-fill)
 
     ;; minted codehighlighting needs shell execution for pygments
     (add-to-list 'TeX-command-list
@@ -1044,6 +1094,7 @@ values."
     (setq indent-tabs-mode nil)
     (setq bibtex-comma-after-last-field t)
     (setq bibtex-align-at-equal-sign t))
+
 
   ;; html
   (defun jj/html-coding-hook ()
@@ -1087,7 +1138,8 @@ values."
   (add-hook 'js-mode-hook                'jj/javascript-coding-hook)
   (add-hook 'html-mode-hook              'jj/html-coding-hook)
   (add-hook 'haskell-mode-hook           'jj/haskell-coding-hook)
-  (add-hook 'c-mode-common-hook          'jj/c-coding-hook)
+  (add-hook 'c-mode-common-hook          'jj/c-base-hook)
+  (add-hook 'c-++-mode-hook              'jj/c++-coding-hook)
   (add-hook 'LaTeX-mode-hook             'jj/latex-coding-hook)
   (add-hook 'bibtex-mode-hook            'jj/bibtex-coding-hook)
   (add-hook 'vhdl-mode-hook              'jj/vhdl-coding-hook)
@@ -1095,6 +1147,16 @@ values."
   (add-hook 'markdown-mode-hook          'jj/markdown-mode-hook)
   (add-hook 'cmake-mode-hook             'jj/cmake-mode-hook)
 
+  (add-hook 'doc-view-mode-hook          'auto-revert-mode)
+  (add-hook 'server-visit-hook (lambda ()
+                                 (prefer-coding-system 'utf-8)
+                                 (setq locale-coding-system 'utf-8)
+                                 (set-terminal-coding-system 'utf-8)
+                                 (set-keyboard-coding-system 'utf-8)
+                                 (set-selection-coding-system 'utf-8)))
+
+  ;; correct zsh coloring in shell:
+  (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
   ;; add a function to multiple hooks
   (defun multi-hook-add (function hooks)
@@ -1188,6 +1250,10 @@ you should place your code here."
  '(cua-auto-tabify-rectangles nil)
  '(cua-enable-cua-keys nil)
  '(cua-mode t nil (cua-base))
+ '(disaster-cc "clang")
+ '(disaster-cxx "clang++")
+ '(disaster-cxxflags "-march=native -std=c++14")
+ '(disaster-objdump "objdump -d -M intel -Sl --no-show-raw-insn")
  '(doc-view-continuous t)
  '(fill-column 76)
  '(inhibit-startup-screen t)
@@ -1206,7 +1272,7 @@ you should place your code here."
                    [36 10])
      (tab-mark 9
                [8728 9]
-               [62 9]))))
+               [62 9]))) t)
  '(whitespace-style
    (quote
     (face tabs trailing newline indentation space-before-tab space-after-tab space-mark tab-mark newline-mark lines-tail))))
