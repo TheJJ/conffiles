@@ -90,6 +90,8 @@ if [[ -x $homebindir/viml ]]; then
 fi
 
 alias woman="man"
+compdef woman=man
+
 alias python3="python3 -q"
 alias p3='python3'
 alias p2='python2'
@@ -97,20 +99,23 @@ alias py3='p3'
 alias py2='p2'
 alias py='p3'
 alias p='py'
+compdef py=python3 p3=python3 p=python3 p2=python2 py2=python2
+
 alias bpy='bpython'
 alias b='bpy'
 alias dmesg='dmesg -L'
 alias watch='watch -c'
 alias ema='emacs -nw'
+alias eopen='emacsclient --no-wait'
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
 alias gdbs='gdbserver --once localhost:8888'
+compdef gdbs=gdb
 alias gdbc='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remote localhost:8888"'
 alias bc='bc -q -l'
 alias cp='cp --reflink=auto'
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
-alias grepi='grep -i'
 alias ag="ag -S"
 alias more='less'
 alias most='less'
@@ -499,7 +504,7 @@ alias help=run-help
 
 # command history
 HISTFILE=~/.zsh-histfile
-HISTSIZE=10000
+HISTSIZE=50000
 SAVEHIST=$HISTSIZE
 setopt append_history share_history extended_history histverify histignorespace histignoredups
 
@@ -800,7 +805,6 @@ zstyle ':completion:*:urls' local 'www' 'public_html' '/srv/http'
 test -r ~/.ssh/known_hosts && _ssh_hosts=(${${${${(f)"$(<$HOME/.ssh/known_hosts)"}:#[\|]*}%%\ *}%%,*}) || _ssh_hosts=()
 test -r /etc/hosts && : ${(A)_etc_hosts:=${(s: :)${(ps:\t:)${${(f)~~"$(</etc/hosts)"}%%\#*}##[:blank:]#[^[:blank:]]#}}} || _etc_hosts=()
 _hosts=(
-	$(hostname)
 	"$_ssh_hosts[@]"
 	"$_etc_hosts[@]"
 	8.8.8.8
