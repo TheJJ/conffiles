@@ -838,6 +838,17 @@ values."
                           ))
       ))
 
+  ;; closing template <> should line up.
+  (defun c++-template-args-cont (langelem)
+    "Indentation of template params for a closing '>'.
+    return values:
+    0   : If the first non-whitespace char is '>'. Line it up under 'template'.
+    nil : Otherwise, return nil and run next lineup function."
+    (save-excursion
+      (beginning-of-line)
+      (if (re-search-forward "^[\t ]*>" (line-end-position) t)
+        0)))
+
   ;; sft coding style
   (defconst sft-c-style
     '("linux"  ;; base it on linux code style
@@ -917,7 +928,8 @@ values."
                           (substatement          . +)
                           (substatement-label    . 0)
                           (substatement-open     . 0)
-                          (template-args-cont    . c-lineup-template-args)
+                          (template-args-cont    . (c++-template-args-cont
+                                                    c-lineup-template-args +))
                           (topmost-intro         . 0)   ; indentation of file start
                           (topmost-intro-cont    . c-lineup-topmost-intro-cont)
                           (cpp-macro             . [0])   ; #define, etcetc
