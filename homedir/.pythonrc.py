@@ -2,7 +2,7 @@
 #
 # jj's pythonrc
 #
-# Copyright (c) 2012-2016 Jonas Jelten <jj@sft.mx>
+# Copyright (c) 2012-2017 Jonas Jelten <jj@sft.mx>
 #
 # Licensed GPLv3 or later.
 
@@ -23,6 +23,14 @@ pager_proc = os.environ.get("PAGER", "less -R -S")
 
 use_pygments = True
 has_pygments = False
+
+
+# cython on the fly compilation
+if False:
+    try:
+        import pyximport; pyximport.install()
+    except ImportError:
+        pass
 
 
 if use_pygments:
