@@ -1321,7 +1321,11 @@ before packages are loaded."
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
-;;customized variables, set by `customize`
+(defun dotspacemacs/emacs-custom-settings ()
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1362,8 +1366,6 @@ before packages are loaded."
  '(whitespace-style
    (quote
     (face tabs trailing newline indentation space-before-tab space-after-tab space-mark tab-mark newline-mark lines-tail))))
-
-;;customized font colors and sizes
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1390,4 +1392,4 @@ before packages are loaded."
  '(whitespace-space-after-tab ((t (:foreground "#101540"))))
  '(whitespace-tab ((t (:background "#292929" :foreground "#a9a9a9"))))
  '(widget-field ((t (:background "gray25")))))
-
+)
