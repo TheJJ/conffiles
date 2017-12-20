@@ -1,7 +1,7 @@
 # i3 config file (v4)
 #
 # JJ's i3 config
-# Copyright (c) 2011-2015 Jonas Jelten <jj@sft.mx>
+# Copyright (c) 2011-2017 Jonas Jelten <jj@sft.mx>
 #
 # Mod1: meta Mod4: super
 set $mod Mod4
@@ -76,6 +76,9 @@ bindsym mod1+F4 kill
 # jump to latest urgent window
 bindsym $mod+x [urgent=latest] focus
 
+# invert colors
+bindsym $mod+Shift+i exec xcalib -invert -alter
+
 bindsym $mod+j focus left
 bindsym $mod+k focus down
 bindsym $mod+l focus up
@@ -128,18 +131,18 @@ bindsym $mod+7 workspace 7
 bindsym $mod+8 workspace 8
 bindsym $mod+9 workspace 9
 bindsym $mod+0 workspace 10
-bindsym $mod+F1 workspace 11
-bindsym $mod+F2 workspace 12
-bindsym $mod+F3 workspace 13
-bindsym $mod+F4 workspace 14
-bindsym $mod+F5 workspace 15
-bindsym $mod+F6 workspace 16
-bindsym $mod+F7 workspace 17
-bindsym $mod+F8 workspace 18
-bindsym $mod+F9 workspace 19
-bindsym $mod+F10 workspace 20
-bindsym $mod+F11 workspace 21
-bindsym $mod+F12 workspace 22
+bindsym $mod+F1 workspace F1
+bindsym $mod+F2 workspace F2
+bindsym $mod+F3 workspace F3
+bindsym $mod+F4 workspace F4
+bindsym $mod+F5 workspace F5
+bindsym $mod+F6 workspace F6
+bindsym $mod+F7 workspace F7
+bindsym $mod+F8 workspace F8
+bindsym $mod+F9 workspace F9
+bindsym $mod+F10 workspace F10
+bindsym $mod+F11 workspace F11
+bindsym $mod+F12 workspace F12
 
 bindsym $mod+Shift+exclam move workspace 1
 bindsym $mod+Shift+at move workspace 2
@@ -151,6 +154,18 @@ bindsym $mod+Shift+ampersand move workspace 7
 bindsym $mod+Shift+asterisk move workspace 8
 bindsym $mod+Shift+parenleft move workspace 9
 bindsym $mod+Shift+parenright move workspace 10
+bindsym $mod+Shift+F1 move workspace F1
+bindsym $mod+Shift+F2 move workspace F2
+bindsym $mod+Shift+F3 move workspace F3
+bindsym $mod+Shift+F4 move workspace F4
+bindsym $mod+Shift+F5 move workspace F5
+bindsym $mod+Shift+F6 move workspace F6
+bindsym $mod+Shift+F7 move workspace F7
+bindsym $mod+Shift+F8 move workspace F8
+bindsym $mod+Shift+F9 move workspace F9
+bindsym $mod+Shift+F10 move workspace F10
+bindsym $mod+Shift+F11 move workspace F11
+bindsym $mod+Shift+F12 move workspace F12
 
 bindsym $mod+Shift+C reload
 bindsym $mod+Shift+R restart
@@ -190,10 +205,6 @@ bindsym $mod+i mode "resize"
 
 #0. bar, multiple bars possible
 bar {
-
-	output LVDS1
-	output HDMI1
-	output VGA1
 	status_command i3status
 	# position of bar: top or bottom
 	position top
@@ -201,7 +212,7 @@ bar {
 	mode dock
 
 	# or none
-	tray_output LVDS1
+	tray_output LVDS-1
 
 	# font xcorefontname
 	# or no # show the numbered workspace buttons
