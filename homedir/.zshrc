@@ -12,6 +12,7 @@
 # * ssh-agent client
 # * colored prompt
 
+
 # if not running interactively, don't do anything!
 [[ $- != *i* ]] && return
 
@@ -105,8 +106,11 @@ alias bpy='bpython'
 alias b='bpy'
 alias dmesg='dmesg -L'
 alias watch='watch -c'
+
 alias ema='emacs -nw'
-alias eopen='emacsclient --no-wait'
+alias edit="emacsclient -n"      # reuse frame
+alias editn="emacsclient -n -c"  # new frame
+
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
 alias gdbs='gdbserver --once localhost:8888'
@@ -114,7 +118,6 @@ compdef gdbs=gdb
 alias gdbc='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remote localhost:8888"'
 alias bc='bc -q -l'
 alias cp='cp --reflink=auto'
-alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias ag="ag -S"
 alias more='less'
@@ -122,6 +125,7 @@ alias most='less'
 alias less='less -R'
 alias mkdir='mkdir -p -v'
 alias nano='nano -w -S -F -A'
+alias anon=' unset HISTFILE'
 alias ..='cd ..'
 alias ../../='cd ../../'
 alias cd..='..'
@@ -133,6 +137,9 @@ alias file='file -L'
 alias xseltoclip="xclip -o | xclip -i -selection clipboard; xclip -o"
 alias xcliptosel="xclip -selection clipboard -o | xclip -i; xclip -selection clipboard -o"
 alias cls="echo -en \\\\033c"
+alias scrolltop="echo -en '\x1b]720;99999\x07'"
+alias scrollbottom="echo -en '\x1b]721;99999\x07'"
+alias rcp="rsync -aHAXP"
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
@@ -145,10 +152,12 @@ function gdbv() {
 	gdb -ex "set architecture i386:x86-64:intel" -ex "target remote | vgdb $args" $*
 }
 
+alias psc='ps xawf -eo pid,user,cgroup,args'
 alias gschichten='fortune'
 alias lol="fortune | ponysay"
 alias sido='sudo'
-alias psc='ps xawf -eo pid,user,cgroup,args'
+compdef sido=sudo
+alias nautilus="nautilus --no-desktop"
 
 alias l='ls'
 alias la='ls -A'
@@ -523,7 +532,7 @@ autoload -U colors && colors
 
 # vcs info
 autoload -Uz vcs_info
-zstyle ':vcs_info:*' enable git svn
+zstyle ':vcs_info:*' enable git svn hg
 zstyle ':vcs_info:*' max-exports 4
 
 # check vcs-dirtyness, takes some time in large repos..
