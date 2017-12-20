@@ -34,9 +34,7 @@ URxvt.color1: rgb:cd/00/00
 URxvt.color9: #E73131
 
 ! see /usr/share/fonts/misc/fonts.alias
-!URxvt.font: 8x13
-!URxvt.font: xft:terminus:size=10
-URxvt.font: xft:DejaVuSansMono:size=10:antialias=true:hinting=true
+URxvt.font: xft:DejaVuSansMono:size=10:antialias=true
 
 ! scrollbar style - rxvt (default), plain (most compact), next, or xterm
 URxvt.scrollstyle: plain
@@ -75,10 +73,13 @@ URxvt.keysym.M-Escape:        perl:keyboard-select:activate
 URxvt.keysym.M-s:             perl:keyboard-select:search
 URxvt.keysym.Shift-Up:        command:\033]720;1\007
 URxvt.keysym.Shift-Down:      command:\033]721;1\007
+URxvt.keysym.Shift-Home:      command:\033]720;999999\007
+URxvt.keysym.Shift-End:       command:\033]721;999999\007
 
 ! font size updating
 URxvt.keysym.M-Up:     perl:font-size:increase
 URxvt.keysym.M-Down:   perl:font-size:decrease
+!URxvt.keysym.M-C-7: command:\033]710;-*-terminus-medium-*-*-*-28-*-*-*-*-*-*-*\007\033]711;-*-terminus-bold-*-*-*-28-*-*-*-*-*-*-*\00
 
 ! window bell via white flash
 URxvt.visualBell: false
@@ -117,8 +118,7 @@ XTerm*pointerColor:           white
 XTerm*pointerColorBackground: black
 
 ! fonts
-XTerm*font: 8x13
-XTerm*faceName: DejaVuSansMono:size=10:antialias=true:hinting=true
+XTerm*faceName: DejaVuSansMono:size=10:antialias=true
 
 ! utf8 ftw
 XTerm*utf8: true
@@ -135,11 +135,10 @@ XTerm*scrollTtyOutput:  false
 XTerm*borderWidth: 0
 
 ! subpixel hinting
-! only for non-fontconfig-aware applications, see .config/fontconfig
-Xft.dpi:        96
+! only for non-fontconfig-aware applications, see .config/fontconfig and eselect fontconfig
 Xft.antialias:  true
 Xft.rgba:       rgb
 Xft.hinting:    true
-Xft.hintstyle:  hintslight
 Xft.autohint:   false
+Xft.hintstyle:  hintfull
 Xft.lcdfilter:  lcddefault
