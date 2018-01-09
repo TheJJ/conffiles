@@ -104,6 +104,7 @@ This function should only modify configuration layer settings."
    ;; A list of packages that will not be installed and loaded.
    dotspacemacs-excluded-packages
    '(
+     wolfram-mode
      smartparens
      auto-highlight-symbol
      )
@@ -1336,13 +1337,10 @@ This function is called at the very end of Spacemacs initialization."
  '(backward-delete-char-untabify-method nil)
  '(company-clang-arguments (quote ("-std=c++14")))
  '(company-idle-delay 0.15)
- '(company-minimum-prefix-length 2)
- '(cua-auto-tabify-rectangles nil)
- '(cua-enable-cua-keys nil)
- '(cua-mode t nil (cua-base))
+ '(company-minimum-prefix-length 2) '(cua-auto-tabify-rectangles nil) '(cua-enable-cua-keys nil) '(cua-mode t nil (cua-base))
  '(disaster-cc "clang")
  '(disaster-cxx "clang++")
- '(disaster-cxxflags "-march=native -std=c++14")
+ '(disaster-cxxflags "-march=native -std=c++17")
  '(disaster-objdump "objdump -d -M intel -Sl --no-show-raw-insn")
  '(doc-view-continuous t)
  '(fill-column 76)
@@ -1365,7 +1363,9 @@ This function is called at the very end of Spacemacs initialization."
                [62 9]))) t)
  '(whitespace-style
    (quote
-    (face tabs trailing newline indentation space-before-tab space-after-tab space-mark tab-mark newline-mark lines-tail))))
+    (face tabs trailing newline indentation space-before-tab space-after-tab space-mark tab-mark newline-mark lines-tail)))
+ ;; now for a useless package list:
+)
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1391,5 +1391,6 @@ This function is called at the very end of Spacemacs initialization."
  '(whitespace-space ((t (:background "default"))))
  '(whitespace-space-after-tab ((t (:foreground "#101540"))))
  '(whitespace-tab ((t (:background "#292929" :foreground "#a9a9a9"))))
- '(widget-field ((t (:background "gray25")))))
+ '(widget-field ((t (:background "gray25"))))
+)
 )
