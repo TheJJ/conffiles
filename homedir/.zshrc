@@ -404,6 +404,15 @@ function tryping() {
 }
 
 
+# test many host if they respond
+function isup() {
+	command -v fping >/dev/null || (echo "fping missing"; return)
+	fping -c1 -t100 "$@" 2>&1 | \
+		awk -F"[:/]" '/rcv/ {print $1, $5}' | \
+		sed 's/ 1/ \x1b[32mup\x1b[0m/g;s/ 0/ \x1b[31mdown\x1b[0m/g'
+}
+
+
 # connect to host=$1 port=$2 via tor and listen at $3
 function torcat() {
 	local torhost="localhost"
