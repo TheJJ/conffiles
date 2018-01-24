@@ -490,6 +490,7 @@ It should only modify the values of Spacemacs settings."
   (xterm-mouse-mode t)
   (global-whitespace-mode t)
   (icomplete-mode t)
+  (editorconfig-mode t)
 
   (put 'scroll-left 'disabled nil)
   (put 'upcase-region 'disabled nil)
@@ -521,6 +522,12 @@ It should only modify the values of Spacemacs settings."
         auto-compression-mode t          ; deal with compressed files
         blink-cursor-mode nil            ; don't blink the cursor
         mouse-yank-at-point t            ; paste as cursor instead of mouse position
+        inhibit-startup-screen t
+        python-fill-docstring-style 'symmetric
+        scrollbar-mode 'right
+        backward-delete-char-untabify-method nil
+        cua-auto-tabify-rectangles nil
+        cua-enable-cua-keys nil
         )
 
   ;; default mode for new buffers
@@ -532,6 +539,15 @@ It should only modify the values of Spacemacs settings."
   (setq-default indent-line-function 'insert-tab)
   (setq-default tab-width 4)
   (setq-default whitespace-line-column 400)
+
+  ;; whitespace config
+  (setq whitespace-display-mappings '((space-mark 160 [164] [95])
+                                      (newline-mark 10 [172 10] [36 10])
+                                      (tab-mark 9 [8728 9] [62 9]))
+        whitespace-style '(face tabs trailing
+                                newline indentation
+                                space-before-tab space-after-tab
+                                space-mark tab-mark newline-mark lines-tail))
 
   ;; backup files
   (setq make-backup-files nil
@@ -1296,6 +1312,10 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
   ;; debugging n stuff
   (setq debug-on-error nil)
+
+  ;; store customizations in extra file
+  (setq custom-file "~/.spacemacs.d/custom.el")
+
   (message "installing mode hooks")
   (jj/mode-hooks)
   )
@@ -1316,81 +1336,10 @@ before packages are loaded."
 
   ;; TODO: reenable but fix multi-activation
   ;(jj/rtags-init)
+
+  ;; load customization file if it exists.
+  (when (file-exists-p custom-file)
+    (load-file custom-file))
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; Do not write anything past this comment. This is where Emacs will
-;; auto-generate custom variable definitions.
-(defun dotspacemacs/emacs-custom-settings ()
-  "Emacs custom settings.
-This is an auto-generated function, do not modify its content directly, use
-Emacs customize menu instead.
-This function is called at the very end of Spacemacs initialization."
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#242424" "#e5786d" "#95e454" "#cae682" "#8ac6f2" "#333366" "#ccaa8f" "#f6f3e8"])
- '(backward-delete-char-untabify-method nil)
- '(company-clang-arguments (quote ("-std=c++14")))
- '(company-idle-delay 0.15)
- '(company-minimum-prefix-length 2) '(cua-auto-tabify-rectangles nil) '(cua-enable-cua-keys nil) '(cua-mode t nil (cua-base))
- '(disaster-cc "clang")
- '(disaster-cxx "clang++")
- '(disaster-cxxflags "-march=native -std=c++17")
- '(disaster-objdump "objdump -d -M intel -Sl --no-show-raw-insn")
- '(doc-view-continuous t)
- '(fill-column 76)
- '(inhibit-startup-screen t)
- '(jit-lock-defer-time 0.01)
- '(nxml-child-indent 1)
- '(python-fill-docstring-style (quote symmetric))
- '(scroll-bar-mode (quote right))
- '(semantic-python-dependency-system-include-path nil)
- '(whitespace-display-mappings
-   (quote
-    ((space-mark 160
-                 [164]
-                 [95])
-     (newline-mark 10
-                   [172 10]
-                   [36 10])
-     (tab-mark 9
-               [8728 9]
-               [62 9]))) t)
- '(whitespace-style
-   (quote
-    (face tabs trailing newline indentation space-before-tab space-after-tab space-mark tab-mark newline-mark lines-tail)))
- ;; now for a useless package list:
-)
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "#14151f" :foreground "#f5f5f5" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))) nil "main font and background")
- '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
- '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil))))
- '(evil-search-highlight-persist-highlight-face ((t (:inherit region :background "#4040d0"))))
- '(font-lock-comment-face ((t (:foreground "gray80"))))
- '(font-lock-doc-face ((t (:foreground "#cca522"))))
- '(font-lock-function-name-face ((t (:foreground "goldenrod"))))
- '(font-lock-keyword-face ((t (:foreground "deep sky blue" :weight normal))))
- '(font-lock-string-face ((t (:foreground "burlywood"))))
- '(font-lock-variable-name-face ((t (:foreground "SeaGreen2"))))
- '(hl-line ((t (:inherit highlight :background "midnight blue"))))
- '(isearch ((t (:inherit region :background "#A6E22E" :foreground "black"))))
- '(magit-item-highlight ((t (:inherit nil))))
- '(region ((t (:background "#3030d0"))))
- '(semantic-decoration-on-unknown-includes ((t (:background "#203030"))))
- '(semantic-highlight-func-current-tag-face ((t (:background "gray15"))))
- '(whitespace-indentation ((t (:foreground "#797979"))))
- '(whitespace-space ((t (:background "default"))))
- '(whitespace-space-after-tab ((t (:foreground "#101540"))))
- '(whitespace-tab ((t (:background "#292929" :foreground "#a9a9a9"))))
- '(widget-field ((t (:background "gray25"))))
-)
-)
