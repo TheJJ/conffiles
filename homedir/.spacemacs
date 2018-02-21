@@ -106,6 +106,7 @@ This function should only modify configuration layer settings."
      ag
      cmake-ide
      pdf-tools
+     afternoon-theme
      )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -208,14 +209,9 @@ It should only modify the values of Spacemacs settings."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(spacemacs-dark
-                         monokai
-                         deeper-blue
-                         spacemacs-light
-                         solarized-light
-                         solarized-dark
-                         leuven
-                         zenburn)
+   dotspacemacs-themes '(afternoon
+                         spacemacs-dark
+                         monokai)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
    ;; `all-the-icons', `custom', `vim-powerline' and `vanilla'. The first three
@@ -233,7 +229,7 @@ It should only modify the values of Spacemacs settings."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("DejaVu Sans Mono"
-                               :size 13
+                               ;;:size 13
                                :weight normal
                                :width normal
                                :powerline-scale 1.2)
@@ -574,6 +570,18 @@ It should only modify the values of Spacemacs settings."
   (global-whitespace-mode t)
   (icomplete-mode t)
   (editorconfig-mode t)
+
+  ;; hide modeline indicators
+  (spacemacs|diminish anaconda-mode)
+  (spacemacs|diminish auto-revert-mode)
+  (spacemacs|diminish evil-mc-mode)
+  (spacemacs|diminish ggtags-mode)
+  (spacemacs|diminish helm-gtags-mode)
+  (spacemacs|diminish hybrid-mode)
+  (spacemacs|diminish which-key-mode)
+  (spacemacs|diminish yas-minor-mode)
+  (spacemacs|diminish global-whitespace-mode)
+  (spacemacs|diminish company-mode)
 
   (put 'scroll-left 'disabled nil)
   (put 'upcase-region 'disabled nil)
