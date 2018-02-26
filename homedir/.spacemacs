@@ -47,7 +47,10 @@ This function should only modify configuration layer settings."
      bibtex
      (c-c++ :variables
             c-c++-default-mode-for-headers 'c++-mode
-            c-c++-enable-clang-support nil)
+            c-c++-enable-clang-support nil
+            c-c++-enable-rtags-support t)
+     (cmake :variables
+            cmake-enable-cmake-ide-support t)
      csv
      emacs-lisp
      major-modes  ;; qml-mode, openscad
@@ -104,7 +107,6 @@ This function should only modify configuration layer settings."
    '(
      bison-mode
      ag
-     cmake-ide
      pdf-tools
      afternoon-theme
      )
@@ -567,21 +569,8 @@ It should only modify the values of Spacemacs settings."
   (delete-selection-mode t)
   (display-battery-mode t)
   (xterm-mouse-mode t)
-  (global-whitespace-mode t)
   (icomplete-mode t)
   (editorconfig-mode t)
-
-  ;; hide modeline indicators
-  (spacemacs|diminish anaconda-mode)
-  (spacemacs|diminish auto-revert-mode)
-  (spacemacs|diminish evil-mc-mode)
-  (spacemacs|diminish ggtags-mode)
-  (spacemacs|diminish helm-gtags-mode)
-  (spacemacs|diminish hybrid-mode)
-  (spacemacs|diminish which-key-mode)
-  (spacemacs|diminish yas-minor-mode)
-  (spacemacs|diminish global-whitespace-mode)
-  (spacemacs|diminish company-mode)
 
   (put 'scroll-left 'disabled nil)
   (put 'upcase-region 'disabled nil)
@@ -601,7 +590,7 @@ It should only modify the values of Spacemacs settings."
         ido-use-virtual-buffers t
         ido-file-extensions-order '(".c" ".cpp" ".h" ".py" ".tex" ".bib" ".hs"))
 
-  (setq nlinum-relative-redisplay-delay 0.2) ; relative number redisplay
+  (setq nlinum-relative-redisplay-delay 0.1) ; relative number redisplay
 
   (setq indicate-empty-lines t
         transient-mark-mode t
@@ -631,14 +620,23 @@ It should only modify the values of Spacemacs settings."
   (setq-default tab-width 4)
   (setq-default whitespace-line-column 400)
 
-  ;; whitespace config
-  (setq whitespace-display-mappings '((space-mark 160 [164] [95])
-                                      (newline-mark 10 [172 10] [36 10])
-                                      (tab-mark 9 [8728 9] [62 9]))
-        whitespace-style '(face tabs trailing
-                                newline indentation
-                                space-before-tab space-after-tab
-                                space-mark tab-mark newline-mark lines-tail))
+
+  ;; hide modeline indicators
+  (spacemacs|diminish anaconda-mode)
+  (spacemacs|diminish auto-revert-mode)
+  (spacemacs|diminish evil-mc-mode)
+  (spacemacs|diminish ggtags-mode)
+  (spacemacs|diminish helm-gtags-mode)
+  (spacemacs|diminish hybrid-mode)
+  (spacemacs|diminish which-key-mode)
+  (spacemacs|diminish yas-minor-mode)
+  (spacemacs|diminish global-whitespace-mode)
+  (spacemacs|diminish company-mode)
+
+
+  ;; whitespace crimes
+  (jj/whitespace-highlight)
+
 
   ;; backup files
   (setq make-backup-files nil
@@ -692,13 +690,18 @@ It should only modify the values of Spacemacs settings."
   ;; see whitespace.el
   (interactive)
 
+  ;; whitespace config
   (setq whitespace-display-mappings
         '(
           ;;(space-mark   ?\     [?\u00B7]     [?.])      ; space - centered dot
-          (space-mark   ?\xA0  [?\u00A4]     [?_])        ; hard space - currency
-          (newline-mark ?\n    [?¬ ?\n]  [?$ ?\n])        ; eol - ¬ symbol
-          (tab-mark     ?\t    [?∘ ?\t] [?> ?\t])         ; tab - ∘ symbol
-          )))
+          (space-mark   ?\xA0  [?\u00A4]   [?_])          ; hard space - currency
+          (newline-mark ?\n    [?¬ ?\n]    [?$ ?\n])      ; eol - ¬ symbol
+          (tab-mark     ?\t    [?∘ ?\t]    [?> ?\t]))     ; tab - ∘ symbol
+        whitespace-style '(face tabs trailing
+                                newline indentation
+                                space-before-tab space-after-tab
+                                space-mark tab-mark newline-mark lines-tail))
+  (global-whitespace-mode t))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -707,18 +710,16 @@ It should only modify the values of Spacemacs settings."
 
 (defun jj/mousescroll ()
   ;;mouse-wheel scrolling
-  (setq
-   mouse-wheel-scroll-amount '(1 ((shift) . 1)
-                                 ((control)))            ; one line at a time
-   mouse-wheel-progressive-speed t                       ; accelerate scrolling
-   mouse-wheel-follow-mouse t)                           ; scroll- window under mouse
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)
+                                      ((control)))            ; one line at a time
+        mouse-wheel-progressive-speed t                       ; accelerate scrolling
+        mouse-wheel-follow-mouse t)                           ; scroll- window under mouse
 
-  (setq
-   scroll-preserve-screen-position t                     ; keep relative column position when scrolling
-   scroll-margin 4                                       ; start scrolling n lines before window borders
-   scroll-conservatively 10                              ; scroll up to n lines to bring pointer back on screen
-   scroll-step 0                                         ; try scrolling n lines when pointer moves out
-   auto-window-vscroll nil))
+  (setq scroll-preserve-screen-position t                     ; keep relative column position when scrolling
+        scroll-margin 4                                       ; start scrolling n lines before window borders
+        scroll-conservatively 10                              ; scroll up to n lines to bring pointer back on screen
+        scroll-step 0                                         ; try scrolling n lines when pointer moves out
+        auto-window-vscroll nil))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -743,62 +744,6 @@ It should only modify the values of Spacemacs settings."
   ;; menubar entry for detected symbols
   (add-hook 'semantic-init-hooks (lambda ()
                                    (imenu-add-to-menubar "Stuff"))))
-
-;; rtags c++ completion setup
-(defun jj/rtags-setup ()
-  (local-set-key (kbd "M-g d") 'rtags-find-symbol-at-point)
-  (local-set-key (kbd "M-g D") 'rtags-find-symbol)
-  (local-set-key (kbd "M-g f") 'rtags-find-references-at-point)
-  (local-set-key (kbd "M-g F") 'rtags-find-references)
-  (local-set-key (kbd "M-g t") 'rtags-symbol-type)
-  (evil-leader/set-key-for-mode 'c++-mode "oo" 'rtags-find-symbol-at-point)
-  (evil-leader/set-key-for-mode 'c++-mode "os" 'rtags-find-symbol)
-  (evil-leader/set-key-for-mode 'c++-mode "or" 'rtags-rename-symbol)
-  (evil-leader/set-key-for-mode 'c++-mode "of" 'rtags-find-references-at-point)
-  (evil-leader/set-key-for-mode 'c++-mode "oF" 'rtags-find-references)
-  (evil-leader/set-key-for-mode 'c++-mode "ov" 'rtags-find-virtuals-at-point)
-  (evil-leader/set-key-for-mode 'c++-mode "ot" 'rtags-symbol-type)
-  (evil-leader/set-key-for-mode 'c++-mode "o," 'rtags-location-stack-back)
-  (evil-leader/set-key-for-mode 'c++-mode "o." 'rtags-location-stack-forward)
-
-  ;; company
-  (require 'company-rtags)
-  (setq rtags-completions-enabled t)
-  ;(push 'company-rtags company-backends-c-mode-common)
-  ;(add-to-list 'company-backends-c-mode-common 'company-rtags)
-
-  ;; flycheck
-  (require 'flycheck-rtags)
-  (flycheck-select-checker 'rtags)
-  (setq-local flycheck-highlighting-mode nil)
-  (setq-local flycheck-check-syntax-automatically nil)
-
-  ;; helm
-  (require 'helm-rtags)
-  (setq rtags-use-helm t
-        rtags-display-result-backend 'helm)
-
-  (setq rtags-autostart-diagnostics nil)
-  (rtags-start-process-unless-running)
-
-  ;; evil
-  (add-hook 'rtags-jump-hook 'evil-set-jump))
-
-
-(defun jj/rtags-init ()
-  ;; only run if rtags is there
-  (message "running rtags init")
-
-  (jj/rtags-setup)
-  (setq cmake-ide-build-pool-use-persistent-naming t)
-  (setq cmake-ide-build-pool-dir "~/.emacs.d/.cache/cmake-ide")
-
-  ;; add cmake-ide hooks to c/c++ mode hooks
-  ;; TODO: somehow adds save hooks for other modes as well
-  (cmake-ide-setup)
-
-  ;; semantic modeline summary conflicts with rtags
-  (semantic-idle-summary-mode 0))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1144,7 +1089,6 @@ It should only modify the values of Spacemacs settings."
   (defun jj/coding-hook ()
     (auto-revert-mode t)
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
-    (jj/whitespace-highlight)
     )
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1402,7 +1346,7 @@ It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
   ;; debugging n stuff
-  (setq debug-on-error nil)
+  (setq debug-on-error t)
 
   ;; store customizations in extra file
   (setq custom-file "~/.spacemacs.d/custom.el")
@@ -1424,9 +1368,6 @@ before packages are loaded."
   (jj/display-setup)
   (jj/mousescroll)
   (jj/keybindings)
-
-  ;; TODO: reenable but fix multi-activation
-  ;(jj/rtags-init)
 
   ;; load customization file if it exists.
   (when (file-exists-p custom-file)
