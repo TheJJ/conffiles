@@ -1,6 +1,6 @@
 ;; -*- mode: emacs-lisp -*-
 ;; jj's spacemacs configuration
-;; Copyright (c) 2016-2017 Jonas Jelten <jj@stusta.net>
+;; Copyright (c) 2011-2018 Jonas Jelten <jj@stusta.net>
 ;; Licensed GPLv3 or later
 
 
@@ -50,7 +50,7 @@ This function should only modify configuration layer settings."
             c-c++-enable-clang-support nil
             c-c++-enable-rtags-support t)
      (cmake :variables
-            cmake-enable-cmake-ide-support t)
+            cmake-enable-cmake-ide-support nil)
      csv
      emacs-lisp
      major-modes  ;; qml-mode, openscad
@@ -72,7 +72,8 @@ This function should only modify configuration layer settings."
      nlinum
      org
      python
-     ranger
+     (ranger :variables
+             ranger-show-preview t)
      restructuredtext
      rust
      salt
@@ -90,6 +91,7 @@ This function should only modify configuration layer settings."
      (syntax-checking :variables
                       syntax-checking-enable-by-default nil
                       syntax-checking-enable-tooltips t)
+     theming
      version-control
      yaml
      (shell :variables
@@ -213,6 +215,8 @@ It should only modify the values of Spacemacs settings."
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(afternoon
+                         deeper-blue
+                         reverse
                          spacemacs-dark
                          monokai)
 
@@ -562,7 +566,7 @@ It should only modify the values of Spacemacs settings."
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; enable funny modes
+;; setup (un)funny modes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun jj/modes ()
   (column-number-mode t)
@@ -609,11 +613,15 @@ It should only modify the values of Spacemacs settings."
         backward-delete-char-untabify-method nil
         cua-auto-tabify-rectangles nil
         cua-enable-cua-keys nil
+        ranger-show-literal t            ; colored ranger previews
         )
 
   ;; default mode for new buffers
   (setq-default major-mode 'text-mode)
   (setq initial-major-mode 'text-mode)
+
+  ;; don't enable auto-newline mode (c-toggle-auto-newline)
+  (remove-hook 'c-mode-common-hook 'spacemacs//c-toggle-auto-newline )
 
   ;; indentation defaults
   ;;(setq-default indent-tabs-mode t)
@@ -626,7 +634,6 @@ It should only modify the values of Spacemacs settings."
   (spacemacs|diminish anaconda-mode)
   (spacemacs|diminish auto-revert-mode)
   (spacemacs|diminish evil-mc-mode)
-  (spacemacs|diminish ggtags-mode)
   (spacemacs|diminish helm-gtags-mode)
   (spacemacs|diminish hybrid-mode)
   (spacemacs|diminish which-key-mode)
@@ -1172,10 +1179,10 @@ It should only modify the values of Spacemacs settings."
 
   ;; py
   (defun jj/python-coding-hook ()
-    (setq python-indent 4)
-    (setq indent-tabs-mode nil)
-    (setq tab-width 4)
-    (setq-default whitespace-line-column 79)
+    (setq python-indent 4
+          indent-tabs-mode nil
+          tab-width 4
+          whitespace-line-column 79)
 
     (setq flycheck-checker 'python-pylint
           flycheck-checker-error-threshold 300)
@@ -1215,8 +1222,10 @@ It should only modify the values of Spacemacs settings."
           TeX-auto-save t   ;; enable parse on save
           TeX-PDF-mode t
           reftex-plug-into-AUCTeX t
-          company-minimum-prefix-length 2
-          )
+          company-minimum-prefix-length 2) ;; complpletes start with 2 chars already
+
+    ;; no long line highlight
+    (setq whitespace-style (delete 'lines-tail whitespace-style))
 
     (setq-default TeX-master nil) ; query for master file
     (visual-line-mode t)
@@ -1347,7 +1356,7 @@ It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
   ;; debugging n stuff
-  (setq debug-on-error t)
+  ;(setq debug-on-error t)
 
   ;; store customizations in extra file
   (setq custom-file "~/.spacemacs.d/custom.el")
