@@ -3,11 +3,14 @@
 # JJ's i3 config
 # Copyright (c) 2011-2017 Jonas Jelten <jj@sft.mx>
 #
+# hint: set unknown scancodes with `setkeycodes`
+#
 # Mod1: meta Mod4: super
 set $mod Mod4
 
 # font for window titles. ISO 10646 = Unicode
-font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
+#font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
+font pango:DejaVu Sans Mono 10
 
 # start a terminal
 bindsym $mod+Return exec --no-startup-id urxvt
@@ -20,16 +23,10 @@ bindsym $mod+shift+d exec rofi -show drun
 bindcode 107 exec ~/bin/screenshot
 bindcode shift+107 exec ~/bin/screenshot s
 
-#in /etc/local.d/50-setkeycodes.start:
-# setkeycodes 67 162
-# setkeycodes 6c 161
-#remapped by X to: 170 and 169 or now 162 and 161
-bindcode 162 exec sleep 0.3 && ~/bin/rscreen
-bindcode 161 exec sleep 0.3 && ~/bin/rscreen portrait
+#bindcode 162 exec sleep 0.3 && ~/bin/rscreen
+#bindcode 161 exec sleep 0.3 && ~/bin/rscreen portrait
 
-#bindcode 199 exec ~/bin/touchpad
-
-#audio stuff
+# audio stuff
 bindcode 121 exec amixer set Master toggle > /dev/null
 bindcode 198 exec amixer set Capture toggle > /dev/null
 bindcode shift+122 exec amixer set Capture 5%- > /dev/null
@@ -47,28 +44,18 @@ bindcode control+233 exec xbacklight -inc 5
 bindcode control+shift+232 exec xbacklight -dec 1
 bindcode control+shift+233 exec xbacklight -inc 1
 
-#bindcode 248 exec amixer set Capture toggle
+# lock & suspend
+bindsym $mod+shift+o exec ~/bin/i3lockjj && systemctl suspend
+# lock
+bindsym $mod+u exec ~/bin/i3lockjj
+bindsym $mod+shift+u exec xtrlock
+# screen off
+bindsym $mod+p exec dpms off
 
-bindcode 124 exec ~/bin/i3lockjj && ~/bin/suspend-jj
-bindcode 160 exec ~/bin/i3lockjj
-
-bindcode 150 exec dpms off
-
-
-#dbus-send --system --print-reply --dest="org.freedesktop.ConsoleKit" /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
-#dbus-send --system --print-reply --dest="org.freedesktop.ConsoleKit" /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Restart
-#dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend
-
-
-#for_window [class="urxvt"] border 1pixel
-
-#for_window [class="firefox"] border none
-#for_window [class="Steam"] floating enable
 
 ################################################################
 
 floating_modifier $mod
-
 
 bindsym $mod+Shift+Q kill
 bindsym mod1+F4 kill
@@ -212,7 +199,7 @@ bar {
 	mode dock
 
 	# or none
-	tray_output LVDS-1
+	tray_output eDP-1
 
 	# font xcorefontname
 	# or no # show the numbered workspace buttons

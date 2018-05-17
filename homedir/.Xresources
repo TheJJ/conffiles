@@ -1,10 +1,26 @@
 ! .Xresources, optimized for urxvt, to make it vergil
 !
 ! Copyright (c) 2011 Michael Enßlin <michael@ensslin.cc>
-! Copyright (c) 2011-2017 Jonas Jelten <jj@sft.mx>
+! Copyright (c) 2011-2018 Jonas Jelten <jj@sft.mx>
 !
 ! released under GNU GPLv3 or later
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! font and hidpi settings
+!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! highdpi!
+Xft.dpi: 144
+
+! subpixel hinting
+! only for non-fontconfig-aware applications, see .config/fontconfig and eselect fontconfig
+Xft.antialias:  true
+Xft.rgba:       rgb
+Xft.hinting:    true
+Xft.autohint:   false
+Xft.hintstyle:  hintfull
+Xft.lcdfilter:  lcddefault
 
 Xcursor.theme: Simple-and-Soft
 
@@ -133,12 +149,3 @@ XTerm*scrollBar:        true
 XTerm*rightScrollBar:   true
 XTerm*scrollTtyOutput:  false
 XTerm*borderWidth: 0
-
-! subpixel hinting
-! only for non-fontconfig-aware applications, see .config/fontconfig and eselect fontconfig
-Xft.antialias:  true
-Xft.rgba:       rgb
-Xft.hinting:    true
-Xft.autohint:   false
-Xft.hintstyle:  hintfull
-Xft.lcdfilter:  lcddefault
