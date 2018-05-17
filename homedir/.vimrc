@@ -2,7 +2,7 @@
 " JJ's vimrc
 "
 " released under the GPLv3 or later
-" (c) 2008 - 2016 Jonas Jelten
+" (c) 2008 - 2018 Jonas Jelten
 
 
 syntax on
@@ -51,12 +51,11 @@ autocmd GUIEnter * set visualbell t_vb=
 
 scriptencoding utf-8
 
-"set list listchars=tab:˫╺╴,eol:¬,trail:·,extends:→,precedes:←
-set list listchars=tab:∘۰,eol:¬,trail:·,extends:→,precedes:←
+set list listchars=tab:╺╴,eol:¬,trail:·,extends:→,precedes:←
 
 set background=dark
 colorscheme ron
-highlight SpecialKey ctermfg=darkgreen
+highlight SpecialKey ctermfg=darkblue
 highlight SpecialKey guifg=#808080
 
 " Tell vim to remember certain things when we exit
