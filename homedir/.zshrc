@@ -107,9 +107,9 @@ alias b='bpy'
 alias dmesg='dmesg -L'
 alias watch='watch -c'
 
-alias ema='emacs -nw'
-alias edit="emacsclient -n"      # reuse frame
-alias editn="emacsclient -n -c"  # new frame
+alias emacsnw='emacs -nw'
+alias emacsopen="emacsclient -n"      # reuse frame
+alias emacsopennew="emacsclient -n -c"  # new frame
 
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
