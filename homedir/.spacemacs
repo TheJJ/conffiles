@@ -1200,8 +1200,7 @@ It should only modify the values of Spacemacs settings."
   (defun jj/lisp-coding-hook ()
     (setq indent-tabs-mode nil)
     (setq tab-width 8)
-    (prettify-symbols-mode)
-    )
+    (prettify-symbols-mode))
 
   ;; javascript / ecmascript
   (defun jj/javascript-coding-hook ()
@@ -1324,25 +1323,38 @@ It should only modify the values of Spacemacs settings."
 
 ;; we have a graphical window
 (defun jj/window-setup ()
-  (message "running in windowed mode")
-  (setq confirm-kill-emacs 'y-or-n-p)
-  )
+  (message "spawned new frame in windowed mode")
+  (setq confirm-kill-emacs 'y-or-n-p))
 
 ;; we're running on tty
 (defun jj/terminal-setup ()
-  (message "running in terminal mode")
-  (custom-set-faces
-   '(default ((t (:background "#000000"))))
-   '(semantic-highlight-func-current-tag-face ((t (:background "gray15")))))
+  (message "spawned new frame in terminal mode")
   (setq confirm-kill-emacs nil)
   ;; TODO: disable hl-line-mode
   )
 
+(defun jj/new-frame-setup (frame)
+  (select-frame frame)
+  (if (window-system frame)
+    (jj/window-setup)
+    (jj/terminal-setup)))
+
 ;; change colors according to display
 (defun jj/display-setup ()
-  (if window-system
-      (jj/window-setup)
-    (jj/terminal-setup)))
+
+  ;; called after a new frame was created
+  ;;(add-hook 'after-make-frame-functions 'jj/new-frame-setup)
+
+  ;; in a terminal, set the background to black!
+  (custom-set-faces
+   '(default (
+              (((type tty) (min-colors 256))
+               (:background "black"))
+              (t
+               (:background "#181a26")))
+      ))
+
+  (jj/new-frame-setup (selected-frame)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; spacemacs init hooks
