@@ -50,7 +50,7 @@ URxvt.color1: rgb:cd/00/00
 URxvt.color9: #E73131
 
 ! see /usr/share/fonts/misc/fonts.alias
-URxvt.font: xft:DejaVuSansMono:size=10:antialias=true
+URxvt.font: xft:DejaVuSansMono:size=10:antialias=true,xft:Noto Color Emoji
 
 ! scrollbar style - rxvt (default), plain (most compact), next, or xterm
 URxvt.scrollstyle: plain
