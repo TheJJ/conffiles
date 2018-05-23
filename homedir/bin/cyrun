@@ -1,0 +1,69 @@
+"""
+Compile and execute a cython file
+"""
+
+from subprocess import run
+import argparse, shutil, shlex, tempfile, os, sys, pathlib
+
+
+def main():
+    """
+    Parse arguments.
+    """
+    cmd = argparse.ArgumentParser()
+    cmd.add_argument('-a', '--annotate', action='store_true')
+    cmd.add_argument('-k', '--keep', action='store_true',
+                     help='keep .cpp file and executable')
+    cmd.add_argument('-n', '--norun', action='store_true')
+    cmd.add_argument('-o', '--output')
+    cmd.add_argument('-c', '--cflags', default=os.environ.get("CFLAGS", ""))
+    cmd.add_argument('pyxfile')
+    cmd.add_argument('pyargs', nargs=argparse.REMAINDER)
+
+    args = cmd.parse_args()
+    cyrun(args)
+
+
+def cyrun(args):
+    """
+    Compile and run a cython file.
+    """
+    pyxpath = pathlib.Path(args.pyxfile)
+    if args.output:
+        outpath = pathlib.Path(args.output)
+    else:
+        outpath = pyxpath.with_suffix('')
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        tmpdir = pathlib.Path(tmpdirname)
+        codepath = tmpdir / 'code.cpp'
+        cyinvoc = ["cython", "--embed", "-3", "--cplus", "--line-directives"]
+        if args.annotate:
+            cyinvoc.append("--annotate")
+        cyinvoc.extend(["-o", str(codepath), str(pyxpath)])
+        if not run(cyinvoc):
+            print("cython compilation failed")
+            exit(1)
+
+        if args.annotate:
+            codepath.with_suffix('.html').rename(outpath.with_suffix('.html'))
+
+        if args.keep:
+            shutil.copy(str(codepath), str(outpath.with_suffix('.cpp')))
+
+        exepath = tmpdir / pyxpath.stem
+        gccinvoc = ("g++ $(python-config --libs --includes --cflags)"
+                    "%s -o %s %s") % (args.cflags, exepath, codepath)
+        if not run(gccinvoc, shell=True):
+            print("failed gcc compilation")
+            exit(1)
+
+        if args.keep:
+            shutil.copy(str(exepath), str(outpath))
+
+        if not args.norun:
+            exit(run([str(exepath)] + args.pyargs).returncode)
+
+
+if __name__ == "__main__":
+    main()
