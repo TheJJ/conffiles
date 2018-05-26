@@ -1345,14 +1345,18 @@ It should only modify the values of Spacemacs settings."
   ;; called after a new frame was created
   ;;(add-hook 'after-make-frame-functions 'jj/new-frame-setup)
 
-  ;; in a terminal, set the background to black!
   (custom-set-faces
+    ;; in a terminal, set the background to black!
    '(default (
               (((type tty) (min-colors 256))
                (:background "black"))
               (t
                (:background "#181a26")))
-      ))
+      )
+   ;; brighter tab circle
+   '(whitespace-tab ((t (:foreground "#206090"))))
+   ;; for alignment, space-after-tab is not evil
+   '(whitespace-space-after-tab ((t (:foreground "#103050")))))
 
   (jj/new-frame-setup (selected-frame)))
 
