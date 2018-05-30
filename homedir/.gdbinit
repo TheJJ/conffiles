@@ -1,26 +1,28 @@
 # JJ's gdb config
-# Copyright (c) 2012-2016 Jonas Jelten <jj@sft.mx>
+# Copyright (c) 2012-2018 Jonas Jelten <jj@sft.mx>
 # Licensed GNU GPLv3 or later
 
 #set architecture i386:x86-64:intel
-set history save
+set auto-load python-scripts on
+set disassemble-next-line auto
+set disassembly-flavor intel
+set history expansion on
 set history filename ~/.gdb_history
+set history save
 set history save on
 set history size 10000
-set history expansion on
-set disassembly-flavor intel
-set print demangle on
-set print asm-demangle off
-set print pretty on
-set print array on
-set print object on
-set print vtbl on
-set auto-load python-scripts on
-set trace-commands off
 set pagination on
-set disassemble-next-line auto
+set print array on
+set print asm-demangle off
+set print demangle on
+set print object on
+set print pretty on
+set print static-members off
 set print symbol-filename off
+set print union on
+set print vtbl on
 set python print-stack full
+set trace-commands off
 #set detach-on-fork off
 
 #set prompt = gdb>> 
