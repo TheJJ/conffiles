@@ -69,7 +69,6 @@ This function should only modify configuration layer settings."
      lua
      (markdown :variables
                markdown-live-preview-engine 'vmd)
-     nlinum
      org
      python
      (ranger :variables
