@@ -1,5 +1,5 @@
 # JJ's zshrc
-# Copyright (c) 2011 - 2017 Jonas Jelten
+# Copyright (c) 2011 - 2018 Jonas Jelten
 #
 # Released under GPLv3 or later.
 #
@@ -100,7 +100,7 @@ alias py3='p3'
 alias py2='p2'
 alias py='p3'
 alias p='py'
-compdef py=python3 p3=python3 p=python3 p2=python2 py2=python2
+compdef py=python3 p3=python3 p=python3 p2=python2 py2=python2 2>/dev/null
 
 alias bpy='bpython'
 alias b='bpy'
@@ -114,11 +114,13 @@ alias emacsopennew="emacsclient -n -c"  # new frame
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
 alias gdbs='gdbserver --once localhost:8888'
-compdef gdbs=gdb
+compdef gdbs=gdb 2>/dev/null
 alias gdbc='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remote localhost:8888"'
 alias bc='bc -q -l'
 alias cp='cp --reflink=auto'
 alias grep='grep --color=auto'
+alias ip='ip --color'
+alias ipb='ip --color --brief'
 alias ag="ag -S"
 alias more='less'
 alias most='less'
@@ -127,7 +129,10 @@ alias mkdir='mkdir -p -v'
 alias nano='nano -w -S -F -A'
 alias anon=' unset HISTFILE'
 alias ..='cd ..'
+alias ....='cd ../../'
+alias ......='cd ../../../'
 alias ../../='cd ../../'
+alias ../../../='cd ../../../'
 alias cd..='..'
 alias cmatrix="cmatrix -a -b"
 alias rd="cd $(pwd)"
@@ -137,9 +142,11 @@ alias file='file -L'
 alias xseltoclip="xclip -o | xclip -i -selection clipboard; xclip -o"
 alias xcliptosel="xclip -selection clipboard -o | xclip -i; xclip -selection clipboard -o"
 alias cls="echo -en \\\\033c"
-alias scrolltop="echo -en '\x1b]720;99999\x07'"
-alias scrollbottom="echo -en '\x1b]721;99999\x07'"
+alias scrolltop="echo -en '\x1b]720;99999\x07'"       # urxvt special command
+alias scrollbottom="echo -en '\x1b]721;99999\x07'"    # urxvt even more special command
 alias rcp="rsync -aHAXP"
+alias icat="kitty +kitten icat"
+alias kittyssh="kitty +kitten ssh"
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
@@ -480,6 +487,13 @@ function catall() {
 	done
 }
 
+
+function pytest() {
+	env python3 - <<-'EOF'
+		print("rofl")
+	EOF
+}
+
 # show the zsh completion file origin
 function completionfile() {
 	if [[ $# -ne 1 ]]; then
@@ -657,6 +671,7 @@ bindkey "\eOF"          end-of-line
 bindkey "\eOH"          beginning-of-line
 bindkey "^[d"           kill-word
 bindkey "^[[3^"         kill-word
+bindkey "^[[3;5~"       kill-word
 #bindkey '^[w'           jj-copy-region-as-kill
 #bindkey '^W'            jj-kill-region
 #bindkey '^Y'            jj-yank
