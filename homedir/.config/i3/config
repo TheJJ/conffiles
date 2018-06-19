@@ -13,7 +13,7 @@ set $mod Mod4
 font pango:DejaVu Sans Mono 10
 
 # start a terminal
-bindsym $mod+Return exec --no-startup-id urxvt
+bindsym $mod+Return exec --no-startup-id kitty
 
 # start something in PATH
 bindsym $mod+d exec rofi -show run
