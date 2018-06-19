@@ -1,0 +1,19 @@
+# jj's .editrc
+# Copyright (c) 2018-2018 Jonas Jelten <jj@stusta.net>
+#
+# used by all editline-enabled programs (e.g. lldb)
+
+edit on          # enable libedit stuff
+history size 0   # infinite history
+
+bind '^[[A' ed-search-prev-history
+bind '^[[B' ed-search-next-history
+bind '^[[5C' vi-next-word
+bind '^[[5D' vi-prev-word
+bind '^B' ed-command
+bind '^P' ed-search-prev-history
+bind '^N' ed-search-next-history
+
+# bind '\\t' rl_complete
+bind '^l' ed-clear-screen
+bind '^r' em-inc-search-prev
