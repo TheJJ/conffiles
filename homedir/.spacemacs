@@ -69,6 +69,7 @@ This function should only modify configuration layer settings."
      lua
      (markdown :variables
                markdown-live-preview-engine 'vmd)
+     nlinum
      org
      python
      (ranger :variables
@@ -77,6 +78,9 @@ This function should only modify configuration layer settings."
      rust
      salt
      semantic
+     (shell :variables
+            shell-default-height 30
+            shell-default-position 'bottom)
      shell-scripts
      smex
      (spell-checking :variables
@@ -93,9 +97,6 @@ This function should only modify configuration layer settings."
      theming
      version-control
      yaml
-     (shell :variables
-            shell-default-height 30
-            shell-default-position 'bottom)
      )
 
    ;; List of additional packages that will be installed without being
@@ -593,8 +594,6 @@ It should only modify the values of Spacemacs settings."
         ido-case-fold t
         ido-use-virtual-buffers t
         ido-file-extensions-order '(".c" ".cpp" ".h" ".py" ".tex" ".bib" ".hs"))
-
-  (setq nlinum-relative-redisplay-delay 0.1) ; relative number redisplay
 
   (setq indicate-empty-lines t
         transient-mark-mode t
@@ -1267,7 +1266,8 @@ It should only modify the values of Spacemacs settings."
 
   ;; markdown-mode
   (defun jj/markdown-mode-hook ()
-    (setq indent-tabs-mode nil))
+    (setq indent-tabs-mode nil
+          whitespace-line-column 400))
 
   (defun jj/cmake-mode-hook ()
     (setq indent-tabs-mode t)
