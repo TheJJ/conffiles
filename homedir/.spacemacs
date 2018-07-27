@@ -69,7 +69,6 @@ This function should only modify configuration layer settings."
      lua
      (markdown :variables
                markdown-live-preview-engine 'vmd)
-     nlinum
      org
      python
      (ranger :variables
@@ -627,6 +626,10 @@ It should only modify the values of Spacemacs settings."
   (setq-default tab-width 4)
   (setq-default whitespace-line-column 400)
 
+  ;; undo-tree-region detection is quite buggy
+  ;; and has successfully wiped the undo history
+  ;; from time to time for me.
+  (setq undo-tree-enable-undo-in-region nil)
 
   ;; hide modeline indicators
   (spacemacs|diminish anaconda-mode)
