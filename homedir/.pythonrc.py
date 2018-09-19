@@ -2,7 +2,7 @@
 #
 # jj's pythonrc
 #
-# Copyright (c) 2012-2017 Jonas Jelten <jj@sft.mx>
+# Copyright (c) 2012-2018 Jonas Jelten <jj@sft.mx>
 #
 # Licensed GPLv3 or later.
 
@@ -18,6 +18,7 @@ if 'bpython' not in sys.modules:
 
     # bpython has its own history management
     python_histfile = ".py_history"
+
 
 pager_proc = os.environ.get("PAGER", "less -R -S")
 
@@ -35,27 +36,35 @@ if False:
 
 if use_pygments:
     try:
-        import pygments
-        import pygments.formatters
+        import pygments.formatters.terminal
         import pygments.lexers
         has_pygments = True
     except ImportError:
         pass
 
 
-def __pager_launch(txt):
-    import subprocess
-    import shlex
-    pager = subprocess.Popen(shlex.split(pager_proc), stdin=subprocess.PIPE)
-    pager.communicate(txt)
-    pager.wait()
+def pager(txt):
+    import subprocess, shlex
+    if not isinstance(txt, bytes):
+        txt = txt.encode()
+    subprocess.run(shlex.split(pager_proc) + ['-'], input=txt)
+
+
+def pager_file(filename):
+    import subprocess, shlex
+    subprocess.run(shlex.split(pager_proc) + [filename])
 
 
 def dis(obj):
     """disassemble given stuff"""
 
     import dis
-    __pager_launch(dis.dis(obj))
+    import io
+
+    output = io.StringIO()
+    dis.dis(obj, file=output)
+    pager(output.getvalue())
+    output.close()
 
 
 def src(obj):
@@ -66,11 +75,11 @@ def src(obj):
             return source
 
         lexer = pygments.lexers.get_lexer_by_name('python')
-        formatter = pygments.formatters.terminal.TerminalFormatter()
+        formatter = pygments.formatters.terminal.TerminalFormatter(bg='dark')
         return pygments.highlight(source, lexer, formatter)
 
     source = highlight(inspect.getsource(obj))
-    __pager_launch(source)
+    pager(source)
 
 
 def _completion():
@@ -115,4 +124,9 @@ except ImportError:
 # helpful imports
 from math import *
 from pprint import pprint
-from subprocess import call
+from subprocess import call, run
+import time
+import datetime
+import asyncio
+import pathlib
+from pathlib import Path
