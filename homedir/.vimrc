@@ -27,7 +27,10 @@ set nowrapscan                     "don't wrap the search
 set nostartofline                  "don't move to first non-space char in line
 set endofline                      "make sure last line ends with \n
 set backspace=indent,eol,start     "expected backspace behavior
-set ttyfast                        "we're in a fast tty
+set ttyfast                        "of course we're in a fast tty
+set ruler                          "enable the bottom line
+set textwidth=0                    "no auto wrapping
+set wrapmargin=0                   "really no auto wrapping
 
 filetype plugin on                 "per-filetype settings
 filetype indent on                 "per-filetype indentation

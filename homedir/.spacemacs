@@ -856,6 +856,17 @@ It should only modify the values of Spacemacs settings."
       (indent-for-tab-command))))
 
 
+(defun sort-words (reverse beg end)
+  "Sort words in region alphabetically, in REVERSE if negative.
+  Prefixed with negative \\[universal-argument], sorts in reverse.
+
+  The variable `sort-fold-case' determines whether alphabetic case
+  affects the sort order.
+
+  See `sort-regexp-fields'."
+  (interactive "*P\nr")
+  (sort-regexp-fields reverse "[a-zA-Z0-9_-]+" "\\&" beg end))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; set kaschtomaisd key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
