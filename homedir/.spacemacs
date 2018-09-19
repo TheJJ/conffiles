@@ -611,6 +611,10 @@ It should only modify the values of Spacemacs settings."
         cua-auto-tabify-rectangles nil
         cua-enable-cua-keys nil
         ranger-show-literal t            ; colored ranger previews
+        frame-title-format nil           ; workaround for https://github.com/syl20bnr/spacemacs/issues/10938
+        python-shell-prompt-detect-failure-warning nil
+        ;python-shell-interpreter-interactive-arg ""
+        tramp-default-method "ssh"
         )
 
   ;; default mode for new buffers
@@ -1175,7 +1179,7 @@ It should only modify the values of Spacemacs settings."
             ("\\<\\(static_assert\\)\\>" . font-lock-keyword-face)
 
             ;; custom defined types
-            ("\\<[A-Za-z_]+[A-Za-z_0-9]*_\\(t\\)\\>" . font-lock-type-face)
+            ("\\<[A-Za-z_]+[A-Za-z_0-9]*_t\\>" . font-lock-type-face)
             )))
 
   ;; py
