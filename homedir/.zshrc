@@ -149,6 +149,7 @@ alias cls="echo -en \\\\033c"
 alias scrolltop="echo -en '\x1b]720;99999\x07'"       # urxvt special command
 alias scrollbottom="echo -en '\x1b]721;99999\x07'"    # urxvt even more special command
 alias rcp="rsync -aHAXP"
+compdef rcp=rsync 2> /dev/null
 alias icat="kitty +kitten icat"
 alias kittyssh="kitty +kitten ssh"
 
@@ -387,9 +388,7 @@ function sudosh() {
 # just return the fucking ip address
 function getip() {
 	local ip=$(dig +short "$1" | tail -n1)
-	if [ -n $ip ]; then
-		echo $ip
-	fi
+	(test -n $ip && echo $ip) || return 1
 }
 
 
@@ -540,7 +539,7 @@ alias help=run-help
 
 # command history
 HISTFILE=~/.zsh-histfile
-HISTSIZE=50000
+HISTSIZE=80000
 SAVEHIST=$HISTSIZE
 setopt append_history share_history extended_history histverify histignorespace histignoredups
 
