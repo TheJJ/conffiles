@@ -16,6 +16,10 @@
 # if not running interactively, don't do anything!
 [[ $- != *i* ]] && return
 
+# if emacs tramp is using this shell,
+# abort everything and be as dumb as possible
+[[ $TERM == "dumb" ]] && unsetopt zle && PS1='$ ' && return
+
 # home bin dir path
 homebindir="$HOME/bin"
 if [[ -d $homebindir ]]; then
