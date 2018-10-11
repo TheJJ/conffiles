@@ -54,7 +54,8 @@ autocmd GUIEnter * set visualbell t_vb=
 
 scriptencoding utf-8
 
-set list listchars=tab:╺╴,eol:¬,trail:·,extends:→,precedes:←
+" whitespace highlighting: eol:¬,
+set list listchars=tab:╺╴,trail:·,extends:→,precedes:←
 
 set background=dark
 colorscheme ron
@@ -82,7 +83,7 @@ augroup resCur
 augroup END
 
 " use w!! to save files with sudo
-cmap w!! w !sudo tee > /dev/null %
+cnoremap w!! execute 'silent! write !sudo tee % >/dev/null' <bar> edit!
 
 " :diffw for current diff
 cmap diffw exec 'w !git diff -R --no-index -- - ' . shellescape(expand('%'))
