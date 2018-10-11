@@ -232,10 +232,10 @@ client.background       #000000
 
 # us international
 #caps:none altwin:meta_alt lv3:rals_switch
-exec setxkbmap us altgr-intl -option ctrl:nocaps
+exec --no-startup-id setxkbmap us altgr-intl -option ctrl:nocaps
 # xmodmap -e "keycode 166 = Home"
 # xmodmap -e "keycode 167 = End"
-exec xset -b
-exec xset r rate 170 55
+exec --no-startup-id xset -b
+exec --no-startup-id xset r rate 170 55
 
-exec xsetroot -solid black
+exec --no-startup-id xsetroot -solid black
