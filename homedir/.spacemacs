@@ -614,7 +614,6 @@ It should only modify the values of Spacemacs settings."
         frame-title-format nil           ; workaround for https://github.com/syl20bnr/spacemacs/issues/10938
         python-shell-prompt-detect-failure-warning nil
         ;python-shell-interpreter-interactive-arg ""
-        tramp-default-method "ssh"
         )
 
   ;; default mode for new buffers
