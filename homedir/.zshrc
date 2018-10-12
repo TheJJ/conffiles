@@ -514,6 +514,13 @@ function _completionfile() {
 compdef _completionfile completionfile
 
 
+# less with highlighting
+function lessh() {
+	local theme=candy
+	LESSOPEN="| /usr/bin/highlight -O xterm256 -s $theme %s" less $*
+}
+
+
 ####################
 # shell setup
 ####################
