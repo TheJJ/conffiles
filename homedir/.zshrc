@@ -89,6 +89,16 @@ bashcompinit
 # aliases for stuff
 ############################
 
+# non-gnu tools don't understand some options
+case `uname` in
+Linux)
+	ON_LINUX=1
+	;;
+*)
+	ON_LINUX=0
+	;;
+esac
+
 # wrap vim to support file:linenumner
 if [[ -x $homebindir/viml ]]; then
 	alias vim=viml
@@ -121,10 +131,11 @@ alias gdbs='gdbserver --once localhost:8888'
 compdef gdbs=gdb 2>/dev/null
 alias gdbc='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remote localhost:8888"'
 alias bc='bc -q -l'
-alias cp='cp --reflink=auto'
+(( $ON_LINUX )) && alias cp='cp --reflink=auto'
 alias grep='grep --color=auto'
 alias ip='ip --color'
 alias ipb='ip --color --brief'
+alias bridge='bridge --color'
 alias ag="ag -S"
 alias more='less'
 alias most='less'
@@ -152,6 +163,7 @@ alias rcp="rsync -aHAXP"
 compdef rcp=rsync 2> /dev/null
 alias icat="kitty +kitten icat"
 alias kittyssh="kitty +kitten ssh"
+alias nemo='nemo --no-desktop'
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
@@ -168,7 +180,7 @@ alias psc='ps xawf -eo pid,user,cgroup,args'
 alias gschichten='fortune'
 alias lol="fortune | ponysay"
 alias sido='sudo'
-compdef sido=sudo
+compdef sido=sudo 2> /dev/null
 alias nautilus="nautilus --no-desktop"
 
 alias l='ls'
@@ -184,13 +196,12 @@ alias lZ='ll -Z'                    # selinux
 alias ll='ls -alhtr'                # magic
 alias lrandom="ls | sort -R | head -n 1"
 
-alias rm='rm -I --one-file-system'
+(( $ON_LINUX )) && alias rm='rm -I --one-file-system'
 alias chown='chown --preserve-root'
 alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
 
-alias ls=' ls --color=auto'
-alias nemo='nemo --no-desktop'
+(( $ON_LINUX )) && alias ls=' ls --color=auto'
 
 alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -delete"
 alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
@@ -519,6 +530,7 @@ function lessh() {
 	local theme=candy
 	LESSOPEN="| /usr/bin/highlight -O xterm256 -s $theme %s" less $*
 }
+compdef lessh=less 2> /dev/null
 
 
 ####################
