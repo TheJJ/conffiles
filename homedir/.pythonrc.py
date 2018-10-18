@@ -6,9 +6,20 @@
 #
 # Licensed GPLv3 or later.
 
+# these imports are available in interactive python shells
+import asyncio
+import datetime
 import inspect
 import os
+import pathlib
+import re
 import sys
+import time
+from math import *
+from pathlib import Path
+from pprint import pprint
+from subprocess import call, run
+
 
 if 'bpython' not in sys.modules:
     # fancy prompt. bpython doesn't like nor need this
@@ -82,6 +93,10 @@ def src(obj):
     pager(source)
 
 
+def sh(*args, check=True, **kwargs):
+    return run(args, check=check, **kwargs).returncode == 0
+
+
 def _completion():
     import atexit
     import os
@@ -119,15 +134,3 @@ try:
     from see import see
 except ImportError:
     pass
-
-
-# helpful imports
-from math import *
-from pprint import pprint
-from subprocess import call, run
-import time
-import datetime
-import asyncio
-import pathlib
-import re
-from pathlib import Path
