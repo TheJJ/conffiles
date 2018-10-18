@@ -90,12 +90,14 @@ bashcompinit
 ############################
 
 # non-gnu tools don't understand some options
+ON_MAC=0
+ON_LINUX=0
 case `uname` in
 Linux)
 	ON_LINUX=1
 	;;
-*)
-	ON_LINUX=0
+Darwin)
+	ON_MAC=1
 	;;
 esac
 
@@ -105,7 +107,7 @@ if [[ -x $homebindir/viml ]]; then
 fi
 
 alias woman="man"
-compdef woman=man
+compdef woman=man 2> /dev/null
 
 alias python3="python3 -q"
 alias p3='python3'
@@ -151,7 +153,7 @@ alias ../../../='cd ../../../'
 alias cd..='..'
 alias cmatrix="cmatrix -a -b"
 alias rd="cd $(pwd)"
-alias chmod="chmod -c"
+(( $ON_LINUX )) && alias chmod="chmod -c"
 alias dd="dd status=progress"
 alias file='file -L'
 alias xseltoclip="xclip -o | xclip -i -selection clipboard; xclip -o"
@@ -179,8 +181,6 @@ function gdbv() {
 alias psc='ps xawf -eo pid,user,cgroup,args'
 alias gschichten='fortune'
 alias lol="fortune | ponysay"
-alias sido='sudo'
-compdef sido=sudo 2> /dev/null
 alias nautilus="nautilus --no-desktop"
 
 alias l='ls'
@@ -202,6 +202,7 @@ alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
 
 (( $ON_LINUX )) && alias ls=' ls --color=auto'
+(( $ON_MAC )) && alias ls=' ls -G'
 
 alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -delete"
 alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
