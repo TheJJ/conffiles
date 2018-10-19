@@ -17,9 +17,14 @@ import sys
 import time
 from math import *
 from pathlib import Path
-from pprint import pprint
+from pprint import pprint, pformat
 from subprocess import call, run
 
+try:
+    # alternative for dir() to view members
+    from see import see
+except ImportError:
+    pass
 
 if 'bpython' not in sys.modules:
     # fancy prompt. bpython doesn't like nor need this
@@ -47,7 +52,8 @@ if False:
 
 if use_pygments:
     try:
-        import pygments.formatters.terminal
+        from pygments import highlight
+        from pygments.formatters import TerminalFormatter
         import pygments.lexers
         has_pygments = True
     except ImportError:
@@ -78,16 +84,23 @@ def dis(obj):
     output.close()
 
 
-def src(obj):
-    """Read the source of an object in the interpreter."""
 
+if use_pygments and has_pygments:
     def highlight(source):
         if not use_pygments or not has_pygments:
             return source
 
         lexer = pygments.lexers.get_lexer_by_name('python')
-        formatter = pygments.formatters.terminal.TerminalFormatter(bg='dark')
+        formatter = TerminalFormatter(bg='dark')
         return pygments.highlight(source, lexer, formatter)
+
+else:
+    def highlight(txt):
+        return txt
+
+
+def src(obj):
+    """Read the source of an object in the interpreter."""
 
     source = highlight(inspect.getsource(obj))
     pager(source)
@@ -129,8 +142,24 @@ if 'bpython' not in sys.modules:
         sys.stderr.write("failed history and completion init: %s\n" % e)
 
 
-try:
-    # alternative for dir() to view members
-    from see import see
-except ImportError:
-    pass
+def _fancy_displayhook(item):
+    if item is None:
+        return
+
+    global _
+    _ = item
+
+    if isinstance(item, int) and not isinstance(item, bool) and item > 0:
+        if item >= 2**32:
+            display_text = "{0}, 0x{0:x}".format(item)
+        else:
+            display_text = "{0}, 0x{0:x}, 0b{0:b}".format(item)
+    else:
+        display_text = pformat(item)
+
+    print(highlight(display_text), end="")
+
+
+# install the hook
+sys.displayhook = _fancy_displayhook
+del _fancy_displayhook
