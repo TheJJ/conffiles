@@ -31,6 +31,7 @@ set ttyfast                        "of course we're in a fast tty
 set ruler                          "enable the bottom line
 set textwidth=0                    "no auto wrapping
 set wrapmargin=0                   "really no auto wrapping
+set scrolloff=4                    "lines to keep visible when scrolling
 
 filetype plugin on                 "per-filetype settings
 filetype indent on                 "per-filetype indentation
