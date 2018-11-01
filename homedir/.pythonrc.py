@@ -157,7 +157,11 @@ def _fancy_displayhook(item):
     else:
         display_text = pformat(item)
 
-    print(highlight(display_text), end="")
+    output = highlight(display_text)
+    if output.endswith("\n"):
+        print(output, end="")
+    else:
+        print(output)
 
 
 # install the hook
