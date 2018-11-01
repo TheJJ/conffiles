@@ -207,6 +207,7 @@ alias chgrp='chgrp --preserve-root'
 alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -delete"
 alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
 alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.argv[1]))"'
+alias jsc="js -C ."  # json coloring
 
 hash colordiff 2>/dev/null && alias diff='colordiff'
 
