@@ -101,12 +101,21 @@ else:
 
 def src(obj):
     """Read the source of an object in the interpreter."""
-
     source = highlight(inspect.getsource(obj))
     pager(source)
 
+def loc(obj):
+    """Get the definition location of give object."""
+    srcfile = inspect.getsourcefile(obj)
+    _, srcline = inspect.getsourcelines(obj)
+    return "%s:%d" % (srcfile, srcline)
+
 
 def sh(*args, check=True, **kwargs):
+    """
+    Execute the given commands and
+    return True if the command exited with 0.
+    """
     return run(args, check=check, **kwargs).returncode == 0
 
 
