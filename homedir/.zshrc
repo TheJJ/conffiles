@@ -116,7 +116,8 @@ alias py3='p3'
 alias py2='p2'
 alias py='p3'
 alias p='py'
-compdef py=python3 p3=python3 p=python3 p2=python2 py2=python2 2>/dev/null
+alias pytrace='python3 -m trace -g -t'
+compdef py=python3 p3=python3 p=python3 p2=python2 py2=python2 pytrace=python3 2>/dev/null
 
 alias bpy='bpython'
 alias b='bpy'
