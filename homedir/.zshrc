@@ -307,13 +307,14 @@ alias git-die="git diff --word-diff-regex=. "
 # fname "search" ["startdiretories" ...]
 function fname() {
 	local what=$1
+	local srchdirs
 	if [[ $# -ge 2 ]]; then
 		shift
-		local srchdirs=($@)
+		srchdirs=("$@")
 	else
-		local srchdirs=(".")
+		srchdirs=(".")
 	fi
-	find ${srchdirs[@]} -iname "*$what*"
+	find "${srchdirs[@]}" -iname "*$what*"
 }
 
 # find with gnu global tag search
