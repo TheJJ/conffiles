@@ -303,17 +303,16 @@ alias git-die="git diff --word-diff-regex=. "
 
 
 # find by name, optionally in dir
-# fname "search" ["startdirectory"]
+# fname "search" ["startdiretories" ...]
 function fname() {
+	local what=$1
 	if [[ $# -ge 2 ]]; then
-		local dir=$1
 		shift
-		local what=$@
+		local srchdirs=($@)
 	else
-		local dir="."
-		local what="$@"
+		local srchdirs=(".")
 	fi
-	find $dir -iname "*$what*"
+	find ${srchdirs[@]} -iname "*$what*"
 }
 
 # find with gnu global tag search
@@ -323,10 +322,11 @@ function ftag() {
 }
 
 # ag for two strings in one line
-# -> better than ag lol | ag rofl
+# agl lol rofl -> better than ag lol | ag rofl
 function agl() {
 	ag "(($1.*$2)|($2.*$1))"
 }
+
 
 # mkdir and cd to it
 function mcd() { mkdir -p "$1" && cd "$1"; }
