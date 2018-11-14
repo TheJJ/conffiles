@@ -483,11 +483,12 @@ function torcat() {
 
 # cat all files in current folder or matching pattern
 function catall() {
+	local list
 	if [[ $# -ge 1 ]]; then
-		local list=($@)
+		list=("$@")
 	else
 		setopt nullglob
-		local list=(./*)
+		list=("./*")
 	fi
 
 	printf "\x1b\x5b\x34\x31m${#list[@]} files\x1b\x5bm\n\n"
@@ -500,7 +501,7 @@ function catall() {
 		printf "\x1b\x5b\x33\x32;10m${f}\n"
 		printf "\x1b\x5bm"
 
-		cat $f;
+		cat "$f";
 		printf "\n"
 	done
 }
