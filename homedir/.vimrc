@@ -52,6 +52,7 @@ else
 endif
 
 autocmd GUIEnter * set visualbell t_vb=
+autocmd FileType text setlocal textwidth=0
 
 scriptencoding utf-8
 
@@ -182,7 +183,6 @@ cmap wt8 call WhitespaceTab(8)
 " language-specific stuff
 " python-specific
 au FileType python setlocal expandtab
-au FileType python setlocal colorcolumn=80
 
 " filetypes where whitespaces are preferred
 autocmd FileType python,perl,pyrex call WhitespaceSpace(4)
