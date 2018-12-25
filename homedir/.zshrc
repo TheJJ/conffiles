@@ -183,6 +183,7 @@ alias psc='ps xawf -eo pid,user,cgroup,args'
 alias gschichten='fortune'
 alias lol="fortune | ponysay"
 alias nautilus="nautilus --no-desktop"
+alias sqlite="sqlite3"
 
 alias l='ls'
 alias la='ls -A'
@@ -209,8 +210,8 @@ alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -del
 alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
 alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.argv[1]))"'
 alias jsc="js -C ."  # json coloring
-
 hash colordiff 2>/dev/null && alias diff='colordiff'
+
 
 #####################################
 # git-shortcuts
@@ -301,6 +302,12 @@ alias git-die="git diff --word-diff-regex=. "
 #####################################
 # random functions
 #####################################
+
+# unix shadow password checking
+# - generate a new hash with random seed for given password
+alias gencrypthash="python3 -c 'import crypt, getpass; print(crypt.crypt(getpass.getpass(\"passwd> \"), crypt.mksalt()))'"
+# - check hash (either via argv0 or input) against given password
+alias checkcrypthash="python3 -c 'import crypt, hmac, getpass, sys; hash=(sys.argv[1] if len(sys.argv) > 1 else input(\"hash> \")); k=(\"kay\" if hmac.compare_digest(crypt.crypt(getpass.getpass(\"passwd> \"), hash), hash) else \"no\"); print(k); exit(0 if k == \"kay\" else 1)'"
 
 
 # find by name, optionally in dir
@@ -488,7 +495,7 @@ function catall() {
 		list=("$@")
 	else
 		setopt nullglob
-		list=("./*")
+		list=(*)
 	fi
 
 	printf "\x1b\x5b\x34\x31m${#list[@]} files\x1b\x5bm\n\n"
@@ -548,6 +555,9 @@ unsetopt autocd beep notify nomatch
 
 # no rehash for directory contents
 setopt nohashdirs
+
+# print literal * and ? if the * or / do not glob-expand
+unsetopt nullglob
 
 # open file suffixes with the given commands
 alias -s tex=vim
