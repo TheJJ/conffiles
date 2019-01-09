@@ -104,11 +104,51 @@ def src(obj):
     source = highlight(inspect.getsource(obj))
     pager(source)
 
+
 def loc(obj):
     """Get the definition location of give object."""
     srcfile = inspect.getsourcefile(obj)
     _, srcline = inspect.getsourcelines(obj)
     return "%s:%d" % (srcfile, srcline)
+
+
+def ls(*args, recurse=False, merge=False):
+    """
+    List the current directory, or if given, all the files/directories.
+    recurse: list contents recursively
+    merge: don't return a dict entry for each listed, instead combine all results to one set
+    """
+
+    to_scan = list()
+
+    if not args:
+        to_scan.append(".")
+    else:
+        to_scan.extend(args)
+
+    result = dict()
+
+    if recurse:
+        for inode in to_scan:
+            result[inode] = os.walk(inode)
+    else:
+        for inode in to_scan:
+            result[inode] = os.listdir(inode)
+
+    if merge:
+        if recurse:
+            raise Exception("merge only available for non-recursive listings")
+
+        result_set = set()
+        for vals in result.values():
+            result_set.update(vals)
+
+        return result_set
+
+    if len(to_scan) == 1:
+        return result[to_scan[0]]
+
+    return result
 
 
 def sh(*args, check=True, **kwargs):
