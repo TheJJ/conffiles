@@ -35,7 +35,7 @@ if [[ -d $machineconfdir ]]; then
 fi
 
 # ssh-agent launched via systemd user service
-sshagentsocket="$XDG_RUNTIME_DIR/ssh-agent.socket"
+local sshagentsocket="$XDG_RUNTIME_DIR/ssh-agent.socket"
 if [[ -r $sshagentsocket ]]; then
 	export SSH_AUTH_SOCK=$sshagentsocket
 fi
@@ -46,6 +46,7 @@ export EDITOR=$VISUAL
 export LESS="-S -i -R -M --shift 5"
 export PAGER="less"
 export GCC_COLORS="yes"
+export NO_AT_BRIDGE=1     # silence funny gtk warnings
 
 # locales
 export LANG="en_US.UTF-8"
@@ -167,6 +168,7 @@ compdef rcp=rsync 2> /dev/null
 alias icat="kitty +kitten icat"
 alias kittyssh="kitty +kitten ssh"
 alias nemo='nemo --no-desktop'
+alias cal='cal -m -w'
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
