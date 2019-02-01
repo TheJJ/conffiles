@@ -127,6 +127,10 @@ vmap <C-x> "+c
 vmap <C-y> c<ESC>"+p
 imap <C-y> "+pA
 
+" control-backspace and control-delete for backward and forward word removal
+imap <C-BS> <C-W>
+imap <C-Del> <C-O>de
+
 " no deselect when shifting
 vnoremap < <gv
 vnoremap > >gv
