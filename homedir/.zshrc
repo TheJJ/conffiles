@@ -26,14 +26,6 @@ if [[ -d $homebindir ]]; then
 	export PATH="$PATH:$homebindir"
 fi
 
-# machine-specific files
-machineconfdir="$HOME/.sftconf.d"
-if [[ -d $machineconfdir ]]; then
-	for f in $machineconfdir/*; do
-		source $f
-	done
-fi
-
 # ssh-agent launched via systemd user service
 local sshagentsocket="$XDG_RUNTIME_DIR/ssh-agent.socket"
 if [[ -r $sshagentsocket ]]; then
@@ -904,3 +896,12 @@ precmd () {
 # best prompt ever!!11111
 PROMPT="%B%{$fg[green]%}%n%{$fg[cyan]%}@%{$fg[blue]%}%m%b %{$fg[red]%}%~ %{$fg[yellow]%}%1v%2v%{$reset_color%}%# "
 RPROMPT="%3v%4v%{$reset_color%}[%{$fg[yellow]%}%?%{$reset_color%}]%1v%{$fg[blue]%}:%{$fg[red]%}%l%{$reset_color%} "
+
+#############################################
+# machine-specific config files
+machineconfdir="$HOME/.config/sftmachine"
+if [[ -d $machineconfdir ]]; then
+	for f in $machineconfdir/*; do
+		source $f
+	done
+fi
