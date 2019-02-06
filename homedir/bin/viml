@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+
+"""
+(c) 2016-2019 Jonas Jelten <jj@sft.mx>
+GPLv3 or any later version.
+
+Wrapper for vim.
+Converts compiler-warning-file+linenumbers so that vim directly opens it.
+"""
+
+import argparse
+import os
+import sys
+import shutil
+
+
+def main():
+    """
+    invoke vim, but inject cursor positioning arguments
+    by parsing filename:linenumber:positioninline:
+    the last : is optional but is usually copied when passing (clan)g++ error messages.
+    """
+    cmd = argparse.ArgumentParser()
+    cmd.add_argument("-r")
+
+    vim_exe = shutil.which("vim")
+
+    invocation = []
+    if sys.argv:
+        invocation.append(vim_exe)
+
+    for vimarg in sys.argv[1:]:
+        if ':' in vimarg:
+            try:
+                parts = vimarg.split(':')
+                filename, pos = parts[0], parts[1:]
+
+                cursor_positioning = [filename]
+
+                if not pos:
+                    raise ValueError("no line number given")
+                elif len(pos) == 1:
+                    cursor_positioning.append('+%d' % int(pos[0]))
+                elif len(pos) in (2, 3):
+                    if not pos[1]:
+                        pos[1] = 0
+                    cursor_positioning.append(
+                        '+cal cursor(%d, %d)' % (int(pos[0]), int(pos[1]))
+                    )
+                else:
+                    raise ValueError("too many position specifiers for cursor")
+
+                invocation.extend(cursor_positioning)
+
+            except ValueError:
+                invocation.append(vimarg)
+        else:
+            invocation.append(vimarg)
+
+    os.execl(vim_exe, *invocation)
+
+
+if __name__ == "__main__":
+    main()
