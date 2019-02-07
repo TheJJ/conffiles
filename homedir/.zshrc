@@ -164,20 +164,21 @@ alias cal='cal -m -w'
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
-alias vga="vg --show-leak-kinds=all"                    # analyze all
-alias vgf="vg --vgdb-error=1 --vgdb=full"               # gdb+errors
-alias vge="vg --vgdb-error=0 --vgdb=full"               # gdb+halt+errors
-alias vgg="vg --vgdb=full --vgdb-stop-at=startup"       # gdb+halt
-function gdbv() {
-	args=""
-	gdb -ex "set architecture i386:x86-64:intel" -ex "target remote | vgdb $args" $*
-}
+alias vge="valgrind --leak-check=no --track-origins=yes" # only memory errors
+vgdb_pipe_prefix="/tmp/vgdb-pipe"
+vgdb_pipe_option="--vgdb-prefix=$vgdb_pipe_prefix"
+alias vga="vg $vgdb_pipe_option --show-leak-kinds=all"                     # analyze all
+alias vgr="vg $vgdb_pipe_option --vgdb-error=1 --vgdb=full"                # (run)  for gdb, halt on every error
+alias vgb="vg $vgdb_pipe_option --vgdb-error=0 --vgdb=full"                # (boot) for gdb, halt on startup and at every error
+alias vgg="vg $vgdb_pipe_option --vgdb=full --vgdb-stop-at=startup"        # for gdb, halt only at startup
+# also consider the gdbv function below which attaches gdb to the above commands
 
 alias psc='ps xawf -eo pid,user,cgroup,args'
 alias gschichten='fortune'
 alias lol="fortune | ponysay"
 alias nautilus="nautilus --no-desktop"
 alias sqlite="sqlite3"
+alias zerocat="xargs -0 -L1 -a"  # cat a file like /proc/pid/environ or comm in lines
 
 alias l='ls'
 alias la='ls -A'
@@ -537,6 +538,78 @@ function lessh() {
 	LESSOPEN="| /usr/bin/highlight -O xterm256 -s $theme %s" less $*
 }
 compdef lessh=less 2> /dev/null
+
+
+# invoke gdb and attach it to valgrind
+function gdbv() {(
+	echo "launching gdb for valgrind..."
+	setopt nullglob
+	unsetopt bash_rematch
+	local pipes=(${vgdb_pipe_prefix}-to-vgdb*)
+	local pipe_pidmap=()
+	pidoption=""  # select default pid (if there's only one pipe)
+	if [ ${#pipes[@]} -eq 0 ]; then
+		echo "no valgrind has opened a pipe"
+		return
+	elif [[ ${#pipes[@]} -ge 2 ]]; then
+		echo "more pipes found, please select correct pid:"
+		for ((i = 1, j=1; i <= ${#pipes[@]}; i++)); do
+			if [[ "${pipes[i]}" =~ 'to-vgdb-from-([^-]+)-by-([^-]+)' ]]; then
+				pid=$match[1]
+				uid=$match[2]
+				debugcmd=($(xargs -0 -L1 -a /proc/$pid/cmdline))
+				((cmdstart=1))
+				for cmdpart in ${debugcmd[2,-1]}; do
+					if [[ "$cmdpart" =~ "^-" ]]; then
+						((cmdstart++))
+					else
+						break
+					fi
+				done
+				((cmdstart++))
+				echo "[$j]: <$uid> $pid: ${debugcmd[$cmdstart,-1]}"
+				pipe_pidmap[$j]=$pid
+
+				((j++))
+			else
+				echo "failed parsing pipe filename: ${pipes[i]}"
+				return
+			fi
+		done
+
+		echo -n "enter pipe id [default=1]: "
+		while true; do
+			read selected_pipe_id
+			cont=1
+			case $selected_pipe_id in
+				'')
+					selected_pipe_id=1
+					cont=0
+					;;
+				*[!0-9]*)
+					echo -n "invalid id entered, try again: "
+					;;
+				*)
+					if [ $selected_pipe_id -lt $j ]; then
+						cont=0
+					else
+						echo -n "id not available, try again: "
+					fi
+					;;
+			esac
+
+			if [ $cont -eq 0 ]; then
+				break
+			fi
+		done
+
+		selected_pid="${pipe_pidmap[$selected_pipe_id]}"
+		echo "selected pid: $selected_pid"
+		pidoption="--pid=$selected_pid"
+	fi
+	gdb -ex "target remote | vgdb $vgdb_pipe_option $pidoption" $*
+)}
+compdef gdbv=gdb 2> /dev/null
 
 
 ####################
