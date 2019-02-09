@@ -136,6 +136,7 @@ alias ag="ag -S"
 alias more='less'
 alias most='less'
 alias less="less $LESS"
+alias lesse="less $LESS +G"
 alias mkdir='mkdir -p -v'
 alias nano='nano -w -S -F -A'
 alias anon=' unset HISTFILE'
