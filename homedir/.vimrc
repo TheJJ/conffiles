@@ -53,6 +53,7 @@ endif
 
 autocmd GUIEnter * set visualbell t_vb=
 autocmd FileType text setlocal textwidth=0
+autocmd BufRead * let &l:modifiable = !&readonly   " prevent editing readonly files
 
 scriptencoding utf-8
 
