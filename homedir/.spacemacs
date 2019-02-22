@@ -518,6 +518,12 @@ It should only modify the values of Spacemacs settings."
 (defadvice iconify-or-deiconify-frame (around disable-xframe-suspending))
 (ad-activate 'iconify-or-deiconify-frame)
 
+;; when exiting isearch, register the search term as regexp-highlight
+(defadvice isearch-done (after ysph-hl-search activate compile)
+           "highlight the search term after isearch has quit"
+           (highlight-regexp (car (if isearch-regexp
+                                    regexp-search-ring
+                                    search-ring)) 'lazy-highlight))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; smart tabs, mix tabs and spaces (fak yea)
@@ -600,6 +606,7 @@ It should only modify the values of Spacemacs settings."
         lazy-highlight t                 ; highlight occurrences
         lazy-highlight-cleanup nil       ; keep search term highlighted
         lazy-highlight-max-at-a-time nil ; all occurences in file
+        isearch-allow-scroll t           ; continue the search even though we're scrolling
         font-lock-maximum-decoration t   ; decoration level: maximum
         auto-compression-mode t          ; deal with compressed files
         blink-cursor-mode nil            ; don't blink the cursor
