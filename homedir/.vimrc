@@ -103,11 +103,19 @@ endif
 autocmd BufWritePost ~/.vimrc source %
 
 " autosave delay, cursorhold trigger, default: 4000ms
-setl updatetime=400
+setl updatetime=300
 
 " highlight the word under cursor (CursorMoved is inperformant)
-highlight WordUnderCursor cterm=underline "ctermfg=7
-autocmd CursorHold * exe printf('match WordUnderCursor /\V\<%s\>/', escape(expand('<cword>'), '/\'))
+highlight WordUnderCursor cterm=underline gui=underline
+autocmd CursorHold * call HighlightCursorWord()
+function! HighlightCursorWord()
+	" jj-specialhack: if hlsearch is active, don't overwrite it!
+	let search = getreg('/')
+	let cword = expand('<cword>')
+	if match(cword, search) == -1
+		exe printf('match WordUnderCursor /\V\<%s\>/', escape(cword, '/\'))
+	endif
+endfunction
 
 
 " new navigation keys
