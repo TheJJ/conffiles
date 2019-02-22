@@ -1253,6 +1253,10 @@ It should only modify the values of Spacemacs settings."
     (LaTeX-math-mode t)
     (turn-on-reftex)
 
+    ;; don't do non-company completions
+    ;; otherwise a funny new buffer appears with "useful" completions
+    (remove-hook 'completion-at-point-functions 'TeX--completion-at-point t)
+
     ;; minted codehighlighting needs shell execution for pygments
     (add-to-list 'TeX-command-list
                  '("LaTeX-shellescape" "%`%l -shell-escape %(mode) %(extraopts) %' %t" TeX-run-TeX nil
