@@ -111,6 +111,7 @@ This function should only modify configuration layer settings."
      ag
      pdf-tools
      afternoon-theme
+     idle-highlight-mode
      )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -1118,6 +1119,7 @@ It should only modify the values of Spacemacs settings."
   ;; main coding configuration function
   (defun jj/coding-hook ()
     (auto-revert-mode t)
+    (idle-highlight t)  ;; idle-highlight word under cursor
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
     )
 
