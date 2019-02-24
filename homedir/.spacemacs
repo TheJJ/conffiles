@@ -1178,7 +1178,6 @@ It should only modify the values of Spacemacs settings."
           eldoc-mode nil
           global-eldoc-mode nil
           lsp-prefer-flymake nil
-          company-transformers nil
           company-lsp-async t
           company-lsp-cache-candidates 'auto
           )
