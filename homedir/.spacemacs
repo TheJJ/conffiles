@@ -86,7 +86,6 @@ This function should only modify configuration layer settings."
             shell-default-height 30
             shell-default-position 'bottom)
      shell-scripts
-     smex
      (spell-checking :variables
                      spell-checking-enable-by-default nil
                      spell-checking-enable-auto-dictionary t
