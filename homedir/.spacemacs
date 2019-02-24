@@ -47,11 +47,13 @@ This function should only modify configuration layer settings."
      bibtex
      (c-c++ :variables
             c-c++-default-mode-for-headers 'c++-mode
-            c-c++-enable-clang-support nil
-            c-c++-enable-rtags-support t)
+            c-c++-backend 'lsp-ccls)
+            ;c-c++-backend 'rtags
+            ;c-c++-enable-rtags-completion t)
      (cmake :variables
             cmake-enable-cmake-ide-support nil)
      csv
+     dap
      emacs-lisp
      major-modes  ;; qml-mode, openscad
      git
@@ -67,6 +69,9 @@ This function should only modify configuration layer settings."
             latex-enable-magic nil
             latex-enable-folding nil)
      lua
+     (lsp :variables
+          lsp-ui-sideline-enable nil
+          lsp-ui-doc-enable nil)
      (markdown :variables
                markdown-live-preview-engine 'vmd)
      org
@@ -715,7 +720,7 @@ It should only modify the values of Spacemacs settings."
         '(
           ;;(space-mark   ?\     [?\u00B7]     [?.])      ; space - centered dot
           (space-mark   ?\xA0  [?\u00A4]   [?_])          ; hard space - currency
-          (newline-mark ?\n    [?¬ ?\n]    [?$ ?\n])      ; eol - ¬ symbol
+          ;;(newline-mark ?\n    [?¬ ?\n]    [?$ ?\n])      ; eol - ¬ symbol
           (tab-mark     ?\t    [?∘ ?\t]    [?> ?\t]))     ; tab - ∘ symbol
         whitespace-style '(face tabs trailing
                                 newline indentation
@@ -1119,7 +1124,7 @@ It should only modify the values of Spacemacs settings."
   ;; main coding configuration function
   (defun jj/coding-hook ()
     (auto-revert-mode t)
-    (idle-highlight t)  ;; idle-highlight word under cursor
+    (idle-highlight-mode t)  ;; idle-highlight word under cursor
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
     )
 
@@ -1165,6 +1170,9 @@ It should only modify the values of Spacemacs settings."
       (setq tab-width 8
             indent-tabs-mode t))
 
+    ;; code lens from ccls
+    (ccls-code-lens-mode t)
+
     ;; smart tabs
     (smart-tabs-advice c-indent-line c-basic-offset)
     (smart-tabs-advice c-indent-region c-basic-offset)
@@ -1177,8 +1185,6 @@ It should only modify the values of Spacemacs settings."
 
     ;; c-codingstyle
     (jj/cstyle-hook)
-
-    ;(add-to-list 'company-backends-c-mode-common 'company-rtags)
     )
 
 
