@@ -83,7 +83,6 @@ This function should only modify configuration layer settings."
      restructuredtext
      rust
      salt
-     semantic
      (shell :variables
             shell-default-height 30
             shell-default-position 'bottom)
@@ -628,10 +627,8 @@ It should only modify the values of Spacemacs settings."
         frame-title-format nil           ; workaround for https://github.com/syl20bnr/spacemacs/issues/10938
         python-shell-prompt-detect-failure-warning nil
         ;python-shell-interpreter-interactive-arg ""
-        global-semantic-idle-summary-mode nil
-        global-semantic-idle-scheduler-mode nil
-        semantic-idle-summary-mode nil
-        semantic-idle-scheduler-mode nil)
+        compilation-environment (quote ("TERM=xterm-256color"))
+        )
 
   ;; default mode for new buffers
   (setq-default major-mode 'text-mode)
@@ -752,27 +749,17 @@ It should only modify the values of Spacemacs settings."
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; semantic symbol jumping
+;; code symbol navigation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun jj/codenav-keybinds ()
   (interactive)
   (local-set-key [M-S-mouse-1] 'xref-find-definitions)
-  (local-set-key (kbd "M-g f") 'semantic-symref)
-  (local-set-key (kbd "M-g i") 'semantic-decoration-include-visit)
-  (local-set-key (kbd "M-g S") 'semantic-complete-jump)
-  (local-set-key (kbd "M-g s") 'semantic-ia-show-doc)
-  (local-set-key (kbd "M-g h") 'semantic-analyze-proto-impl-toggle)
-
-  ;;(local-set-key [(control return)] 'semantic-ia-complete-symbol-menu)
-  ;;(local-set-key (kbd "C-c ?") 'semantic-ia-complete-symbol)
-  ;;(local-set-key (kbd "C-c >") 'semantic-complete-analyze-inline)
-  ;;(local-set-key "\C-c=" 'semantic-decoration-include-visit)
-  ;;(local-set-key "\C-cs" 'semantic-ia-show-summary)
-
-  ;; menubar entry for detected symbols
-  (add-hook 'semantic-init-hooks (lambda ()
-                                   (imenu-add-to-menubar "Stuff"))))
+  (local-set-key (kbd "M-g d") 'xref-find-definitions)
+  (local-set-key (kbd "M-g f") 'xref-find-references)
+  (local-set-key (kbd "M-g D") 'lsp-ui-peek-find-definitions)
+  (local-set-key (kbd "M-g R") 'lsp-ui-peek-find-references)
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -971,12 +958,6 @@ It should only modify the values of Spacemacs settings."
   ;; force company completion:
   (global-set-key (kbd "S-<tab>") 'tab-indent-or-complete)
 
-  ;; jump to definition
-  (local-set-key (kbd "M-g d") 'spacemacs/jump-to-definition)
-
-  ;; TODO: auto-highlight-symbol
-  ;; (ahs-backward) M-<up>
-
   ;;unset unneeded keys
   ;;(global-unset-key (kbd "C-t")) ; annoying character swapping
 
@@ -986,9 +967,6 @@ It should only modify the values of Spacemacs settings."
 
 (defun jj/cstyle-keybinds ()
   (interactive)
-
-  ;; TODO: if in a cmake project, use the former else the latter
-  (local-set-key (kbd "C-c C-c") 'cmake-ide-compile)
   (local-set-key (kbd "C-c C-C") 'projectile-compile-project))
 
 
@@ -1136,16 +1114,10 @@ It should only modify the values of Spacemacs settings."
   ;; special language-specific hooks
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  ;; c-codestyle setup
+  ;; c-like-language setup
   (defun jj/cstyle-hook ()
     ;; create codestyle
     (jj/create-codestyles)
-
-    ;; code navigation jumping
-    (jj/codenav-keybinds)
-
-    ;; keybindings for clike languages
-    (jj/cstyle-keybinds)
 
     ;; magic region formatting
     (with-library
@@ -1176,14 +1148,17 @@ It should only modify the values of Spacemacs settings."
 
     ;; language server features
     (setq lsp-mode t
-          eldoc-mode nil
-          global-eldoc-mode nil
           lsp-prefer-flymake nil
           company-lsp-async t
-          company-lsp-cache-candidates 'auto
-          )
+          company-lsp-cache-candidates 'auto)
 
-    ;; smart tabs
+    ;; code navigation jumping
+    (jj/codenav-keybinds)
+
+    ;; keybindings for clike languages
+    (jj/cstyle-keybinds)
+
+    ;; smart tabs: mix tabs and spaces the right way
     (smart-tabs-advice c-indent-line c-basic-offset)
     (smart-tabs-advice c-indent-region c-basic-offset)
     )
@@ -1191,7 +1166,7 @@ It should only modify the values of Spacemacs settings."
 
   ;; hook for all c-like languages
   (defun jj/c-base-hook ()
-    (setq flycheck-gcc-language-standard "c++14")
+    (setq flycheck-gcc-language-standard "c++17")
 
     ;; c-codingstyle
     (jj/cstyle-hook)
