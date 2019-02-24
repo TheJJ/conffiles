@@ -1294,6 +1294,14 @@ It should only modify the values of Spacemacs settings."
     (setq indent-tabs-mode t)
     (setq cmake-tab-width 4))
 
+  (defun jj/compilation-mode-hook ()
+    ;; colorized compilation
+    (require 'ansi-color)
+    (defun colorize-compilation-buffer ()
+      (when (eq major-mode 'compilation-mode)
+        (ansi-color-apply-on-region compilation-filter-start (point-max))))
+    (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
+
   ;; hooks to be inherited:
   ;;(add-hook 'text-mode-hook       'something)
   (add-hook 'prog-mode-hook       'jj/coding-hook)
@@ -1314,6 +1322,7 @@ It should only modify the values of Spacemacs settings."
   (add-hook 'org-mode-hook               'jj/org-mode-hook)
   (add-hook 'markdown-mode-hook          'jj/markdown-mode-hook)
   (add-hook 'cmake-mode-hook             'jj/cmake-mode-hook)
+  (add-hook 'compilation-mode-hook       'jj/compilation-mode-hook)
 
   (add-hook 'doc-view-mode-hook          'auto-revert-mode)
   (add-hook 'server-visit-hook (lambda ()
