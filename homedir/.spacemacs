@@ -627,7 +627,10 @@ It should only modify the values of Spacemacs settings."
         frame-title-format nil           ; workaround for https://github.com/syl20bnr/spacemacs/issues/10938
         python-shell-prompt-detect-failure-warning nil
         ;python-shell-interpreter-interactive-arg ""
-        )
+        global-semantic-idle-summary-mode nil
+        global-semantic-idle-scheduler-mode nil
+        semantic-idle-summary-mode nil
+        semantic-idle-scheduler-mode nil)
 
   ;; default mode for new buffers
   (setq-default major-mode 'text-mode)
@@ -751,9 +754,9 @@ It should only modify the values of Spacemacs settings."
 ;; semantic symbol jumping
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun jj/semantic-completion-keybinds ()
+(defun jj/codenav-keybinds ()
   (interactive)
-  (local-set-key [M-S-mouse-1] 'semantic-ia-fast-mouse-jump)
+  (local-set-key [M-S-mouse-1] 'xref-find-definitions)
   (local-set-key (kbd "M-g f") 'semantic-symref)
   (local-set-key (kbd "M-g i") 'semantic-decoration-include-visit)
   (local-set-key (kbd "M-g S") 'semantic-complete-jump)
@@ -1137,8 +1140,8 @@ It should only modify the values of Spacemacs settings."
     ;; create codestyle
     (jj/create-codestyles)
 
-    ;; semantic-mode jumping
-    (jj/semantic-completion-keybinds)
+    ;; code navigation jumping
+    (jj/codenav-keybinds)
 
     ;; keybindings for clike languages
     (jj/cstyle-keybinds)
@@ -1170,8 +1173,15 @@ It should only modify the values of Spacemacs settings."
       (setq tab-width 8
             indent-tabs-mode t))
 
-    ;; code lens from ccls
-    (ccls-code-lens-mode t)
+    ;; language server features
+    (setq lsp-mode t
+          eldoc-mode nil
+          global-eldoc-mode nil
+          lsp-prefer-flymake nil
+          company-transformers nil
+          company-lsp-async t
+          company-lsp-cache-candidates 'auto
+          )
 
     ;; smart tabs
     (smart-tabs-advice c-indent-line c-basic-offset)
@@ -1391,7 +1401,10 @@ It should only modify the values of Spacemacs settings."
    ;; brighter tab circle
    '(whitespace-tab ((t (:foreground "#206090"))))
    ;; for alignment, space-after-tab is not evil
-   '(whitespace-space-after-tab ((t (:foreground "#103050")))))
+   '(whitespace-space-after-tab ((t (:foreground "#103050"))))
+   ;; set the idle-highlight face to only underline
+   '(idle-highlight ((t (:underline t))))
+   )
 
   (jj/new-frame-setup (selected-frame)))
 
