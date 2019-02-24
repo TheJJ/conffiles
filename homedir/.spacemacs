@@ -1,7 +1,9 @@
-;; -*- mode: emacs-lisp -*-
 ;; jj's spacemacs configuration
-;; Copyright (c) 2011-2018 Jonas Jelten <jj@stusta.net>
+;; Copyright (c) 2011-2019 Jonas Jelten <jj@sft.mx>
 ;; Licensed GPLv3 or later
+
+;; vim: ft=lisp
+;; -*- mode: emacs-lisp -*-
 
 
 (defun dotspacemacs/layers ()
