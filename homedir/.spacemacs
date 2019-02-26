@@ -527,6 +527,7 @@ It should only modify the values of Spacemacs settings."
 ;; when exiting isearch, register the search term as regexp-highlight
 (defadvice isearch-done (after ysph-hl-search activate compile)
            "highlight the search term after isearch has quit"
+           (unhighlight-regexp t)
            (highlight-regexp (car (if isearch-regexp
                                     regexp-search-ring
                                     search-ring)) 'lazy-highlight))
