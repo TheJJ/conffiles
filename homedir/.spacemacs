@@ -56,6 +56,7 @@ This function should only modify configuration layer settings."
             cmake-enable-cmake-ide-support nil)
      csv
      dap
+     debug
      emacs-lisp
      major-modes  ;; qml-mode, openscad
      git
@@ -76,6 +77,7 @@ This function should only modify configuration layer settings."
           lsp-ui-doc-enable nil)
      (markdown :variables
                markdown-live-preview-engine 'vmd)
+     multiple-cursors
      org
      python
      (ranger :variables
@@ -99,6 +101,7 @@ This function should only modify configuration layer settings."
                       syntax-checking-enable-by-default nil
                       syntax-checking-enable-tooltips t)
      theming
+     treemacs
      version-control
      yaml
      )
