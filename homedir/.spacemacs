@@ -979,7 +979,7 @@ See the header of this file for more information."
 
 (defun jj/cstyle-keybinds ()
   (interactive)
-  (local-set-key (kbd "C-c C-C") 'projectile-compile-project))
+  (local-set-key (kbd "C-c C-c") 'helm-make-projectile))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
