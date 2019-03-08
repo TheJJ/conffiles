@@ -1,21 +1,28 @@
 #!/usr/bin/env python3
-#
-# jj's pythonrc
-#
-# Copyright (c) 2012-2018 Jonas Jelten <jj@sft.mx>
-#
-# Licensed GPLv3 or later.
+
+"""
+jj's pythonrc
+
+Copyright (c) 2012-2019 Jonas Jelten <jj@sft.mx>
+Licensed GPLv3 or later.
+"""
+
 
 # these imports are available in interactive python shells
 import asyncio
 import datetime
 import inspect
+import io
+import json
+import math
 import os
 import pathlib
 import re
+import shlex
+import subprocess
 import sys
 import time
-from math import *
+
 from pathlib import Path
 from pprint import pprint, pformat
 from subprocess import call, run
@@ -32,68 +39,65 @@ if 'bpython' not in sys.modules:
     sys.ps1 = '\x01\x1b[36m\x02>>>\x01\x1b[m\x02 '
     sys.ps2 = '\x01\x1b[36m\x02...\x01\x1b[m\x02 '
 
-    # bpython has its own history management
-    python_histfile = ".py_history"
 
+PAGER_INVOCATION = os.environ.get("PAGER", "less -R -S")
 
-pager_proc = os.environ.get("PAGER", "less -R -S")
-
-use_pygments = True
-has_pygments = False
+USE_PYGMENTS = True
+HAS_PYGMENTS = False
 
 
 # cython on the fly compilation
-if False:
-    try:
-        import pyximport; pyximport.install()
-    except ImportError:
-        pass
+try:
+    import pyximport
+    pyximport.install(
+        build_in_temp=False,
+        reload_support=True,
+        inplace=True,
+        language_level=sys.version_info.major
+    )
+except ImportError:
+    pass
 
 
-if use_pygments:
+if USE_PYGMENTS:
     try:
-        from pygments import highlight
+        import pygments
         from pygments.formatters import TerminalFormatter
         import pygments.lexers
-        has_pygments = True
+        HAS_PYGMENTS = True
     except ImportError:
         pass
 
 
 def pager(txt):
-    import subprocess, shlex
     if not isinstance(txt, bytes):
         txt = txt.encode()
-    subprocess.run(shlex.split(pager_proc) + ['-'], input=txt)
+    subprocess.run(shlex.split(PAGER_INVOCATION) + ['-'], input=txt)
 
 
 def pager_file(filename):
-    import subprocess, shlex
-    subprocess.run(shlex.split(pager_proc) + [filename])
+    subprocess.run(shlex.split(PAGER_INVOCATION) + [filename])
 
 
 def dis(obj):
     """disassemble given stuff"""
 
-    import dis
-    import io
+    import dis as pydis
 
     output = io.StringIO()
-    dis.dis(obj, file=output)
+    pydis.dis(obj, file=output)
     pager(output.getvalue())
     output.close()
 
 
-
-if use_pygments and has_pygments:
+if USE_PYGMENTS and HAS_PYGMENTS:
     def highlight(source):
-        if not use_pygments or not has_pygments:
+        if not USE_PYGMENTS or not HAS_PYGMENTS:
             return source
 
         lexer = pygments.lexers.get_lexer_by_name('python')
         formatter = TerminalFormatter(bg='dark')
         return pygments.highlight(source, lexer, formatter)
-
 else:
     def highlight(txt):
         return txt
@@ -160,35 +164,58 @@ def sh(*args, check=True, **kwargs):
 
 
 def _completion():
+    """
+    set up readline and history.
+    supports parallel sessions and appends only the new history part
+    to the history file.
+    """
     import atexit
-    import os
     import readline
-    import rlcompleter
 
-    readline.parse_and_bind('tab: complete')
+    readline_statements = (
+        r'"\e[A": history-search-backward',
+        r'"\e[B": history-search-forward',
+        r'"\e[C": forward-char',
+        r'"\e[D": backward-char',
+        r'"\eOd": backward-word',
+        r'"\eOc": forward-word',
+        r'"\e[3^": kill-word',
+        r'"\C-h": backward-kill-word',
+        'tab: complete',
+    )
 
-    history_dir = os.path.join(os.path.expanduser('~'), python_histfile)
+    for rlcmd in readline_statements:
+        readline.parse_and_bind(rlcmd)
 
-    if not os.path.exists(history_dir):
-        os.makedirs(history_dir)
+    history_file = (Path(os.path.expanduser('~')) /
+                    (".python%d_history" % sys.version_info.major))
 
-    # support multiple executables:
-    # history files keyed by inode of the current py executable.
-    executable_inode = str(os.stat(sys.executable).st_ino)
-    history_file = os.path.join(history_dir, executable_inode)
+    if history_file.exists():
+        readline.read_history_file(str(history_file))
+        h_len = readline.get_current_history_length()
+    else:
+        h_len = 0
 
-    if os.path.exists(history_file):
-        readline.read_history_file(history_file)
-    atexit.register(readline.write_history_file, history_file)
+    def save(prev_h_len, histfile):
+        new_h_len = readline.get_current_history_length()
+        readline.set_history_length(50000)
+        readline.append_history_file(new_h_len - prev_h_len, histfile)
+
+    atexit.register(save, h_len, str(history_file))
+
+    return history_file
 
 
 # bpython has its own completion stuff
 if 'bpython' not in sys.modules:
     try:
-        _completion()
+        HISTFILE = _completion()
         del _completion
-    except Exception as e:
-        sys.stderr.write("failed history and completion init: %s\n" % e)
+    except Exception as exc:
+        sys.stderr.write("failed history and completion init: %s\n" % exc)
+        import traceback
+        traceback.print_exc()
+        HISTFILE = None
 
 
 def _fancy_displayhook(item):
