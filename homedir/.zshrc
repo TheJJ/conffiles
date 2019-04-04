@@ -177,7 +177,7 @@ alias vgg="vg $vgdb_pipe_option --vgdb=full --vgdb-stop-at=startup"        # for
 alias psc='ps xawf -eo pid,user,cgroup,args'
 alias gschichten='fortune'
 alias lol="fortune | ponysay"
-alias nautilus="nautilus --no-desktop"
+alias nautilus="nautilus"
 alias sqlite="sqlite3"
 alias zerocat="xargs -0 -L1 -a"  # cat a file like /proc/pid/environ or comm in lines
 
