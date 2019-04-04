@@ -195,6 +195,8 @@ def _completion():
         h_len = readline.get_current_history_length()
     else:
         h_len = 0
+        with history_file.open("w") as fd:
+            pass
 
     def save(prev_h_len, histfile):
         new_h_len = readline.get_current_history_length()
