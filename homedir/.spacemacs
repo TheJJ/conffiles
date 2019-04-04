@@ -636,10 +636,11 @@ See the header of this file for more information."
         cua-auto-tabify-rectangles nil
         cua-enable-cua-keys nil
         ranger-show-literal t            ; colored ranger previews
-        frame-title-format nil           ; workaround for https://github.com/syl20bnr/spacemacs/issues/10938
         python-shell-prompt-detect-failure-warning nil
         ;python-shell-interpreter-interactive-arg ""
         compilation-environment (quote ("TERM=xterm-256color"))
+        lsp-enable-on-type-formatting nil  ; using t funnily changes screen content whenever lsp thinks it can do "formatting"
+        lsp-enable-file-watchers nil       ; lsp server can do inotify itself, but that may slow emacs down (https://github.com/MaskRay/ccls/issues/354)
         )
 
   ;; default mode for new buffers
@@ -926,7 +927,6 @@ See the header of this file for more information."
   (global-set-key (kbd "M-[ b") 'forward-paragraph)
 
   ;; newline magic
-  ;(global-set-key (kbd "RET") 'electric-newline-and-maybe-indent)
   (global-set-key (kbd "<C-return>") 'newline)
   (global-set-key (kbd "C-c C-a") 'mark-whole-buffer)
 
@@ -1161,6 +1161,7 @@ See the header of this file for more information."
     ;; language server features
     (setq lsp-mode t
           lsp-prefer-flymake nil
+          lsp-enable-indentation nil       ; don't ask the language server for indentations
           company-lsp-async t
           company-lsp-cache-candidates 'auto)
 
