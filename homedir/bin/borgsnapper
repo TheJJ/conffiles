@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+
+"""
+backup the latest snapper snapshot with borg
+
+released under the GNU GPLv3 or any later version.
+(c) 2019 Jonas Jelten <jj@sft.mx>
+"""
+
+
+import os
+import argparse
+import datetime
+import subprocess
+
+
+def main():
+    cli = argparse.ArgumentParser()
+    cli.add_argument("--snapperdir", default="/.snapshots",
+                     help="directory where snapper stores the snapshots (default: %(default)s)")
+    cli.add_argument("--dryrun", action="store_true")
+    cli.add_argument("--compress", default="none",
+                     help="compression argument for borg, e.g. 'auto,zstd,4' (default: %(default)s")
+    cli.add_argument("borgrepo")
+    cli.add_argument("passwdfile")
+    args = cli.parse_args()
+
+    backup(args.dryrun, args.borgrepo, args.snapperdir, args.passwdfile, args.compress)
+
+
+def backup(dryrun, borgrepo, snapperdir, passwdfile, compress):
+    print("figuring out latest snapper snapshot...")
+    snapper_list = subprocess.check_output(["snapper", "list"]).decode()
+
+    # list of existing snapper snapshots
+    # [(id, type, pre_id, date, user, cleanup, description, userdata), ...]
+    snapshots = []
+    for snap_entry in snapper_list.split("\n"):
+        entry = tuple(ent.strip() for ent in snap_entry.split("|"))
+        if len(entry) >= 5 and entry[4] == "root":
+            snapshots.append((int(entry[0]),) + entry[1:])
+
+    snapshots = sorted(snapshots, key=lambda x: x[0])
+    latest_snap = snapshots[-1]
+
+    borg_flags = ["--one-file-system",
+                  "--stats",
+                  "--progress",
+                  "--exclude-caches",
+                  "--show-rc",
+                  "--checkpoint-interval", "600",
+                  "--compression", compress]  # borg help compression
+
+    excludes = ["home/*/.cache/*", "var/tmp/*", "tmp/*", "var/cache/*"]
+    for exclude in excludes:
+        borg_flags.extend(["--exclude", exclude])
+
+    snap_id = latest_snap[0]
+    snap_date = datetime.datetime.strptime(latest_snap[3], "%Y-%m-%dT%H:%M:%S %Z")
+    snapshot_path = os.path.join(snapperdir, str(snap_id), "snapshot")
+    backupname = f"snapshot-{snap_id}-{snap_date.isoformat()}"
+    print(f"using {backupname}")
+
+    passwdfile = os.path.abspath(passwdfile)
+    env = {
+        'BORG_PASSCOMMAND': f'cat {passwdfile}',
+    }
+
+    os.chdir(snapshot_path)
+    borg_invocation = ["borg", "create"] + borg_flags + [f"{borgrepo}::{backupname}", "."]
+    print(f"$ {' '.join(borg_invocation)}")
+
+    if not dryrun:
+        subprocess.run(borg_invocation, env=env, check=True)
+
+    # borg prune --list --prefix '{hostname}-' --show-rc --keep-daily 7 --keep-weekly 4 --keep-monthly 6 {borgrepo}
+
+
+if __name__ == '__main__':
+    main()
