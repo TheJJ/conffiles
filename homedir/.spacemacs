@@ -1064,6 +1064,9 @@ See the header of this file for more information."
                                  (extern-lang-close after)
                                  (statement-case-open after)))
       (c-offsets-alist . (
+                          ; documentation:
+                          ; https://www.gnu.org/software/emacs/draft/manual/html_node/ccmode/Syntactic-Symbols.html
+                          ;
                           ; arg indent helper funcs: c-lineup-*
                           ; arglist = indent to matching (|here, asdf
                           ; argcont = indent to (asdf, |here
@@ -1084,11 +1087,14 @@ See the header of this file for more information."
                           (case-label            . 0)   ; case 1337:
                           (statement-case-open   . 0)   ; { after case 1337:
                           (statement-case-intro  . +)   ; code after case 1337:
+                          (cpp-macro             . [0])   ; #define, etcetc
                           (defun-block-intro     . +)   ; beginning of keyword (...) { stuff  }
                           (inclass               . +)   ; members of struct or class
-                          (inlambda              . 0)   ; function body of a lambda
+                          (inexpr-class          . 0)   ; class declaration within expression
+                          (inexpr-statement      . 0)   ; statement block within expression
                           (inher-intro           . +)   ; beginning of inheritance def
                           (inher-cont            . c-lineup-multi-inher)   ; inheritance continuation
+                          (inlambda              . 0)   ; function body of a lambda
                           (inline-open           . +)
                           (innamespace           . 0)   ; namespace lol {\nthisstatement
                           (knr-argdecl-intro     . 0)
@@ -1097,7 +1103,6 @@ See the header of this file for more information."
                           (member-init-cont      . c-lineup-multi-inher)   ; further members
                           (statement             . 0)
                           (statement-block-intro . +)   ; line in if () {\nthisline
-                          (statement-case-open   . +)
                           (statement-cont        . (max c-lineup-assignments
                                                         c-lineup-cascaded-calls
                                                         c-lineup-string-cont))
@@ -1108,7 +1113,6 @@ See the header of this file for more information."
                                                     c-lineup-template-args +))
                           (topmost-intro         . 0)   ; indentation of file start
                           (topmost-intro-cont    . c-lineup-topmost-intro-cont)
-                          (cpp-macro             . [0])   ; #define, etcetc
                           ))
 
       ;; information about indent parsing on TAB
