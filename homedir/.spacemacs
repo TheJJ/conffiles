@@ -819,6 +819,14 @@ See the header of this file for more information."
   (interactive)
   (insert-char ?\t))
 
+(defun tabs-disable ()
+  (interactive)
+  (setq indent-tabs-mode nil))
+
+(defun tabs-enable  ()
+  (interactive)
+  (setq indent-tabs-mode t))
+
 (defun nowrap-newline-and-indent ()
   (interactive)
   (end-of-line)
@@ -1078,6 +1086,7 @@ See the header of this file for more information."
                           (statement-case-intro  . +)   ; code after case 1337:
                           (defun-block-intro     . +)   ; beginning of keyword (...) { stuff  }
                           (inclass               . +)   ; members of struct or class
+                          (inlambda              . 0)   ; function body of a lambda
                           (inher-intro           . +)   ; beginning of inheritance def
                           (inher-cont            . c-lineup-multi-inher)   ; inheritance continuation
                           (inline-open           . +)
