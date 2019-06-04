@@ -42,6 +42,7 @@ if 'bpython' not in sys.modules:
 
 
 PAGER_INVOCATION = os.environ.get("PAGER", "less -S -i -R -M --shift 5")
+HISTSIZE = 50000
 
 USE_PYGMENTS = True
 HAS_PYGMENTS = False
@@ -205,7 +206,7 @@ def _completion():
 
     def save(prev_h_len, histfile):
         new_h_len = readline.get_current_history_length()
-        readline.set_history_length(50000)
+        readline.set_history_length(HISTSIZE)
         readline.append_history_file(new_h_len - prev_h_len, histfile)
 
     atexit.register(save, h_len, str(history_file))
