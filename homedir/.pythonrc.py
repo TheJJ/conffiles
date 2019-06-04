@@ -40,10 +40,14 @@ if 'bpython' not in sys.modules:
     sys.ps2 = '\x01\x1b[36m\x02...\x01\x1b[m\x02 '
 
 
-PAGER_INVOCATION = os.environ.get("PAGER", "less -R -S")
+PAGER_INVOCATION = os.environ.get("PAGER", "less -S -i -R -M --shift 5")
 
 USE_PYGMENTS = True
 HAS_PYGMENTS = False
+
+# convenience variables
+loop = asyncio.get_event_loop()
+loop.set_debug(True)
 
 
 # cython on the fly compilation
@@ -206,6 +210,30 @@ def _completion():
     atexit.register(save, h_len, str(history_file))
 
     return history_file
+
+
+def cororun(coro):
+    """
+    run the given coroutine and block until it's done
+    """
+    loop = asyncio.get_event_loop()
+    loop.set_debug(True)
+    try:
+        return loop.run_until_complete(coro)
+    except KeyboardInterrupt:
+        print("cancelled coro run")
+
+
+def looprun():
+    """
+    run the main eventloop forever.
+    """
+    loop = asyncio.get_event_loop()
+    loop.set_debug(True)
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        print("cancelled loop run")
 
 
 # bpython has its own completion stuff
