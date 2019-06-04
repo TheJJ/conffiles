@@ -30,12 +30,12 @@ bindcode shift+107 exec ~/bin/screenshot s
 bindcode 121 exec pactl set-sink-mute 0 toggle > /dev/null
 bindcode 198 exec pactl set-source-mute 1 toggle > /dev/null
 
-bindcode shift+122 exec pamixer --source 1 -d 5 > /dev/null
-bindcode shift+123 exec pamixer --source 1 -i 5 > /dev/null
-bindcode 122 exec pamixer --sink 0 -d 5 > /dev/null
-bindcode 123 exec pamixer --sink 0 -i 5 > /dev/null
-bindcode control+122 exec pamixer --sink 0 -d 15 > /dev/null
-bindcode control+123 exec pamixer --sink 0 -i 15 > /dev/null
+bindcode shift+122 exec pactl set-source-volume 1 -5% > /dev/null
+bindcode shift+123 exec pactl set-source-volume 1 +5% > /dev/null
+bindcode 122 exec pactl set-sink-volume 0 -5% > /dev/null
+bindcode 123 exec pactl set-sink-volume 0 +5% > /dev/null
+bindcode control+122 exec pactl set-sink-volume 0 -15% > /dev/null
+bindcode control+123 exec pactl set-sink-volume 0 +15% > /dev/null
 
 bindcode 232 exec xbacklight -dec 10
 bindcode 233 exec xbacklight -inc 10
