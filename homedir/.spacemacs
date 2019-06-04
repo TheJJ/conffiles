@@ -543,6 +543,22 @@ See the header of this file for more information."
                                     regexp-search-ring
                                     search-ring)) 'lazy-highlight))
 
+;; git-gutter+ doesn't properly handle tramp-connections
+;; https://github.com/nonsequitur/git-gutter-plus/issues/42
+(with-eval-after-load 'git-gutter+
+   (defun git-gutter+-remote-default-directory (dir file)
+     (let* ((vec (tramp-dissect-file-name file))
+            (method (tramp-file-name-method vec))
+            (user (tramp-file-name-user vec))
+            (domain (tramp-file-name-domain vec))
+            (host (tramp-file-name-host vec))
+            (port (tramp-file-name-port vec)))
+       (tramp-make-tramp-file-name method user domain host port dir)))
+
+   (defun git-gutter+-remote-file-path (dir file)
+     (let ((file (tramp-file-name-localname (tramp-dissect-file-name file))))
+       (replace-regexp-in-string (concat "\\`" dir) "" file))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; smart tabs, mix tabs and spaces (fak yea)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -637,10 +653,14 @@ See the header of this file for more information."
         cua-enable-cua-keys nil
         ranger-show-literal t            ; colored ranger previews
         python-shell-prompt-detect-failure-warning nil
+        python-shell-interpreter "ipython3" ; tramp on remote-hosts needs ipython3 and python3-setuptools
         ;python-shell-interpreter-interactive-arg ""
         compilation-environment (quote ("TERM=xterm-256color"))
         lsp-enable-on-type-formatting nil  ; using t funnily changes screen content whenever lsp thinks it can do "formatting"
         lsp-enable-file-watchers nil       ; lsp server can do inotify itself, but that may slow emacs down (https://github.com/MaskRay/ccls/issues/354)
+        tramp-ssh-controlmaster-options    ; synced with .ssh/config ControlMaster settings
+          (concat "-o ControlPath=/tmp/ssh_mux_%%u@%%l_%%r@%%h:%%p "
+                  "-o ControlMaster=auto -o ControlPersist=10")
         )
 
   ;; default mode for new buffers
