@@ -19,6 +19,7 @@ import os
 import pathlib
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -261,7 +262,8 @@ def _fancy_displayhook(item):
         else:
             display_text = "{0}, 0x{0:x}, 0b{0:b}".format(item)
     else:
-        display_text = pformat(item)
+        term_width, term_height = shutil.get_terminal_size(fallback=(80, 24))
+        display_text = pformat(item, width=term_width)
 
     output = highlight(display_text)
     if output.endswith("\n"):
