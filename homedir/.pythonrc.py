@@ -122,6 +122,30 @@ def loc(obj):
     return "%s:%d" % (srcfile, srcline)
 
 
+def cd(name):
+    """Change the current directory to the given one."""
+    os.chdir(name)
+
+
+def pwd():
+    """Return the current directory."""
+    return os.getcwd()
+
+
+def cat(name, binary=False, lines=False):
+    """Read the given file and return its contents."""
+    mode = "rb" if binary else "r"
+    with open(name, mode) as fd:
+        if lines:
+            return fd.readlines()
+        return fd.read()
+
+
+def catln(name, binary=False):
+    """Read the lines of the given file and return them."""
+    return cat(name, binary, lines=True)
+
+
 def ls(*args, recurse=False, merge=False):
     """
     List the current directory, or if given, all the files/directories.
