@@ -1249,6 +1249,11 @@ See the header of this file for more information."
     (setq flycheck-checker 'python-pylint
           flycheck-checker-error-threshold 300)
 
+    ;; code navigation jumping
+    (local-set-key [M-S-mouse-1] 'anaconda-mode-find-definitions)
+    (local-set-key (kbd "M-g d") 'anaconda-mode-find-definitions)
+    (local-set-key (kbd "M-g f") 'anaconda-mode-find-references)
+
     ;; don't show anaconda mode error popup gaaarrhhgh
     (remove-hook 'anaconda-mode-response-read-fail-hook
                  'anaconda-mode-show-unreadable-response)
