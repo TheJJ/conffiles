@@ -127,6 +127,7 @@ This function should only modify configuration layer settings."
    ;; A list of packages that will not be installed and loaded.
    dotspacemacs-excluded-packages
    '(
+     sqlup-mode
      wolfram-mode
      smartparens
      auto-highlight-symbol
@@ -1348,6 +1349,26 @@ See the header of this file for more information."
         (ansi-color-apply-on-region compilation-filter-start (point-max))))
     (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
 
+  (defun jj/sql-mode-hook ()
+    (setq indent-tabs-mode t)
+    (setq sqlind-basic-offset 4))
+
+  (defun jj/sql-interactive-mode-hook ()
+    (let ((lval 'sql-input-ring-file-name)
+          (rval 'sql-product))
+      (if (symbol-value rval)
+        (let ((filename
+                (concat "~/.emacs.d/sql/"
+                        (symbol-name (symbol-value rval))
+                        "-history.sql")))
+          (set (make-local-variable lval) filename))
+        (error
+          (format "SQL history will not be saved because %s is nil"
+                  (symbol-name rval))))))
+
+  (defun jj/sql-mode-hook ()
+    (setq indent-tabs-mode nil))
+
   ;; hooks to be inherited:
   ;;(add-hook 'text-mode-hook       'something)
   (add-hook 'prog-mode-hook       'jj/coding-hook)
@@ -1369,6 +1390,7 @@ See the header of this file for more information."
   (add-hook 'markdown-mode-hook          'jj/markdown-mode-hook)
   (add-hook 'cmake-mode-hook             'jj/cmake-mode-hook)
   (add-hook 'compilation-mode-hook       'jj/compilation-mode-hook)
+  (add-hook 'sql-mode-hook               'jj/sql-mode-hook)
 
   (add-hook 'doc-view-mode-hook          'auto-revert-mode)
   (add-hook 'server-visit-hook (lambda ()
