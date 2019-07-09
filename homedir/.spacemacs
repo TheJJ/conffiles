@@ -1355,8 +1355,11 @@ See the header of this file for more information."
     (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
 
   (defun jj/sql-mode-hook ()
-    (setq indent-tabs-mode t)
-    (setq sqlind-basic-offset 4))
+    (setq indent-tabs-mode t
+          tab-width 4
+          sqlind-basic-offset 4)
+
+    (smart-tabs-advice sqlind-indent-line sqlind-basic-offset))
 
   (defun jj/sql-interactive-mode-hook ()
     (let ((lval 'sql-input-ring-file-name)
@@ -1370,9 +1373,6 @@ See the header of this file for more information."
         (error
           (format "SQL history will not be saved because %s is nil"
                   (symbol-name rval))))))
-
-  (defun jj/sql-mode-hook ()
-    (setq indent-tabs-mode nil))
 
   ;; hooks to be inherited:
   ;;(add-hook 'text-mode-hook       'something)
