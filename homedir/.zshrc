@@ -12,7 +12,6 @@
 # * ssh-agent client
 # * colored prompt
 
-
 # if not running interactively, don't do anything!
 [[ $- != *i* ]] && return
 
@@ -125,7 +124,8 @@ alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
 alias gdbs='gdbserver --once localhost:8888'
 compdef gdbs=gdb 2>/dev/null
-alias gdbc='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remote localhost:8888"'
+alias gdbc='gdb -q -ex "target remote localhost:8888"'
+alias gdbcx64='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remote localhost:8888"'
 alias bc='bc -q -l'
 (( $ON_LINUX )) && alias cp='cp --reflink=auto'
 alias grep='grep --color=auto'
@@ -158,6 +158,8 @@ alias scrolltop="echo -en '\x1b]720;99999\x07'"       # urxvt special command
 alias scrollbottom="echo -en '\x1b]721;99999\x07'"    # urxvt even more special command
 alias rcp="rsync -aHAXP"
 compdef rcp=rsync 2> /dev/null
+alias rmirror="rsync --recursive --links --perms --times --timeout 180 --safe-links --delete-after --delay-updates --delete --force"
+compdef rmirror=rsync 2> /dev/null
 alias icat="kitty +kitten icat"
 alias kittyssh="kitty +kitten ssh"
 alias nemo='nemo --no-desktop'
@@ -183,7 +185,6 @@ alias zerocat="xargs -0 -L1 -a"  # cat a file like /proc/pid/environ or comm in 
 
 alias l='ls'
 alias la='ls -A'
-alias lll='ls -l'
 alias lal='ls -la'
 alias lla='ls -la'
 alias lr='ls -R'                    # recursive ls
@@ -191,7 +192,7 @@ alias lx='ll -BX'                   # sort by extension
 alias lz='ll -rS'                   # sort by size
 alias lt='ll -rt'                   # sort by date
 alias lZ='ll -Z'                    # selinux
-alias ll='ls -alhtr'                # magic
+alias ll='ls -lhtr'                 # magic
 alias lrandom="ls | sort -R | head -n 1"
 
 (( $ON_LINUX )) && alias rm='rm -I --one-file-system'
@@ -432,7 +433,7 @@ function tryping() {
 }
 
 
-# test many host if they respond
+# test many hosts if they respond
 function isup() {
 	command -v fping >/dev/null || (echo "fping missing"; return)
 	fping -c1 -t100 "$@" 2>&1 | \
@@ -501,8 +502,7 @@ function catall() {
 			continue
 		fi
 
-		printf "\x1b\x5b\x33\x32;10m${f}\n"
-		printf "\x1b\x5bm"
+		printf "+++ \x1b\x5b\x33\x32;10m${f}\x1b\x5bm +++\n"
 
 		cat "$f";
 		printf "\n"
@@ -611,6 +611,26 @@ function gdbv() {(
 	gdb -ex "target remote | vgdb $vgdb_pipe_option $pidoption" $*
 )}
 compdef gdbv=gdb 2> /dev/null
+
+
+# p12 certificate/key extracting
+function p12extract() {
+	local password
+	local list
+
+	if [[ $# -lt 1 ]]; then
+		echo "missing .p12 file to extract"
+		return
+	fi
+	list=("$@")
+
+	for f in "${list[@]}"; do
+		echo -n "Password to extract $f: "
+		read -s password
+		openssl pkcs12 -in "$f" -out "${f%.p12}.crt.pem" -clcerts -nokeys -passin file:<(echo $password)
+		openssl pkcs12 -in "$f" -out "${f%.p12}.key.pem" -clcerts -nodes -passin file:<(echo $password)
+	done
+}
 
 
 ####################
