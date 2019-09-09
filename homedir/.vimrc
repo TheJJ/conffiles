@@ -2,7 +2,7 @@
 " JJ's vimrc
 "
 " released under the GPLv3 or later
-" (c) 2008 - 2018 Jonas Jelten
+" (c) 2008 - 2019 Jonas Jelten
 
 
 syntax on
@@ -32,6 +32,7 @@ set ruler                          "enable the bottom line
 set textwidth=0                    "no auto wrapping
 set wrapmargin=0                   "really no auto wrapping
 set scrolloff=4                    "lines to keep visible when scrolling
+set formatoptions-=cro             "no 'helpful' comment continuation
 
 filetype plugin on                 "per-filetype settings
 filetype indent on                 "per-filetype indentation
@@ -61,6 +62,7 @@ scriptencoding utf-8
 set list listchars=tab:╺╴,trail:·,extends:→,precedes:←
 
 set background=dark
+" not totally crappy themes: elflord, ron, desert, murphy, slate, koehler
 colorscheme ron
 highlight SpecialKey ctermfg=darkblue
 highlight SpecialKey guifg=#808080
@@ -95,8 +97,9 @@ cmap diffw exec 'w !git diff -R --no-index -- - ' . shellescape(expand('%'))
 autocmd BufWritePost * if &diff == 1 | diffupdate | endif
 
 " different colorscheme for diff
+" themes that are not totally crappy: slate, murphy, industry
 if &diff
-	colorscheme slate
+	colorscheme murphy
 endif
 
 " refresh vimrc (this file) after saving
