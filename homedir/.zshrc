@@ -627,8 +627,10 @@ function p12extract() {
 	for f in "${list[@]}"; do
 		echo -n "Password to extract $f: "
 		read -s password
-		openssl pkcs12 -in "$f" -out "${f%.p12}.crt.pem" -clcerts -nokeys -passin file:<(echo $password)
+		echo "\nextracting..."
+		openssl pkcs12 -in "$f" -out "${f%.p12}.crt.pem" -clcerts -nokeys -passin file:<(echo $password) || return
 		openssl pkcs12 -in "$f" -out "${f%.p12}.key.pem" -clcerts -nodes -passin file:<(echo $password)
+		chmod 400 "${f%.p12}.key.pem"
 	done
 }
 
