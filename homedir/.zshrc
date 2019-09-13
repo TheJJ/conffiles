@@ -961,8 +961,8 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 # urls
 zstyle ':completion:*:urls' local 'www' 'public_html' '/srv/http'
 
-# host completion, guttenberg'd from grml config
-test -r ~/.ssh/known_hosts && _ssh_hosts=(${${${${(f)"$(<$HOME/.ssh/known_hosts)"}:#[\|]*}%%\ *}%%,*}) || _ssh_hosts=()
+# host completion, guttenberg'd from grml config and then improved
+test -r ~/.ssh/known_hosts && _ssh_hosts=(${${${${${${${(f)"$(<$HOME/.ssh/known_hosts)"}:#[\|]*}:#\#*}%%\ *}%%,*}##\[}%%\]*}) || _ssh_hosts=()
 test -r /etc/hosts && : ${(A)_etc_hosts:=${(s: :)${(ps:\t:)${${(f)~~"$(</etc/hosts)"}%%\#*}##[:blank:]#[^[:blank:]]#}}} || _etc_hosts=()
 _hosts=(
 	"$_ssh_hosts[@]"
@@ -972,7 +972,10 @@ _hosts=(
 	::1
 	localhost
 )
+unset _ssh_hosts
+unset _etc_hosts
 zstyle ':completion:*:hosts' hosts $_hosts
+unset _hosts
 
 
 DONTSETRPROMPT=1
