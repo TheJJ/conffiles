@@ -38,6 +38,7 @@ export LESS="-S -i -R -M --shift 5"
 export PAGER="less"
 export GCC_COLORS="yes"
 export NO_AT_BRIDGE=1     # silence funny gtk warnings
+export PYTHONPYCACHEPREFIX=$HOME/.cache/python/
 
 # locales
 export LANG="en_US.UTF-8"
@@ -164,6 +165,8 @@ alias icat="kitty +kitten icat"
 alias kittyssh="kitty +kitten ssh"
 alias nemo='nemo --no-desktop'
 alias cal='cal -m -w'
+alias contentgrep='grep -v -e "^$" -e "^#" -e "^;"'   # good to strip conffile comments
+alias curlws='curl --no-buffer --header "Connection: Upgrade" --header "Upgrade: websocket"'
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
