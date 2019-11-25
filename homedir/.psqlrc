@@ -1,0 +1,12 @@
+\set QUIET 1
+
+\pset null '[NULL]'
+\set HISTCONTROL ignoredups
+\set HISTFILE ~/.psql/history- :DBNAME
+\set ON_ERROR_ROLLBACK interactive
+\set PROMPT1 '%[%033[37m%]%M %[%033[92;1m%]%n%[%033[36m%]@%[%033[34m%]%/%[%033[31m%]%R%[%033[0m%]%# '
+\set VERBOSITY verbose
+\timing
+\x auto
+
+\unset QUIET
