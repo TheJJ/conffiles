@@ -166,7 +166,7 @@ alias kittyssh="kitty +kitten ssh"
 alias nemo='nemo --no-desktop'
 alias cal='cal -m -w'
 alias contentgrep='grep -v -e "^$" -e "^#" -e "^;"'   # good to strip conffile comments
-alias curlws='curl --no-buffer --header "Connection: Upgrade" --header "Upgrade: websocket"'
+alias curlws='curl --no-buffer --header "Connection: Upgrade" --header "Upgrade: websocket" --header "Sec-WebSocket-Key: bG9sd2Vic29ja2V0Cg==" --header "Sec-WebSocket-Version: 13"'
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
