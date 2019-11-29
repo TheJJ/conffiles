@@ -140,8 +140,20 @@ vmap <C-y> c<ESC>"+p
 imap <C-y> "+pA
 
 " control-backspace and control-delete for backward and forward word removal
-imap <C-BS> <C-W>
+imap <C-BS> <C-w>
+noremap! <C-BS> <C-w>
+
 imap <C-Del> <C-O>de
+" ctrl-backspace on kitty (entered with insert-mode C-v)
+imap [3;5~ <C-o>dw
+
+noremap! <C-h> <C-w>
+noremap! <C-Del> <C-O>de
+
+" more readline-like word deletion
+inoremap <C-w> <C-\><C-o>dB
+inoremap <C-BS> <C-\><C-o>db
+
 
 " no deselect when shifting
 vnoremap < <gv
