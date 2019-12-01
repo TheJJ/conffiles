@@ -9,5 +9,6 @@
 \timing
 \pset expanded off
 \pset linestyle unicode
+SET bytea_output = 'escape';
 
 \unset QUIET
