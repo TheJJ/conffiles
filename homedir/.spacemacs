@@ -42,6 +42,7 @@ This function should only modify configuration layer settings."
      ;; active layers select which of the magic of spacemacs
      ;; shall be activated.
 
+     asm
      (auto-completion :variables
                       auto-completion-enable-sort-by-usage t
                       auto-completion-enable-help-tooltip t)
@@ -103,6 +104,7 @@ This function should only modify configuration layer settings."
      theming
      treemacs
      version-control
+     xclipboard
      yaml
      )
 
@@ -788,11 +790,15 @@ See the header of this file for more information."
 
 (defun jj/codenav-keybinds ()
   (interactive)
-  (local-set-key [M-S-mouse-1] 'xref-find-definitions)
-  (local-set-key (kbd "M-g d") 'xref-find-definitions)
-  (local-set-key (kbd "M-g f") 'xref-find-references)
-  (local-set-key (kbd "M-g D") 'lsp-ui-peek-find-definitions)
-  (local-set-key (kbd "M-g R") 'lsp-ui-peek-find-references)
+  (local-set-key [C-mouse-1] 'xref-find-definitions)
+  (local-set-key (kbd "M-g d") 'xref-find-definitions-other-frame)
+  (local-set-key (kbd "M-g D") 'xref-find-definitions)
+  (local-set-key (kbd "M-g f") 'xref-find-references-other-frame)
+  (local-set-key (kbd "M-g F") 'xref-find-references)
+  ;; lsp-ui-peek-mode does not highlight the relevant line,
+  ;; so it's currently rather useless, but may be cool in the future.
+  ;(local-set-key (kbd "M-g D") 'lsp-ui-peek-find-definitions)
+  ;(local-set-key (kbd "M-g F") 'lsp-ui-peek-find-references)
   )
 
 
@@ -1049,6 +1055,7 @@ See the header of this file for more information."
   (defconst sft-c-style
     '("linux"  ;; base it on linux code style
       (c-doc-comment-style        . javadoc)
+      (c-block-comment-prefix     . " * ")
       (indent-tabs-mode           . t)
       (c-basic-offset             . 4)
       (c-tab-always-indent        . t)
@@ -1134,12 +1141,14 @@ See the header of this file for more information."
                                                     c-lineup-template-args +))
                           (topmost-intro         . 0)   ; indentation of file start
                           (topmost-intro-cont    . c-lineup-topmost-intro-cont)
+                          (comment-intro         . c-lineup-comment)   ; start of comment
+                          (c                     . c-lineup-C-comments)  ; multiline comment continuation. what a name.
                           ))
 
       ;; information about indent parsing on TAB
       ;; this is also triggered by C-c C-s
       (c-echo-syntactic-information-p . nil))
-    "The SFT C programming style"
+    "The SFT C++ programming style"
     ))
 ;;; end coding style definitions
 
@@ -1222,22 +1231,19 @@ See the header of this file for more information."
 
   ;; c++ special stuff
   (defun jj/c++-coding-hook ()
-
     ;; comment parsing and word highlighting
-
-    ;; javadoc-style comments in c++
-    (add-to-list 'c-doc-comment-style '(c++-mode . javadoc))
 
     ;; placing regexes into `c-mode-common-hook' may work but their
     ;; evaluation order matters.
     (font-lock-add-keywords
       nil '(
-            ;; missing C++11 keywords
-            ("\\<\\(static_assert\\)\\>" . font-lock-keyword-face)
+            ;; missing C++ keywords
+            ("\\<\\(static_assert\\|concept\\|requires\\|consteval\\|co_await\\|co_yield\\|co_return\\)\\>" . font-lock-keyword-face)
 
             ;; custom defined types
             ("\\<[A-Za-z_]+[A-Za-z_0-9]*_t\\>" . font-lock-type-face)
-            )))
+            ))
+    )
 
   ;; py
   (defun jj/python-coding-hook ()
@@ -1250,7 +1256,7 @@ See the header of this file for more information."
           flycheck-checker-error-threshold 300)
 
     ;; code navigation jumping
-    (local-set-key [M-S-mouse-1] 'anaconda-mode-find-definitions)
+    (local-set-key [C-mouse-1] 'anaconda-mode-find-definitions)
     (local-set-key (kbd "M-g d") 'anaconda-mode-find-definitions)
     (local-set-key (kbd "M-g f") 'anaconda-mode-find-references)
 
@@ -1279,7 +1285,8 @@ See the header of this file for more information."
   (defun jj/latex-coding-hook ()
     ;; set latex indent offset so it doesn't fuck up
     ;; (i.e. use values != n*tab-width)
-    (setq tab-width 4
+    (setq TeX-engine 'default    ;; or xetex
+          tab-width 4
           fill-column 76
           LaTeX-indent-level 4
           LaTeX-item-indent -4
@@ -1305,7 +1312,13 @@ See the header of this file for more information."
     ;; minted codehighlighting needs shell execution for pygments
     (add-to-list 'TeX-command-list
                  '("LaTeX-shellescape" "%`%l -shell-escape %(mode) %(extraopts) %' %t" TeX-run-TeX nil
-                   (latex-mode doctex-mode) :help "Run LaTeX -shell-escape") t))
+                   (latex-mode doctex-mode) :help "Run LaTeX -shell-escape") t)
+    (add-to-list 'TeX-command-list
+                 '("XeLaTeX" "%`xelatex %(mode) %(extraopts) %' %t" TeX-run-TeX nil
+                   (latex-mode doctex-mode) :help "Run XeLaTeX") t)
+    (add-to-list 'TeX-command-list
+                 '("XeLaTeXMk" "latexmk -xelatex %(-PDF)%S%(mode) %(file-line-error) %(extraopts) %t" TeX-run-latexmk nil
+                   (plain-tex-mode latex-mode doctex-mode) :help "Run LaTeXMk with XeLaTeX") t))
 
   ;; BibTeX
   (defun jj/bibtex-coding-hook ()
@@ -1387,7 +1400,7 @@ See the header of this file for more information."
   (add-hook 'html-mode-hook              'jj/html-coding-hook)
   (add-hook 'haskell-mode-hook           'jj/haskell-coding-hook)
   (add-hook 'c-mode-common-hook          'jj/c-base-hook)
-  (add-hook 'c-++-mode-hook              'jj/c++-coding-hook)
+  (add-hook 'c++-mode-hook               'jj/c++-coding-hook)
   (add-hook 'LaTeX-mode-hook             'jj/latex-coding-hook)
   (add-hook 'bibtex-mode-hook            'jj/bibtex-coding-hook)
   (add-hook 'vhdl-mode-hook              'jj/vhdl-coding-hook)
