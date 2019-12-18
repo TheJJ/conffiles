@@ -1498,8 +1498,6 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; store customizations in extra file
   (setq custom-file "~/.spacemacs.d/custom.el")
 
-  (message "installing mode hooks")
-  (jj/mode-hooks)
   )
 
 (defun dotspacemacs/user-load ()
@@ -1517,6 +1515,7 @@ Put your configuration code here, except for variables that should be set
 before packages are loaded."
 
   (message "loading user config")
+  (jj/mode-hooks)
   (jj/modes)
   (jj/defaults)
   (jj/display-setup)
