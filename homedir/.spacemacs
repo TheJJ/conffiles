@@ -57,7 +57,6 @@ This function should only modify configuration layer settings."
             cmake-enable-cmake-ide-support nil)
      csv
      dap
-     debug
      emacs-lisp
      major-modes  ;; qml-mode, openscad
      git
@@ -117,11 +116,12 @@ This function should only modify configuration layer settings."
    ;; Also include the dependencies as they will not be resolved automatically.
    dotspacemacs-additional-packages
    '(
-     bison-mode
-     ag
-     pdf-tools
      afternoon-theme
+     ag
+     bison-mode
+     company-posframe
      idle-highlight-mode
+     pdf-tools
      )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -1434,6 +1434,9 @@ See the header of this file for more information."
      (run-hooks 'prog-mode-hook))
    '(python-mode-hook
      haskell-mode-hook))
+
+  (with-eval-after-load 'company
+    (company-posframe-mode))
   )
 
 ;; we have a graphical window
