@@ -119,7 +119,7 @@ This function should only modify configuration layer settings."
      afternoon-theme
      ag
      bison-mode
-     company-posframe
+     ;company-posframe
      idle-highlight-mode
      pdf-tools
      )
@@ -679,11 +679,6 @@ See the header of this file for more information."
   (setq-default tab-width 4)
   (setq-default whitespace-line-column 400)
 
-  ;; undo-tree-region detection is quite buggy
-  ;; and has successfully wiped the undo history
-  ;; from time to time for me.
-  (setq undo-tree-enable-undo-in-region nil)
-
   ;; hide modeline indicators
   (spacemacs|diminish anaconda-mode)
   (spacemacs|diminish auto-revert-mode)
@@ -791,10 +786,9 @@ See the header of this file for more information."
 (defun jj/codenav-keybinds ()
   (interactive)
   (local-set-key [C-mouse-1] 'xref-find-definitions)
-  (local-set-key (kbd "M-g d") 'xref-find-definitions-other-frame)
-  (local-set-key (kbd "M-g D") 'xref-find-definitions)
-  (local-set-key (kbd "M-g f") 'xref-find-references-other-frame)
-  (local-set-key (kbd "M-g F") 'xref-find-references)
+  (local-set-key (kbd "M-g d") 'xref-find-definitions)
+  (local-set-key (kbd "M-g D") 'xref-find-definitions-other-frame)
+  (local-set-key (kbd "M-g f") 'xref-find-references)
   ;; lsp-ui-peek-mode does not highlight the relevant line,
   ;; so it's currently rather useless, but may be cool in the future.
   ;(local-set-key (kbd "M-g D") 'lsp-ui-peek-find-definitions)
@@ -1255,11 +1249,6 @@ See the header of this file for more information."
     (setq flycheck-checker 'python-pylint
           flycheck-checker-error-threshold 300)
 
-    ;; code navigation jumping
-    (local-set-key [C-mouse-1] 'anaconda-mode-find-definitions)
-    (local-set-key (kbd "M-g d") 'anaconda-mode-find-definitions)
-    (local-set-key (kbd "M-g f") 'anaconda-mode-find-references)
-
     ;; don't show anaconda mode error popup gaaarrhhgh
     (remove-hook 'anaconda-mode-response-read-fail-hook
                  'anaconda-mode-show-unreadable-response)
@@ -1435,8 +1424,8 @@ See the header of this file for more information."
    '(python-mode-hook
      haskell-mode-hook))
 
-  (with-eval-after-load 'company
-    (company-posframe-mode))
+  ;(with-eval-after-load 'company
+  ;  (company-posframe-mode))
   )
 
 ;; we have a graphical window
@@ -1492,11 +1481,14 @@ configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
+  (message "initializing stuff")
   ;; debugging n stuff
   ;(setq debug-on-error t)
 
   ;; store customizations in extra file
   (setq custom-file "~/.spacemacs.d/custom.el")
+
+  (jj/mode-hooks)
 
   )
 
@@ -1515,7 +1507,6 @@ Put your configuration code here, except for variables that should be set
 before packages are loaded."
 
   (message "loading user config")
-  (jj/mode-hooks)
   (jj/modes)
   (jj/defaults)
   (jj/display-setup)
