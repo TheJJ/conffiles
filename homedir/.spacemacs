@@ -664,6 +664,7 @@ See the header of this file for more information."
         tramp-ssh-controlmaster-options    ; synced with .ssh/config ControlMaster settings
           (concat "-o ControlPath=/tmp/ssh_mux_%%u@%%l_%%r@%%h:%%p "
                   "-o ControlMaster=auto -o ControlPersist=10")
+        lsp-diagnostic-package :none     ; disable lsp diagnostics for performance reasons (flycheck/flymake)
         )
 
   ;; default mode for new buffers
@@ -912,6 +913,18 @@ See the header of this file for more information."
   (interactive "*P\nr")
   (sort-regexp-fields reverse "[a-zA-Z0-9_-]+" "\\&" beg end))
 
+(defun sort-words-nocase (reverse beg end)
+  "Sort words in region alphabetically, case insensitively"
+  (interactive "*P\nr")
+  (let ((sort-fold-case t))
+    (call-interactively 'sort-words)))
+
+(defun sort-lines-nocase ()
+  "Sort lines in region alphabetically, case insensitively"
+  (interactive)
+  (let ((sort-fold-case t))
+    (call-interactively 'sort-lines)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; set kaschtomaisd key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1026,13 +1039,14 @@ See the header of this file for more information."
   ;; codestyle definitions
 
   ;; linux kernel indentation style
-  (defconst kernel-c-style
-    '("linux" ;; based on the builtin linux style
-      (c-offsets-alist . (
-                          (arglist-cont-nonempty c-lineup-gcc-asm-reg c-lineup-arglist)
-                          (arglist-close . 0)
-                          ))
-      ))
+  (c-add-style
+   "linux-kernel"
+   '("linux" ;; based on the builtin linux style
+     (c-offsets-alist . (
+                         (arglist-cont-nonempty c-lineup-gcc-asm-reg c-lineup-arglist)
+                         (arglist-close . 0)
+                         ))
+     ))
 
   ;; closing template <> should line up.
   (defun c++-template-args-cont (langelem)
@@ -1090,8 +1104,8 @@ See the header of this file for more information."
                           ; https://www.gnu.org/software/emacs/draft/manual/html_node/ccmode/Syntactic-Symbols.html
                           ;
                           ; arg indent helper funcs: c-lineup-*
-                          ; arglist = indent to matching (|here, asdf
-                          ; argcont = indent to (asdf, |here
+                          ; arglist = indent to matching (|here, stuff
+                          ; argcont = indent to (stuff, |here
                           ; casecaded calls = ->lol\n->stuff
                           ; absolute offset: [0]
                           (access-label          . -)   ; public: or private:
@@ -1105,6 +1119,7 @@ See the header of this file for more information."
                           (block-open            . 0)   ; { to open a block
                           (block-close           . 0)   ; } after a block
                           (brace-list-intro      . +)   ; first element in {\nthisone
+                                                        ;; this will be improved through emacs commit aa1a4cceca2d93d83c721ce83950230739073727
                           (brace-list-entry      . 0)   ; other elements in {\nelem\nthisone
                           (case-label            . 0)   ; case 1337:
                           (statement-case-open   . 0)   ; { after case 1337:
@@ -1143,7 +1158,32 @@ See the header of this file for more information."
       ;; this is also triggered by C-c C-s
       (c-echo-syntactic-information-p . nil))
     "The SFT C++ programming style"
-    ))
+    )
+  (c-add-style "sftstyle"     sft-c-style)
+
+  ;; https://github.com/llvm-mirror/llvm/blob/master/utils/emacs/emacs.el
+  (defun llvm-lineup-statement (langelem)
+    (let ((in-assign (c-lineup-assignments langelem)))
+      (if (not in-assign)
+          '++
+        (aset in-assign 0
+              (+ (aref in-assign 0)
+                 (* 2 c-basic-offset)))
+        in-assign)))
+
+  ;; ciip style based on llvm
+  ;; https://gitlab.lrz.de/IP/elsa/-/blob/master/.clang-format
+  (c-add-style "ciipstyle"
+               '("gnu"
+                 (fill-column . 100)
+                 (c++-indent-level . 4)
+                 (c-basic-offset . 4)
+                 (indent-tabs-mode . nil)
+                 (c-offsets-alist . ((arglist-intro . ++)
+                                     (innamespace . +)  ;; ohh whyyyy, pls change to 0
+                                     (member-init-intro . ++)
+                                     (statement-cont . llvm-lineup-statement)))))
+  )
 ;;; end coding style definitions
 
 
@@ -1172,9 +1212,6 @@ See the header of this file for more information."
     (with-library
      clang-format
      (global-set-key (kbd "C-M-<tab>") 'clang-format-region))
-
-    (c-add-style "sftstyle"     sft-c-style)
-    (c-add-style "linux-kernel" kernel-c-style)
 
     ;; default to sft style
     (c-set-style "sftstyle")
