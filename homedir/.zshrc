@@ -165,7 +165,7 @@ alias icat="kitty +kitten icat"
 alias kittyssh="kitty +kitten ssh"
 alias nemo='nemo --no-desktop'
 alias cal='cal -m -w'
-alias contentgrep='grep -v -e "^$" -e "^#" -e "^;"'   # good to strip conffile comments
+alias confgrep='grep -v -P "^\\s*($|#|;)"'   # good to strip conffile comments
 alias curlws='curl --no-buffer --header "Connection: Upgrade" --header "Upgrade: websocket" --header "Sec-WebSocket-Key: bG9sd2Vic29ja2V0Cg==" --header "Sec-WebSocket-Version: 13"'
 
 # valgrind awesomeness
@@ -210,7 +210,7 @@ alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -del
 alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
 alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.argv[1]))"'
 alias jsc="js -C ."  # json coloring
-hash colordiff 2>/dev/null && alias diff='colordiff'
+hash colordiff 2>/dev/null && alias diff='colordiff' || alias diff='diff --color'
 
 
 #####################################
@@ -384,6 +384,11 @@ function gccflags() {
 	echo "----------------------------------"
 	echo "=== expanded invocation:"
 	gcc '-###' -e -v -march=$arch $* /usr/include/stdlib.h 2>&1
+}
+
+function gccinvok() {
+	# e.g. invoke with -march=native or something like that
+	echo "" | gcc -v -E $* - 2>&1 | grep cc1
 }
 
 # run shell as user, with benefits of env_keep of sudo
