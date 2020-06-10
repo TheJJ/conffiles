@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 
 """
-Compile and execute a cython file
+Compile and execute a cython .pyx file
 """
 
-from subprocess import run
-import argparse, shutil, shlex, tempfile, os, sys, pathlib
+import argparse
+import logging
+import os
+import pathlib
+import shlex
+import shutil
+import sys
+import tempfile
+import subprocess
+from distutils.sysconfig import get_config_var
 
 
 def main():
@@ -13,17 +21,45 @@ def main():
     Parse arguments.
     """
     cmd = argparse.ArgumentParser()
-    cmd.add_argument('-a', '--annotate', action='store_true')
+    cmd.add_argument('-a', '--annotate', action='store_true',
+                     help="create .html file as annotation")
     cmd.add_argument('-k', '--keep', action='store_true',
                      help='keep .cpp file and executable')
-    cmd.add_argument('-n', '--norun', action='store_true')
-    cmd.add_argument('-o', '--output')
-    cmd.add_argument('-c', '--cflags', default=os.environ.get("CFLAGS", ""))
-    cmd.add_argument('pyxfile')
-    cmd.add_argument('pyargs', nargs=argparse.REMAINDER)
+    cmd.add_argument('-n', '--norun', action='store_true',
+                     help="")
+    cmd.add_argument('-m', '--module', action='store_true',
+                     help="compile the .pyx as a .so module")
+    cmd.add_argument('-o', '--output', help="output filename")
+    cmd.add_argument('-c', '--cxxflags', default=os.environ.get("CXXFLAGS", ""))
+    cmd.add_argument("-v", "--verbose", action="count", default=0,
+                     help="increase program verbosity")
+    cmd.add_argument("-q", "--quiet", action="count", default=0,
+                     help="decrease program verbosity")
+    cmd.add_argument('pyxfile',
+                     help=".pyx or .py file to compile")
+    cmd.add_argument('pyargs', nargs=argparse.REMAINDER,
+                     help=("pass these arguments to the pyxfile "
+                           "to be run"))
 
     args = cmd.parse_args()
+
+    log_setup(args.verbose - args.quiet)
+
     cyrun(args)
+
+
+def log_setup(verbosity, default_verbosity=1):
+    """
+    set up the logging functionality
+    """
+
+    levels = (logging.ERROR, logging.WARNING, logging.INFO,
+              logging.DEBUG, logging.NOTSET)
+    select = max(0, min(verbosity + default_verbosity, len(levels)))
+    level = levels[select]
+
+    logging.basicConfig(level=level, format="%(message)s")
+    logging.captureWarnings(True)
 
 
 def cyrun(args):
@@ -36,16 +72,24 @@ def cyrun(args):
     else:
         outpath = pyxpath.with_suffix('')
 
+    if args.module:
+        module_suffix = get_config_var('EXT_SUFFIX')
+        outpath = outpath.with_suffix(module_suffix)
+
     with tempfile.TemporaryDirectory() as tmpdirname:
         tmpdir = pathlib.Path(tmpdirname)
         codepath = tmpdir / 'code.cpp'
-        cyinvoc = ["cython", "--embed", "-3", "--cplus", "--line-directives", "-Wextra"]
+        cyinvoc = ["cython", "-3", "--cplus", "--line-directives", "-Wextra"]
+        if not args.module:
+            cyinvoc.append("--embed")
         if args.annotate:
             cyinvoc.append("--annotate")
+
         cyinvoc.extend(["-o", str(codepath), str(pyxpath)])
-        if run(cyinvoc).returncode != 0:
+        logging.info("$ %s", " ".join(cyinvoc))
+        if subprocess.run(cyinvoc).returncode != 0:
             print("cython compilation failed")
-            exit(1)
+            sys.exit(1)
 
         if args.annotate:
             shutil.move(str(codepath.with_suffix('.html')),
@@ -55,17 +99,30 @@ def cyrun(args):
             shutil.copy(str(codepath), str(outpath.with_suffix('.cpp')))
 
         exepath = tmpdir / pyxpath.stem
-        gccinvoc = ("g++ $(python-config --libs --includes --cflags)"
-                    "%s -o %s %s") % (args.cflags, exepath, codepath)
-        if run(gccinvoc, shell=True).returncode != 0:
-            print("failed gcc compilation")
-            exit(1)
+        gccinvoc = [os.environ.get("CXX", 'g++')]
+        gccinvoc.extend(shlex.split(subprocess.check_output(
+            ["python-config", "--libs", "--includes", "--cflags"]
+        ).decode()))
+        if args.cxxflags:
+            gccinvoc.append(args.cxxflags)
+        if args.module:
+            gccinvoc.extend(["-fPIC", "-shared"])
+        gccinvoc.extend(["-o", str(exepath), str(codepath)])
 
-        if args.keep:
+        logging.info("$ %s", " ".join(gccinvoc))
+
+        if subprocess.run(gccinvoc).returncode != 0:
+            print("failed gcc compilation")
+            sys.exit(1)
+
+        if args.keep or args.module:
+            logging.info("$ cp %s %s", exepath, outpath)
             shutil.copy(str(exepath), str(outpath))
 
-        if not args.norun:
-            exit(run([str(exepath)] + args.pyargs).returncode)
+        if not (args.norun or args.module):
+            run_invoc = [str(exepath)] + args.pyargs
+            logging.info("$ %s", run_invoc)
+            sys.exit(subprocess.run(run_invoc).returncode)
 
 
 if __name__ == "__main__":
