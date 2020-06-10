@@ -48,7 +48,8 @@ def cyrun(args):
             exit(1)
 
         if args.annotate:
-            codepath.with_suffix('.html').rename(outpath.with_suffix('.html'))
+            shutil.move(str(codepath.with_suffix('.html')),
+                        str(outpath.with_suffix('.html')))
 
         if args.keep:
             shutil.copy(str(codepath), str(outpath.with_suffix('.cpp')))
