@@ -2,3 +2,4 @@
 :set +s
 :set +m
 :set prompt "< %s >\n\ESC[32mλ\ESC[m "
+:set -fbreak-on-exception
