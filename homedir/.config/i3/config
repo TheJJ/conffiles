@@ -1,7 +1,7 @@
 # i3 config file (v4)
 #
 # JJ's i3 config
-# Copyright (c) 2011-2017 Jonas Jelten <jj@sft.mx>
+# Copyright (c) 2011-2020 Jonas Jelten <jj@sft.mx>
 #
 # hint: set unknown scancodes with `setkeycodes`
 #
@@ -21,7 +21,7 @@ bindsym $mod+d exec rofi -show run
 bindsym $mod+shift+d exec rofi -show drun
 
 bindcode 107 exec ~/bin/screenshot
-bindcode shift+107 exec ~/bin/screenshot s
+bindcode shift+107 exec ~/bin/screenshot --select
 
 #bindcode 162 exec sleep 0.3 && ~/bin/rscreen
 #bindcode 161 exec sleep 0.3 && ~/bin/rscreen portrait
@@ -239,3 +239,6 @@ exec --no-startup-id xset -b
 exec --no-startup-id xset r rate 170 60
 
 exec --no-startup-id xsetroot -solid black
+
+# lol compositor (picom?)
+exec --no-startup-id xcompmgr
