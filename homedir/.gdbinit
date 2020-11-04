@@ -41,6 +41,9 @@ define hook-stop
 	#x /1i $pc
 end
 
+# kernel debugging
+add-auto-load-safe-path /usr/src/linux/scripts/gdb/vmlinux-gdb.py
+
 ##########################
 # utility functions
 
@@ -276,6 +279,57 @@ end
 document pyg
 	Print _PyGC_Dump(arg), arg must me a PyObject *.
 end
+
+# qt debugging helpers
+
+define printqs4
+	printf "(Q4String)0x%x (length=%i): \"", &$arg0, $arg0.d->size
+
+	set $i=0
+	while $i < $arg0.d->size
+		set $char=$arg0.d->data[$i++]
+		if $char < 32 || $char > 127
+			printf "\\u0x%04x", $char
+		else
+			printf "%c", (char)$char
+		end
+	end
+	printf "\"\n"
+end
+
+define printqs5static
+	set $data=$arg0.d
+	printf "(Q5String)0x%x length=%i: \"", &$arg0, $data->size
+
+	set $i=0
+	set $chararray=(const ushort*)(((const char*)$data)+$data->offset)
+	while $i < $data->size
+		set $char=$chararray[$i++]
+		if $char < 32 || $char > 127
+			printf "\\u%04x", $char
+		else
+			printf "%c" , (char)$char
+		end
+	end
+	printf "\"\n"
+end
+
+define printqs5dynamic
+	set $data=(QStringData*)$arg0.d
+	printf "(Q5String)0x%x length=%i: \"", &$arg0, $data->size
+
+	set $i=0
+	while $i < $data->size
+		set $c=$data->data()[$i++]
+		if $c < 32 || $c > 127
+			printf "\\u%04x", $c
+		else
+			printf "%c", (char)$c
+		end
+	end
+	printf "\"\n"
+end
+
 
 
 # enable voltron if found
