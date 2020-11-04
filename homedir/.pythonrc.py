@@ -3,13 +3,14 @@
 """
 jj's pythonrc
 
-Copyright (c) 2012-2019 Jonas Jelten <jj@sft.mx>
+Copyright (c) 2012-2020 Jonas Jelten <jj@sft.mx>
 Licensed GPLv3 or later.
 """
 
 
 # these imports are available in interactive python shells
 import asyncio
+import base64
 import datetime
 import inspect
 import io
@@ -23,6 +24,7 @@ import shutil
 import subprocess
 import sys
 import time
+import traceback
 
 from pathlib import Path
 from pprint import pprint, pformat
