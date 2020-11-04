@@ -1,5 +1,5 @@
 # JJ's zshrc
-# Copyright (c) 2011 - 2018 Jonas Jelten
+# Copyright (c) 2011 - 2020 Jonas Jelten
 #
 # Released under GPLv3 or later.
 #
@@ -166,7 +166,7 @@ alias kittyssh="kitty +kitten ssh"
 alias nemo='nemo --no-desktop'
 alias cal='cal -m -w'
 alias confgrep='grep -v -P "^\\s*($|#|;)"'   # good to strip conffile comments
-alias curlws='curl --no-buffer --header "Connection: Upgrade" --header "Upgrade: websocket" --header "Sec-WebSocket-Key: bG9sd2Vic29ja2V0Cg==" --header "Sec-WebSocket-Version: 13"'
+alias curlws='curl --no-buffer --header "Connection: Upgrade" --header "Upgrade: websocket" --header "Sec-WebSocket-Key: bG9sd2Vic29ja2V0Y29ubg==" --header "Sec-WebSocket-Version: 13"'
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
@@ -210,7 +210,7 @@ alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -del
 alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
 alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.argv[1]))"'
 alias jsc="js -C ."  # json coloring
-hash colordiff 2>/dev/null && alias diff='colordiff' || alias diff='diff --color'
+hash colordiff 2>/dev/null && alias diff='colordiff' || alias diff='diff --color=auto'
 
 
 #####################################
@@ -354,19 +354,27 @@ function xpid() { xprop | grep PID | cut -d" " -f3 }
 
 # message dialog in gtk
 function popup() {
-	if [[ "x$1" != "x" ]]; then
-		local title=$1
-	else
-		return
-	fi
-
-	if [[ "x$2" != "x" ]]; then
-		local addition="d.format_secondary_text('$2');"
-	else
-		local addition=""
-	fi
-
-	python3 -c "from gi.repository import Gtk; d = Gtk.MessageDialog(None, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, '$title'); $addition d.connect('delete-event', Gtk.main_quit); d.connect('response', Gtk.main_quit); d.show_all(); Gtk.main();"
+	python3 - $@ <<EOP
+import argparse
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+cli = argparse.ArgumentParser()
+cli.add_argument('message')
+cli.add_argument('subtitle', nargs='?', default='')
+args = cli.parse_args()
+d = Gtk.MessageDialog(parent=None,
+                      flags=0,
+                      message_type=Gtk.MessageType.INFO,
+                      buttons=Gtk.ButtonsType.OK,
+                      text=args.message)
+if args.subtitle:
+    d.format_secondary_text(args.subtitle)
+d.connect('delete-event', Gtk.main_quit)
+d.connect('response', Gtk.main_quit)
+d.show_all()
+Gtk.main()
+EOP
 }
 
 # gcc arch flags
