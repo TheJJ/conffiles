@@ -78,7 +78,7 @@ def cyrun(args):
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         tmpdir = pathlib.Path(tmpdirname)
-        codepath = tmpdir / 'code.cpp'
+        codepath = tmpdir / pyxpath.with_suffix('.cpp').name
         cyinvoc = ["cython", "-3", "--cplus", "--line-directives", "-Wextra"]
         if not args.module:
             cyinvoc.append("--embed")

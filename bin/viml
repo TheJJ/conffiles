@@ -23,7 +23,10 @@ def main():
     cmd = argparse.ArgumentParser()
     cmd.add_argument("-r")
 
-    vim_exe = shutil.which("vim")
+    old_vim_exe = shutil.which("vim")
+    nvim_exe = shutil.which("nvim")
+
+    vim_exe = nvim_exe or old_vim_exe
 
     invocation = []
     if sys.argv:

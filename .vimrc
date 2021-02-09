@@ -67,13 +67,26 @@ colorscheme ron
 highlight SpecialKey ctermfg=darkblue
 highlight SpecialKey guifg=#808080
 
-" Tell vim to remember certain things when we exit
-"  '10  :  marks will be remembered for up to 10 previously edited files
-"  "100 :  will save up to 100 lines for each register
-"  :20  :  up to 20 lines of command-line history will be remembered
-"  %    :  saves and restores the buffer list
-"  n... :  where to save the viminfo files
-set viminfo='10,\"100,:20,%,n~/.viminfo
+if has('nvim')
+	" neovim SHAred DAta
+	" https://neovim.io/doc/user/options.html#'shada'
+	"  !    : global vars
+	"  '300 : remember marks of previously edited files
+	"  <100 : lines for each register
+	"  :100 : command line history
+	"  s    : max size in kb
+	"  %    : save and restore buffer list
+	"  h    : no hlsearch on startup
+	set shada=!,'300,<100,:1000,s100,%
+else
+	" Tell vim to remember certain things when we exit
+	"  '10  :  marks will be remembered for up to 10 previously edited files
+	"  "100 :  will save up to 100 lines for each register
+	"  :... :  command-line history will be remembered
+	"  %    :  saves and restores the buffer list
+	"  n... :  where to save the viminfo files
+	set viminfo='200,\"100,:1000,%,n~/.viminfo
+endif
 
 function! RestoreCursorPosition()
 	if line("'\"") <= line("$")
@@ -195,7 +208,7 @@ function! WhitespaceTab(x)
 	:2match evilws /^\t*\zs \+\|[^\t]\zs\t\+\|\s\+\%#\@<!$/
 endfunction
 
-" default: tab indentation with width 4
+" default indentation scheme
 call WhitespaceTab(4)
 
 " linux code looks really ugly without 8-sized tabs

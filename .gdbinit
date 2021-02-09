@@ -280,6 +280,33 @@ document pyg
 	Print _PyGC_Dump(arg), arg must me a PyObject *.
 end
 
+define less
+python argc = $argc
+python
+import os
+err_write = lambda f, s: f.write(s) if f else print(s)
+try:
+    f = None
+    f = os.popen("less -S -i -R -M --shift 5", mode="w")
+    f.write(
+        gdb.execute(' '.join(f"$arg{i}" for i in range(0, argc)),
+                    to_string=True)
+    )
+except gdb.error as e:
+    err_write(f, f'GDB Error: {e}')
+except Exception as e:
+    err_write(f, f'Error {type(e)}: {e}')
+finally:
+    if f:
+        f.close()
+end
+end
+document pyg
+	Run any gdb command piped into less.
+	So you can finally search and page the output nicely.
+end
+
+
 # qt debugging helpers
 
 define printqs4
@@ -329,7 +356,6 @@ define printqs5dynamic
 	end
 	printf "\"\n"
 end
-
 
 
 # enable voltron if found

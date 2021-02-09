@@ -2,7 +2,7 @@
 ;; vim: ft=lisp
 
 ;; jj's spacemacs configuration
-;; Copyright (c) 2011-2019 Jonas Jelten <jj@sft.mx>
+;; Copyright (c) 2011-2021 Jonas Jelten <jj@sft.lol>
 ;; Licensed GPLv3 or later
 
 (defun dotspacemacs/layers ()
@@ -118,6 +118,7 @@ This function should only modify configuration layer settings."
      afternoon-theme
      ag
      bison-mode
+     google-c-style
      idle-highlight-mode
      pdf-tools
      )
@@ -167,7 +168,7 @@ It should only modify the values of Spacemacs settings."
    ;; To load it when starting Emacs add the parameter `--dump-file'
    ;; when invoking Emacs 27.1 executable on the command line, for instance:
    ;;   ./emacs --dump-file=$HOME/.emacs.d/.cache/dumps/spacemacs-27.1.pdmp
-   ;; (default spacemacs-27.1.pdmp)
+   ;; (default (format "spacemacs-%s.pdmp" emacs-version))
    dotspacemacs-emacs-dumper-dump-file (format "spacemacs-%s.pdmp" emacs-version)
 
    ;; If non-nil ELPA repositories are contacted via HTTPS whenever it's
@@ -197,7 +198,9 @@ It should only modify the values of Spacemacs settings."
 
    ;; If non-nil then Spacelpa repository is the primary source to install
    ;; a locked version of packages. If nil then Spacemacs will install the
-   ;; latest version of packages from MELPA. (default nil)
+   ;; latest version of packages from MELPA. Spacelpa is currently in
+   ;; experimental state please use only for testing purposes.
+   ;; (default nil)
    dotspacemacs-use-spacelpa nil
 
    ;; If non-nil then verify the signature for downloaded Spacelpa archives.
@@ -239,9 +242,13 @@ It should only modify the values of Spacemacs settings."
    ;; List of items to show in startup buffer or an association list of
    ;; the form `(list-type . list-size)`. If nil then it is disabled.
    ;; Possible values for list-type are:
-   ;; `recents' `bookmarks' `projects' `agenda' `todos'.
+   ;; `recents' `recents-by-project' `bookmarks' `projects' `agenda' `todos'.
    ;; List sizes may be nil, in which case
    ;; `spacemacs-buffer-startup-lists-length' takes effect.
+   ;; The exceptional case is `recents-by-project', where list-type must be a
+   ;; pair of numbers, e.g. `(recents-by-project . (7 .  5))', where the first
+   ;; number is the project limit and the second the limit on the recent files
+   ;; within a project.
    dotspacemacs-startup-lists '((recents . 5)
                                 (projects . 7))
 
@@ -255,6 +262,14 @@ It should only modify the values of Spacemacs settings."
 
    ;; Default major mode of the scratch buffer (default `text-mode')
    dotspacemacs-scratch-mode 'text-mode
+
+   ;; If non-nil, *scratch* buffer will be persistent. Things you write down in
+   ;; *scratch* buffer will be saved and restored automatically.
+   dotspacemacs-scratch-buffer-persistent nil
+
+   ;; If non-nil, `kill-buffer' on *scratch* buffer
+   ;; will bury it instead of killing.
+   dotspacemacs-scratch-buffer-unkillable nil
 
    ;; Initial message in the scratch buffer, such as "Welcome to Spacemacs!"
    ;; (default nil)
@@ -282,7 +297,9 @@ It should only modify the values of Spacemacs settings."
    ;; (default t)
    dotspacemacs-colorize-cursor-according-to-state t
 
-   ;; Default font or prioritized list of fonts.
+   ;; Default font or prioritized list of fonts. The `:size' can be specified as
+   ;; a non-negative integer (pixel size), or a floating-point (point size).
+   ;; Point size is recommended, because it's device independent. (default 10.0)
    dotspacemacs-default-font '("DejaVu Sans Mono"
                                ;;:size 13
                                :weight normal
@@ -441,7 +458,7 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-line-numbers t
 
-   ;; Code folding method. Possible values are `evil' and `origami'.
+   ;; Code folding method. Possible values are `evil', `origami' and `vimish'.
    ;; (default 'evil)
    dotspacemacs-folding-method 'evil
 
@@ -502,6 +519,9 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil - same as frame-title-format)
    dotspacemacs-icon-title-format nil
 
+   ;; Show trailing whitespace (default t)
+   dotspacemacs-show-trailing-whitespace t
+
    ;; Delete whitespace while saving buffer. Possible values are `all'
    ;; to aggressively delete empty line and long sequences of whitespace,
    ;; `trailing' to delete only the whitespace at end of lines, `changed' to
@@ -516,14 +536,12 @@ It should only modify the values of Spacemacs settings."
    ;; (default t)
    dotspacemacs-use-clean-aindent-mode t
 
-   ;; If non-nil activate `snoopy-mode' which shifts your number row
-   ;; to match the set of signs given in `dotspacemacs-snoopy-keyrow'
-   ;; in programming modes (insert-mode only). (default nil)
-   dotspacemacs-use-snoopy-mode nil
-
-   ;; Text of shifted values from your
-   ;; keyboard's number row. (default '!@#$%^&*()')
-   dotspacemacs-snoopy-keyrow "!@#$%^&*()"
+   ;; If non-nil shift your number row to match the entered keyboard layout
+   ;; (only in insert state). Currently supported keyboard layouts are:
+   ;; `qwerty-us', `qwertz-de' and `querty-ca-fr'.
+   ;; New layouts can be added in `spacemacs-editing' layer.
+   ;; (default nil)
+   dotspacemacs-swap-number-row nil
 
    ;; Either nil or a number of seconds. If non-nil zone out after the specified
    ;; number of seconds. (default nil)
@@ -611,28 +629,47 @@ See the header of this file for more information."
 ;; smart tabs, mix tabs and spaces (fak yea)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defadvice align (around smart-tabs activate)
-           (let ((indent-tabs-mode nil)) ad-do-it))
 
-(defadvice align-regexp (around smart-tabs activate)
-           (let ((indent-tabs-mode nil)) ad-do-it))
+(defmacro no-tabs-mode-advice (function)
+  `(unless (ad-find-advice ',function 'around 'smart-tabs)
+     (defadvice ,function (around smart-tabs activate)
+       (if smart-tabs-mode
+           (let ((indent-tabs-mode nil)) ad-do-it)
+         ad-do-it))))
 
-(defadvice indent-relative (around smart-tabs activate)
-           (let ((indent-tabs-mode nil)) ad-do-it))
 
-(defadvice indent-according-to-mode (around smart-tabs activate)
-           (let ((indent-tabs-mode indent-tabs-mode))
-             (if (memq indent-line-function
-                       '(indent-relative indent-relative-maybe))
-               (setq indent-tabs-mode nil))
-             ad-do-it))
+(define-minor-mode smart-tabs-mode
+  "Indent with tabs, align with spaces!
+   So cool, so good, so beautiful."
+
+  :init-value nil
+
+  (progn
+    (no-tabs-mode-advice align)
+    (no-tabs-mode-advice align-regexp)
+    (no-tabs-mode-advice indent-relative)
+    (no-tabs-mode-advice comment-dwim)
+    (no-tabs-mode-advice comment-box)
+    (no-tabs-mode-advice comment-indent)
+
+    (unless
+        (ad-find-advice 'indent-according-to-mode 'around 'smart-tabs)
+      (defadvice indent-according-to-mode (around smart-tabs activate)
+        (if smart-tabs-mode
+            (let ((indent-tabs-mode indent-tabs-mode))
+              (if (memq indent-line-function
+                        '(indent-relative
+                          indent-relative-maybe))
+                  (setq indent-tabs-mode nil))
+              ad-do-it)
+          ad-do-it)))
+    ))
 
 (defmacro smart-tabs-advice (function offset)
   `(progn
-     ;(defvaralias ',offset 'tab-width)
      (defadvice ,function (around smart-tabs activate)
                 (cond
-                  (indent-tabs-mode
+                  ((and smart-tabs-mode indent-tabs-mode)
                     ;remove spaces before or in between tabs
                     (save-excursion
                       (beginning-of-line)
@@ -646,7 +683,7 @@ See the header of this file for more information."
                          ;;(wstart (window-start))
                          )
                       (unwind-protect
-                          (progn ad-do-it)
+                        (progn ad-do-it)
                         ;;(set-window-start (selected-window) wstart)
                         )))
                   (t ad-do-it)))))
@@ -671,16 +708,14 @@ See the header of this file for more information."
 
 
 (defun jj/defaults ()
+
+  (message "setting up 'sane' defaults")
+
   ;; push the mouse out of the way when the cursor approaches.
   (mouse-avoidance-mode 'cat-and-mouse)
 
   (setq-default visible-bell nil            ; disable window flashing
                 ring-bell-function 'ignore) ; and also disable the sound
-
-  (setq ido-enable-flex-matching t
-        ido-case-fold t
-        ido-use-virtual-buffers t
-        ido-file-extensions-order '(".c" ".cpp" ".h" ".py" ".tex" ".bib" ".hs"))
 
   (setq indicate-empty-lines t
         transient-mark-mode t
@@ -710,6 +745,8 @@ See the header of this file for more information."
           (concat "-o ControlPath=/tmp/ssh_mux_%%u@%%l_%%r@%%h:%%p "
                   "-o ControlMaster=auto -o ControlPersist=10")
         lsp-diagnostic-package :none     ; disable lsp diagnostics for performance reasons (flycheck/flymake)
+        helm-ff-file-name-history-use-recentf t
+        history-delete-duplicates t      ; helm history duplicate removal
         )
 
   ;; default mode for new buffers
@@ -721,8 +758,8 @@ See the header of this file for more information."
 
   ;; indentation defaults
   ;;(setq-default indent-tabs-mode t)
-  (setq-default indent-line-function 'insert-tab)
-  (setq-default tab-width 4)
+  ;;(setq-default indent-line-function 'insert-tab)
+  ;;(setq-default tab-width 4)
   (setq-default whitespace-line-column 400)
 
   ;; hide modeline indicators
@@ -851,17 +888,6 @@ See the header of this file for more information."
   (let ((face (or (get-char-property (point) 'read-face-name) (get-char-property (point) 'face))))
     (if face (message "Face: %s" face) (message "No face at %d" pos))))
 
-;; argument lineup by tabs only
-(defun c-lineup-arglist-tabs-only (ignored)
-  "Line up argument lists by tabs, not spaces"
-  (let* ((anchor (c-langelem-pos c-syntactic-element))
-         (column (c-langelem-2nd-pos c-syntactic-element))
-         (offset (- (1+ column) anchor))
-         (steps (floor offset c-basic-offset))
-         )
-    (* (max steps 1)
-       c-basic-offset)))
-
 (defvar watch-buffer-command nil "Command to be executed upon buffer save.")
 (make-variable-buffer-local 'watch-buffer-command)
 
@@ -898,22 +924,6 @@ See the header of this file for more information."
   (interactive)
   (end-of-line)
   (newline-and-indent))
-
-(defun call-pop-kill-ring (func)
-  (funcall func)
-  ; emacs 24.3 needed that:
-  ;(setq kill-ring (cdr kill-ring))
-  )
-
-(defun kill-word-no-kill-ring ()
-  (interactive)
-  (call-pop-kill-ring (lambda () (kill-word 1)))
-  )
-
-(defun backward-kill-word-no-kill-ring ()
-  (interactive)
-  (call-pop-kill-ring (lambda () (backward-kill-word 1)))
-  )
 
 (defun shift-text (distance)
   "Move a block of text to the right or left"
@@ -974,6 +984,61 @@ See the header of this file for more information."
 ;; set kaschtomaisd key bindings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun jj/delete-word (arg)
+  "forward delete until end of word.
+  argument specifies repetitions.
+  does not yank to kill-ring."
+  (interactive "p")
+  (delete-region
+   (point)
+   (progn
+     (forward-word arg)
+     (point))))
+
+(defun jj/delete-word-backward (arg)
+  "backward delete until end of word.
+  argument specifies repetitions.
+  does not yank to kill-ring."
+  (interactive "p")
+  (jj/delete-word (- arg)))
+
+(defun jj/delete-line ()
+  "delete until end of line.
+  if point is at line-end, delete the whole line.
+  does not yank to kill-ring."
+  (interactive)
+  (save-excursion
+    (let ((orig-point (point)))
+      (move-end-of-line 1)
+      (if (= orig-point (point))
+        (jj/delete-whole-line)
+        (delete-region
+          orig-point
+          (line-end-position))))))
+
+(defun jj/delete-line-backward ()
+  "delete from beginning of line to point.
+  does not yank to kill-ring."
+  (interactive)
+  (save-excursion
+    (let ((orig-point (point)))
+      (beginning-of-line 1)
+      (delete-region
+        (point)
+        orig-point))))
+
+(defun jj/delete-whole-line ()
+  "delete the current line, from beginning to end of line.
+  does not yank to kill-ring."
+  (interactive)
+  (save-excursion
+    (delete-region
+      (line-beginning-position)
+      (line-end-position))
+    (delete-char 1) ; the newline
+    ))
+
+
 (defun jj/keybindings ()
   (interactive)
 
@@ -988,24 +1053,16 @@ See the header of this file for more information."
   (global-set-key (kbd "C-<up>")    'backward-paragraph)
   (global-set-key (kbd "C-<down>")  'forward-paragraph)
 
-  ; jlk; stuff
-  ;;(global-set-key (kbd "M-j") 'backward-char)
-  ;;(global-set-key (kbd "M-;") 'forward-char)
-  ;;(global-set-key (kbd "M-l") 'previous-line)
-  ;;(global-set-key (kbd "M-k") 'next-line)
-
-  ;;(global-set-key (kbd "C-M-j") 'backward-word)
-  ;;(global-set-key (kbd "C-M-;") 'forward-word)
-  ;;(global-set-key (kbd "C-M-l") 'backward-paragraph)
-  ;;(global-set-key (kbd "C-M-k") 'forward-paragraph)
-
-  (global-set-key (kbd "C-k") 'kill-line)
+  ;; line nativation/deleteion
+  (global-set-key (kbd "C-k") 'jj/delete-line)
+  (global-set-key (kbd "C-S-k") 'jj/delete-line-backward)
   (global-set-key (kbd "C-l") 'recenter-top-bottom)
   (global-set-key (kbd "C-j") 'nowrap-newline-and-indent)
+  (global-set-key (kbd "C-S-<backspace>") 'jj/delete-whole-line)
 
   ;; word deletion
-  (global-set-key (kbd "C-<delete>")    'kill-word-no-kill-ring)
-  (global-set-key (kbd "C-<backspace>") 'backward-kill-word-no-kill-ring)
+  (global-set-key (kbd "C-<delete>")    'jj/delete-word)
+  (global-set-key (kbd "C-<backspace>") 'jj/delete-word-backward)
 
   ;; terminal fu
   (global-set-key (kbd "M-[ d") 'left-word)  ;backward-word
@@ -1016,6 +1073,15 @@ See the header of this file for more information."
   ;; newline magic
   (global-set-key (kbd "<C-return>") 'newline)
   (global-set-key (kbd "C-c C-a") 'mark-whole-buffer)
+
+  ;; the best™ file chooser!!11
+  (use-package helm-for-files
+    :defer t
+    :init (progn
+            (global-set-key (kbd "C-x C-S-f") 'helm-for-files)
+            (spacemacs||set-helm-key "fF" helm-for-files)))
+
+  (global-set-key (kbd "C-x b") 'helm-mini)
 
   (global-set-key (kbd "C-x B") 'bury-buffer)
   (global-set-key (kbd "C-x E") 'apply-macro-to-region-lines)
@@ -1034,7 +1100,8 @@ See the header of this file for more information."
   ;; align the current region to = or whatever
   (global-set-key (kbd "M-A") 'align-current)
 
-  (global-set-key (kbd "C-c g") 'magit-status) ;git stuff
+  (global-set-key (kbd "C-c g") 'magit-status)
+  (global-set-key (kbd "C-x g") 'magit-status)
 
   ;;(global-set-key (kbd "C-v") 'cua-set-rectangle-mark) ;rectangle-select
   (global-set-key (kbd "M-SPC") 'just-one-space) ;fold space to 1
@@ -1057,8 +1124,8 @@ See the header of this file for more information."
   ;; force company completion:
   (global-set-key (kbd "S-<tab>") 'tab-indent-or-complete)
 
-  ;; code navigation jumping
-  (jj/codenav-keybinds)
+  ;; TODO: wrap the xref--marker-ring so we can go back and forward with M-, and M-.
+  ;; also replace the evil-normal-state-map binding so we don't need to enter insert mode then...
 
   ;;unset unneeded keys
   ;;(global-unset-key (kbd "C-t")) ; annoying character swapping
@@ -1149,7 +1216,9 @@ See the header of this file for more information."
                                  (statement-case-open after)))
       (c-offsets-alist . (
                           ; documentation:
-                          ; https://www.gnu.org/software/emacs/draft/manual/html_node/ccmode/Syntactic-Symbols.html
+                          ; https://www.gnu.org/software/emacs/manual/html_node/ccmode/c_002doffsets_002dalist.html
+                          ; symbols:
+                          ; https://www.gnu.org/software/emacs/manual/html_node/ccmode/Syntactic-Symbols.html
                           ;
                           ; arg indent helper funcs: c-lineup-*
                           ; arglist = indent to matching (|here, stuff
@@ -1161,6 +1230,7 @@ See the header of this file for more information."
                           (arglist-cont          . 0)   ; wrapped function args: func(\nthisone
                                                         ; wrapped function args after func(arg,\nthisone:
                           (arglist-cont-nonempty . (max c-lineup-arglist
+                                                        c-lineup-argcont
                                                         c-lineup-string-cont
                                                         c-lineup-cascaded-calls))
                           (arglist-close         . 0)   ; intentation of ) which closes tabbed args
@@ -1188,9 +1258,12 @@ See the header of this file for more information."
                           (member-init-cont      . c-lineup-multi-inher)   ; further members
                           (statement             . 0)
                           (statement-block-intro . +)   ; line in if () {\nthisline
+                                                        ; int a =\nthisone or return B{\nthisone
+                                                        ; or B{asdf +\nthisone
                           (statement-cont        . (max c-lineup-assignments
                                                         c-lineup-cascaded-calls
                                                         c-lineup-string-cont))
+                          (stream-op             . c-lineup-streamop)
                           (substatement          . +)
                           (substatement-label    . 0)
                           (substatement-open     . 0)
@@ -1233,6 +1306,13 @@ See the header of this file for more information."
                                      (member-init-intro . ++)
                                      (inlambda . 0)   ; lambda function body
                                      (statement-cont . llvm-lineup-statement)))))
+
+  ;; google c++ style
+  ;; https://github.com/google/styleguide/blob/gh-pages/google-c-style.el
+  ;; installed as melpa package
+  ;(eval-when-compile (require 'google-c-style))
+  (require 'google-c-style)
+  (c-add-style "Google" google-c-style t)
   )
 ;;; end coding style definitions
 
@@ -1247,11 +1327,36 @@ See the header of this file for more information."
     (auto-revert-mode t)
     (idle-highlight-mode t)  ;; idle-highlight word under cursor
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
+    (jj/lsp-enable)
+    )
+
+  (defun jj/lsp-enable ()
+    ;; for c++, use ccls-lsp
+    (setq lsp-mode t
+          lsp-prefer-flymake nil
+          lsp-enable-indentation nil       ; don't ask the language server for indentations
+          lsp-enable-imenu nil
+          lsp-enable-xref t
+          lsp-headerline-breadcrumb-enable-diagnostics nil
+          company-lsp-async t
+          company-lsp-cache-candidates 'auto
+          company-minimum-prefix-length 1  ;; lsp does the lookup :)
+          company-idle-delay 0.0) ;; default is 0.2
+
+    (jj/codenav-keybinds)
     )
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; special language-specific hooks
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  ;; example .dir-locals.el file for linux repos:
+  ;; (
+  ;;  (nil . ((indent-tabs-mode . t)
+  ;;          (tab-width . 8)))
+  ;;  (c-mode . ((c-file-style . "linux-kernel")))
+  ;;  (c++-mode . ((c-file-style . "linux-kernel")))
+  ;;  )
 
   ;; c-like-language setup
   (defun jj/cstyle-hook ()
@@ -1272,27 +1377,11 @@ See the header of this file for more information."
     (c-toggle-auto-newline nil) ; no automatic
     (c-toggle-auto-state nil)   ; newlines
 
-    ;; kernel code style: tabwidth=8, kernelstyle
-    (when
-        (and buffer-file-name
-             (string-match
-              (expand-file-name "/usr/src/linux") buffer-file-name))
-      (c-set-style "linux-kernel")
-
-      (setq tab-width 8
-            indent-tabs-mode t))
-
-    ;; ccls-lsp language server features
-    (setq lsp-mode t
-          lsp-prefer-flymake nil
-          lsp-enable-indentation nil       ; don't ask the language server for indentations
-          company-lsp-async t
-          company-lsp-cache-candidates 'auto)
-
     ;; keybindings for clike languages
     (jj/cstyle-keybinds)
 
     ;; smart tabs: mix tabs and spaces the right way
+    (smart-tabs-mode)
     (smart-tabs-advice c-indent-line c-basic-offset)
     (smart-tabs-advice c-indent-region c-basic-offset)
     )
@@ -1300,7 +1389,7 @@ See the header of this file for more information."
 
   ;; hook for all c-like languages
   (defun jj/c-base-hook ()
-    (setq flycheck-gcc-language-standard "c++17")
+    (setq flycheck-gcc-language-standard "c++20")
 
     ;; c-codingstyle
     (jj/cstyle-hook)
@@ -1316,7 +1405,7 @@ See the header of this file for more information."
     (font-lock-add-keywords
       nil '(
             ;; missing C++ keywords
-            ("\\<\\(static_assert\\|concept\\|requires\\|consteval\\|co_await\\|co_yield\\|co_return\\)\\>" . font-lock-keyword-face)
+            ("\\<\\(static_assert\\|concept\\|requires\\|consteval\\|co_await\\|co_yield\\|co_return\\|export\\|import\\|module\\)\\>" . font-lock-keyword-face)
 
             ;; custom defined types
             ("\\<[A-Za-z_]+[A-Za-z_0-9]*_t\\>" . font-lock-type-face)
@@ -1342,12 +1431,14 @@ See the header of this file for more information."
           lsp-signature-render-documentation t)
 
     ;; smart tabs
+    (smart-tabs-mode)
     (smart-tabs-advice py-indent-line py-indent-offset)
     (smart-tabs-advice py-newline-and-indent py-indent-offset)
     (smart-tabs-advice py-indent-region py-indent-offset))
 
   ;; elisp
   (defun jj/lisp-coding-hook ()
+    (jj/codenav-keybinds)
     (setq indent-tabs-mode nil)
     (setq tab-width 8)
     (prettify-symbols-mode))
@@ -1360,22 +1451,31 @@ See the header of this file for more information."
 
   ;; TeX
   (defun jj/latex-coding-hook ()
+
+    (message "custom latex config loading...")
+
     ;; set latex indent offset so it doesn't fuck up
     ;; (i.e. use values != n*tab-width)
     (setq TeX-engine 'default    ;; or xetex
           tab-width 4
           fill-column 76
           LaTeX-indent-level 4
-          LaTeX-item-indent -4
+          LaTeX-item-indent 0
           indent-tabs-mode nil
           TeX-parse-self t  ;; enable parse on load
           TeX-auto-save t   ;; enable parse on save
           TeX-PDF-mode t
           reftex-plug-into-AUCTeX t
-          company-minimum-prefix-length 2) ;; complpletes start with 2 chars already
+          company-minimum-prefix-length 2) ;; so completes start with 2 chars already
 
-    ;; no long line highlight
-    (setq whitespace-style (delete 'lines-tail whitespace-style))
+    ;; don't highlight long lines
+    ;; whitespace-highlight may not be initialized yet, thus handle both cases..
+    (let ((no-lines-tail (lambda ()
+                           (setq whitespace-style (delete 'lines-tail whitespace-style)))))
+      (if (boundp 'whitespace-style)
+        (funcall no-lines-tail)
+        (progn
+          (add-hook 'global-whitespace-mode-hook no-lines-tail))))
 
     (setq-default TeX-master nil) ; query for master file
     (visual-line-mode t)
@@ -1399,10 +1499,10 @@ See the header of this file for more information."
 
   ;; BibTeX
   (defun jj/bibtex-coding-hook ()
-    (setq tab-width 2)
-    (setq indent-tabs-mode nil)
-    (setq bibtex-comma-after-last-field t)
-    (setq bibtex-align-at-equal-sign t))
+    (setq tab-width 2
+          indent-tabs-mode nil
+          bibtex-comma-after-last-field t
+          bibtex-align-at-equal-sign t))
 
 
   ;; html
@@ -1419,6 +1519,7 @@ See the header of this file for more information."
   ;; vhdl
   (defun jj/vhdl-coding-hook ()
     (setq indent-tabs-mode nil)
+    (smart-tabs-mode)
     (smart-tabs-advice vhdl-indent-line vhdl-basic-offset)
     (setq vhdl-indent-tabs-mode t))
 
@@ -1449,6 +1550,7 @@ See the header of this file for more information."
           tab-width 4
           sqlind-basic-offset 4)
 
+    (smart-tabs-mode)
     (smart-tabs-advice sqlind-indent-line sqlind-basic-offset))
 
   (defun jj/sql-interactive-mode-hook ()
@@ -1514,6 +1616,10 @@ See the header of this file for more information."
 
   ;(with-eval-after-load 'company
   ;  (company-posframe-mode))
+
+  ;; file suffix assignments to automatic mode loading
+  ;(add-to-list 'auto-mode-alist '("\\.nyan\\'" . nyan-mode))
+  (add-to-list 'auto-mode-alist '("\\.tex\\'" . LaTeX-mode))
   )
 
 ;; we have a graphical window
@@ -1569,15 +1675,18 @@ configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
-  (message "initializing stuff")
-  ;; debugging n stuff
-  ;(setq debug-on-error t)
+  (message "initializing user code...")
+  ;; for debugging this file and emacs itself
+  (setq debug-on-error t)
+  ;; to watch variable writes, there's M-x debug-watch
+  ;(debug-watch 'indent-line-function)
 
   ;; store customizations in extra file
   (setq custom-file "~/.spacemacs.d/custom.el")
 
+  ;; mode hooks need to be here since user-config is executed
+  ;; after command-line-provided files' modes are initialized.
   (jj/mode-hooks)
-
   )
 
 (defun dotspacemacs/user-load ()
@@ -1594,7 +1703,7 @@ configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
 
-  (message "loading user config")
+  (message "loading user config...")
   (jj/modes)
   (jj/defaults)
   (jj/display-setup)

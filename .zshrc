@@ -77,7 +77,6 @@ autoload -U bashcompinit
 bashcompinit
 ########################################
 
-
 ############################
 # aliases for stuff
 ############################
@@ -93,11 +92,6 @@ Darwin)
 	ON_MAC=1
 	;;
 esac
-
-# wrap vim to support file:linenumner
-if [[ -x $homebindir/viml ]]; then
-	alias vim=viml
-fi
 
 alias woman="man"
 compdef woman=man 2> /dev/null
@@ -203,14 +197,36 @@ alias chown='chown --preserve-root'
 alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
 
-(( $ON_LINUX )) && alias ls=' ls --color=auto'
-(( $ON_MAC )) && alias ls=' ls -G'
+(( $ON_LINUX )) && alias ls='ls --color=auto'
+(( $ON_MAC )) && alias ls='ls -G'
 
 alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -delete"
 alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
 alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.argv[1]))"'
 alias jsc="js -C ."  # json coloring
 hash colordiff 2>/dev/null && alias diff='colordiff' || alias diff='diff --color=auto'
+alias g++std20='g++ -std=c++20 -Wall -Wextra -pedantic -pthread -fcoroutines'
+
+# vim
+#
+
+hash nvim 2>/dev/null && alias vim='nvim'
+hash nvim 2>/dev/null && alias vimdiff='nvim -d'
+
+# wrap vim to support file:linenumner
+if [[ -x $homebindir/viml ]]; then
+	alias vim=viml
+fi
+
+# conffiles management git stuff
+# the git bare repo is in ~/.conffiles.git
+alias conffiles="git --work-tree=$HOME --git-dir=$HOME/.conffiles.git"
+function confclone() {
+	git clone --separate-git-dir=$HOME/.conffiles.git $1 /tmp/conffiles-workdir  && \
+	mv /tmp/conffiles-workdir/{.*,*} $HOME/  && \
+	rmdir /tmp/conffiles-workdir  && \
+	conffiles config status.showUntrackedFiles no
+}
 
 
 #####################################
@@ -399,30 +415,18 @@ function gccinvok() {
 	echo "" | gcc -v -E $* - 2>&1 | grep cc1
 }
 
-# run shell as user, with benefits of env_keep of sudo
-function sudosh() {
-	local function usage() {
-		echo "sudosh <user>"
-		echo "run the current shell as another user"
-	}
-	if [[ $# -ge 2 ]]; then
-		usage
-		return
-	elif [[ $1 == "-h" || $1 == "--help" ]]; then
-		usage
-		return
-	elif [[ x$1 != "x" ]]; then
-		local user="$1"
-	else
-		local user="root"
-	fi
-
-	exec sudo -u $user $SHELL
-}
 
 # just return the fucking ip address
 function getip() {
-	local ip=$(dig +short "$1" | tail -n1)
+	qtype="A"
+	if [[ "$1" == "-6" ]]; then
+		qtype="AAAA"
+		shift
+	elif [[ "$1" == "-4" ]]; then
+		qtype="A"
+		shift
+	fi
+	local ip=$(dig +short "$qtype" "$1" | tail -n1)
 	(test -n $ip && echo $ip) || return 1
 }
 
@@ -681,7 +685,9 @@ alias help=run-help
 HISTFILE=~/.zsh-histfile
 HISTSIZE=80000
 SAVEHIST=$HISTSIZE
+HISTORY_IGNORE="(ls|pwd|exit|cd ..)"
 setopt append_history share_history extended_history histverify histignorespace histignoredups
+histsearch() { fc -lim "*$@*" 0 }
 
 # directory history and stack
 DIRSTACKSIZE=16
