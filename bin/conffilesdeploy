@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# set up the conffiles repo after it was cloned somewhere
+# and you executed this script
+#
+# basically moves the git repo contents to ~
+#
+# (c) 2021 Jonas Jelten <jj@sft.lol>
+# GPLv3 or later
+
+set -e
+
+echo "setting up conffiles"
+
+BINDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+# check if not already installed
+if [[ -f $HOME/.conffiles.git/HEAD ]]; then
+	echo "~/.conffiles.git already exist"
+	exit 1
+fi
+
+CONFROOT=$(cd "$BINDIR/.." && pwd)
+cd $CONFROOT
+
+echo "moving from $(pwd) to $HOME..."
+
+# convenience git settings
+git config status.showUntrackedFiles no
+
+echo "moving git dir..."
+mv -v .git "$HOME/.conffiles.git"
+
+echo "moving config files..."
+GLOBIGNORE=".:.."
+mv -iv * "$HOME"
+
+cd $HOME
+# it's empty now!
+rmdir $CONFROOT
+
+echo "setup done!"

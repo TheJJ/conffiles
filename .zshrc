@@ -148,10 +148,10 @@ alias dd="dd status=progress"
 alias file='file -L'
 alias xseltoclip="xclip -o | xclip -i -selection clipboard; xclip -o"
 alias xcliptosel="xclip -selection clipboard -o | xclip -i; xclip -selection clipboard -o"
-alias cls="echo -en \\\\033c"
+alias cls="echo -en \\\\033c"  # clear screen and scrollback
 alias scrolltop="echo -en '\x1b]720;99999\x07'"       # urxvt special command
 alias scrollbottom="echo -en '\x1b]721;99999\x07'"    # urxvt even more special command
-alias rcp="rsync -aHAXP --append-verify"
+alias rcp="rsync -aHAXP --append-verify"  # yes, this shadows the real rcp
 compdef rcp=rsync 2> /dev/null
 alias rmirror="rsync --recursive --links --perms --times --timeout 180 --safe-links --delete-after --delay-updates --delete --force"
 compdef rmirror=rsync 2> /dev/null
@@ -207,9 +207,8 @@ alias jsc="js -C ."  # json coloring
 hash colordiff 2>/dev/null && alias diff='colordiff' || alias diff='diff --color=auto'
 alias g++std20='g++ -std=c++20 -Wall -Wextra -pedantic -pthread -fcoroutines'
 
-# vim
-#
 
+# vim
 hash nvim 2>/dev/null && alias vim='nvim'
 hash nvim 2>/dev/null && alias vimdiff='nvim -d'
 
@@ -221,11 +220,13 @@ fi
 # conffiles management git stuff
 # the git bare repo is in ~/.conffiles.git
 alias conffiles="git --work-tree=$HOME --git-dir=$HOME/.conffiles.git"
+compdef conffiles=git 2> /dev/null
 function confclone() {
-	git clone --separate-git-dir=$HOME/.conffiles.git $1 /tmp/conffiles-workdir  && \
-	mv /tmp/conffiles-workdir/{.*,*} $HOME/  && \
-	rmdir /tmp/conffiles-workdir  && \
-	conffiles config status.showUntrackedFiles no
+	test -d "$HOME/.conffiles.git" && echo "you already have ~/.conffiles.git repo" && return
+	echo "cloning and deploying config files..."
+	# --separate-git-dir=$HOME/.conffiles.git
+	git clone $1 /tmp/conffiles-workdir  && \
+		/tmp/conffiles-workdir/conffilesdeploy
 }
 
 
