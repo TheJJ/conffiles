@@ -2,7 +2,7 @@
 " JJ's vimrc
 "
 " released under the GPLv3 or later
-" (c) 2008 - 2019 Jonas Jelten
+" (c) 2008 - 2021 Jonas Jelten
 
 
 syntax on
@@ -33,6 +33,7 @@ set textwidth=0                    "no auto wrapping
 set wrapmargin=0                   "really no auto wrapping
 set scrolloff=4                    "lines to keep visible when scrolling
 set formatoptions-=cro             "no 'helpful' comment continuation
+set title                          "set x11 window title
 
 filetype plugin on                 "per-filetype settings
 filetype indent on                 "per-filetype indentation
