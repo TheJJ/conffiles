@@ -62,7 +62,8 @@ This function should only modify configuration layer settings."
             gtags-enable-by-default nil)
      (haskell :variables
               haskell-completion-backend 'intero)
-     helm
+     (helm :variables
+           helm-enable-auto-resize t)
      html
      javascript
      (latex :variables
@@ -698,8 +699,9 @@ See the header of this file for more information."
   (delete-selection-mode t)
   (display-battery-mode t)
   (xterm-mouse-mode t)
-  (icomplete-mode t)
   (editorconfig-mode t)
+  (auto-revert-mode t)
+  (idle-highlight-mode t)  ;; idle-highlight word under cursor
 
   (put 'scroll-left 'disabled nil)
   (put 'upcase-region 'disabled nil)
@@ -1324,8 +1326,6 @@ See the header of this file for more information."
 (defun jj/mode-hooks ()
   ;; main coding configuration function
   (defun jj/coding-hook ()
-    (auto-revert-mode t)
-    (idle-highlight-mode t)  ;; idle-highlight word under cursor
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
     (jj/lsp-enable)
     )
@@ -1676,10 +1676,12 @@ It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
   (message "initializing user code...")
-  ;; for debugging this file and emacs itself
-  (setq debug-on-error t)
+  ;; for debugging whatever error occurs in this file and emacs itself
+  (setq debug-on-error nil)
   ;; to watch variable writes, there's M-x debug-watch
   ;(debug-watch 'indent-line-function)
+  ;; to debug slowness somewhere, use M-x profiler-start, and profiler-report!
+  ;; To debug on C-g, use M-x toggle-debug-on-quit
 
   ;; store customizations in extra file
   (setq custom-file "~/.spacemacs.d/custom.el")
