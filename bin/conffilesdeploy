@@ -5,6 +5,9 @@
 #
 # basically moves the git repo contents to ~
 #
+# this once again is a bash script that should not be in bash,
+# but unfortunately it grew. you know how that happens.
+#
 # (c) 2021 Jonas Jelten <jj@sft.lol>
 # GPLv3 or later
 
@@ -23,17 +26,64 @@ fi
 CONFROOT=$(cd "$BINDIR/.." && pwd)
 cd $CONFROOT
 
-echo "moving from $(pwd) to $HOME..."
-
-# convenience git settings
+# don't show the whole homefolder as untracked
 git config status.showUntrackedFiles no
 
-echo "moving git dir..."
-mv -v .git "$HOME/.conffiles.git"
+echo "moving from $(pwd) to $HOME..."
 
 echo "moving config files..."
 GLOBIGNORE=".:.."
-mv -iv * "$HOME"
+for f in *; do
+	if [[ "$f" == ".git" ]]; then
+		continue
+	fi
+	target="$HOME/$f"
+	mv_ok=true
+
+	# all this now is for handling existing files
+	if [[ -e "$target" || -h "$target" ]]; then
+
+		# symlink cleanup
+		if [[ -h "$target" ]]; then
+			echo "removing previous symlink at $target -> $(readlink -f $target)"
+
+			if [[ -e "$target" ]]; then
+				rm -i "$target"
+			else
+				rm "$target"
+			fi
+		fi
+
+		# we would move a directory which already exists
+		# so we need to merge it
+		if [[ -d "$f" ]]; then
+			mv_ok=false
+			find "$f" -type f -o -type l | while read dirfile; do
+				target_dirfile="$HOME/$dirfile"
+				if [[ -h "$target_dirfile" ]]; then
+					echo "remove previous symlink in directory at $target_dirfile -> $(readlink -f $target_dirfile)?"
+					if [[ -e "$target_dirfile" ]]; then
+						rm -i "$target_dirfile"
+					else
+						rm "$target_dirfile"
+					fi
+				fi
+				echo "merging $dirfile to $target_dirfile"
+				mkdir -p -v "$(dirname $target_dirfile)"
+				mv -iv -T "$dirfile" "$target_dirfile"
+				echo "done merging file."
+			done
+		fi
+	fi
+
+	if [[ "$mv_ok" == "true" ]]; then
+		echo "moving $f to $target"
+		mv -iv -T "$f" "$target"
+	fi
+done
+
+echo "moving git dir..."
+mv -v .git "$HOME/.conffiles.git"
 
 cd $HOME
 # it's empty now!
