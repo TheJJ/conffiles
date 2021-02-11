@@ -63,7 +63,7 @@ This function should only modify configuration layer settings."
      (haskell :variables
               haskell-completion-backend 'intero)
      (helm :variables
-           helm-enable-auto-resize t)
+           helm-enable-auto-resize nil)
      html
      javascript
      (latex :variables
@@ -1620,6 +1620,7 @@ See the header of this file for more information."
   ;; file suffix assignments to automatic mode loading
   ;(add-to-list 'auto-mode-alist '("\\.nyan\\'" . nyan-mode))
   (add-to-list 'auto-mode-alist '("\\.tex\\'" . LaTeX-mode))
+  (add-to-list 'auto-mode-alist '("\\.tikz\\'" . LaTeX-mode))
   )
 
 ;; we have a graphical window
