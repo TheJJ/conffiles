@@ -1152,6 +1152,40 @@ See the header of this file for more information."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;; closing template <> should line up.
+(defun c-lineup-c++-template-args-cont (langelem)
+  "Indentation of template params for a closing '>'.
+return values:
+0   : If the first non-whitespace char is '>'. Line it up under 'template'.
+nil : Otherwise, return nil and run next lineup function."
+  (save-excursion
+    (beginning-of-line)
+    (if (re-search-forward "^[\t ]*>" (line-end-position) t)
+        0)))
+
+
+(defun jj/c-lineup-2nd-brace-entry-in-arglist (langelem)
+  "fixed version of c-lineup-2nd-brace-entry-in-arglist, waiting for upstream change."
+  ;; brace-list-intro and brace-list-entry are both present for the second
+  ;; entry of the list when the first entry is on the same line as the opening
+  ;; brace.
+  (and (assq 'brace-list-intro c-syntactic-context)
+       (assq 'brace-list-entry c-syntactic-context)
+       (or (assq 'arglist-cont-nonempty c-syntactic-context)       ; "(" earlier on the line
+           (save-excursion                                         ; "{" earlier on the line
+             (goto-char (c-langelem-pos
+                         (assq 'brace-list-entry c-syntactic-context)))
+             (and
+              (eq (c-backward-token-2
+                   1 nil
+                   (c-point 'bol (c-langelem-pos
+                                  (assq 'brace-list-entry
+                                        c-syntactic-context))))
+                  0)
+              (eq (char-after) ?{))))
+       'c-lineup-arglist-intro-after-paren))
+
+
 (defun jj/create-codestyles ()
   ;; codestyle definitions
 
@@ -1164,17 +1198,6 @@ See the header of this file for more information."
                          (arglist-close . 0)
                          ))
      ))
-
-  ;; closing template <> should line up.
-  (defun c++-template-args-cont (langelem)
-    "Indentation of template params for a closing '>'.
-    return values:
-    0   : If the first non-whitespace char is '>'. Line it up under 'template'.
-    nil : Otherwise, return nil and run next lineup function."
-    (save-excursion
-      (beginning-of-line)
-      (if (re-search-forward "^[\t ]*>" (line-end-position) t)
-        0)))
 
   ;; sft coding style
   (defconst sft-c-style
@@ -1231,16 +1254,23 @@ See the header of this file for more information."
                           (arglist-intro         . +)   ; first arg in newline
                           (arglist-cont          . 0)   ; wrapped function args: func(\nthisone
                                                         ; wrapped function args after func(arg,\nthisone:
-                          (arglist-cont-nonempty . (max c-lineup-arglist
-                                                        c-lineup-argcont
-                                                        c-lineup-string-cont
-                                                        c-lineup-cascaded-calls))
+                          (arglist-cont-nonempty . (first c-lineup-string-cont
+                                                          c-lineup-cascaded-calls
+                                                          ;c-lineup-argcont
+                                                          c-lineup-arglist))
                           (arglist-close         . 0)   ; intentation of ) which closes tabbed args
                           (block-open            . 0)   ; { to open a block
                           (block-close           . 0)   ; } after a block
-                          (brace-list-intro      . +)   ; first element in {\nthisone
-                                                        ;; this will be improved through emacs commit aa1a4cceca2d93d83c721ce83950230739073727
-                          (brace-list-entry      . 0)   ; other elements in {\nelem\nthisone
+                          (brace-list-open       . 0)
+                                                        ; first element in {\nthisone:
+                          (brace-list-intro      . (first jj/c-lineup-2nd-brace-entry-in-arglist
+                                                          c-lineup-class-decl-init-+
+                                                          +))
+                                                        ;; much improved through emacs commit aa1a4cceca2d93d83c721ce83950230739073727
+                                                        ; other elements in {\nelem\nthisone
+                          (brace-list-entry      . 0)
+                          (brace-list-close      . 0)   ; } of brace list
+                          (brace-entry-open      . 0)   ; {...,\n{thisone
                           (case-label            . 0)   ; case 1337:
                           (statement-case-open   . 0)   ; { after case 1337:
                           (statement-case-intro  . +)   ; code after case 1337:
@@ -1262,15 +1292,18 @@ See the header of this file for more information."
                           (statement-block-intro . +)   ; line in if () {\nthisline
                                                         ; int a =\nthisone or return B{\nthisone
                                                         ; or B{asdf +\nthisone
-                          (statement-cont        . (max c-lineup-assignments
-                                                        c-lineup-cascaded-calls
-                                                        c-lineup-string-cont))
+                                                        ; or return asdf +\nthisone
+                          (statement-cont        . (first c-lineup-string-cont
+                                                          c-lineup-cascaded-calls
+                                                          c-lineup-assignments
+                                                          +))
                           (stream-op             . c-lineup-streamop)
                           (substatement          . +)
                           (substatement-label    . 0)
                           (substatement-open     . 0)
-                          (template-args-cont    . (c++-template-args-cont
-                                                    c-lineup-template-args +))
+                          (template-args-cont    . (first c-lineup-c++-template-args-cont
+                                                          c-lineup-template-args
+                                                          +))
                           (topmost-intro         . 0)   ; indentation of file start
                           (topmost-intro-cont    . c-lineup-topmost-intro-cont)
                           (comment-intro         . c-lineup-comment)   ; start of comment
@@ -1410,6 +1443,12 @@ See the header of this file for more information."
             ;; custom defined types
             ("\\<[A-Za-z_]+[A-Za-z_0-9]*_t\\>" . font-lock-type-face)
             ))
+
+    ;; fix cc-mode indentation engine which doesn't use 'throw' as expression statement keyword
+    ;; basically we amend the definition of c-return-kwds for c++
+    ;; better would be to use c-make-keywords-re but it crashes as it needs c-nonsymbol-key
+    ;; this will hopefully be fixed "correctly" upstream.
+    (setq c-return-key "\\(\\(?:return\\|throw\\)\\)\\([^[:alnum:]_$]\\|$\\)")
     )
 
   ;; py
@@ -1678,7 +1717,7 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
   (message "initializing user code...")
   ;; for debugging whatever error occurs in this file and emacs itself
-  (setq debug-on-error nil)
+  ;(setq debug-on-error t)
   ;; to watch variable writes, there's M-x debug-watch
   ;(debug-watch 'indent-line-function)
   ;; to debug slowness somewhere, use M-x profiler-start, and profiler-report!
