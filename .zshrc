@@ -114,6 +114,7 @@ alias watch='watch -c'
 alias emacsnw='emacs -nw'
 alias emacsopen="emacsclient -n"      # reuse frame
 alias emacsopennew="emacsclient -n -c"  # new frame
+alias emacscc"emacs -batch -f batch-byte-compile"  # compile some file
 
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
@@ -228,6 +229,9 @@ function confclone() {
 	git clone $1 /tmp/conffiles-workdir  && \
 		/tmp/conffiles-workdir/conffilesdeploy
 }
+
+alias conffilestig="GIT_DIR=$HOME/.conffiles.git tig"
+compdef conffilestig=tig 2> /dev/null
 
 
 #####################################
