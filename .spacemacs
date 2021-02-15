@@ -49,8 +49,6 @@ This function should only modify configuration layer settings."
      (c-c++ :variables
             c-c++-default-mode-for-headers 'c++-mode
             c-c++-backend 'lsp-ccls)
-            ;c-c++-backend 'rtags
-            ;c-c++-enable-rtags-completion t)
      (cmake :variables
             cmake-enable-cmake-ide-support nil)
      csv
@@ -741,15 +739,22 @@ See the header of this file for more information."
         python-shell-interpreter "ipython3" ; tramp on remote-hosts needs ipython3 and python3-setuptools
         ;python-shell-interpreter-interactive-arg ""
         compilation-environment (quote ("TERM=xterm-256color"))
-        lsp-enable-on-type-formatting nil  ; using t funnily changes screen content whenever lsp thinks it can do "formatting"
-        lsp-enable-file-watchers nil       ; lsp server can do inotify itself, but that may slow emacs down (https://github.com/MaskRay/ccls/issues/354)
         tramp-ssh-controlmaster-options    ; synced with .ssh/config ControlMaster settings
           (concat "-o ControlPath=/tmp/ssh_mux_%%u@%%l_%%r@%%h:%%p "
                   "-o ControlMaster=auto -o ControlPersist=10")
-        lsp-diagnostic-package :none     ; disable lsp diagnostics for performance reasons (flycheck/flymake)
         helm-ff-file-name-history-use-recentf t
         history-delete-duplicates t      ; helm history duplicate removal
-        )
+
+        ;; lsp settings
+        lsp-enable-indentation nil       ; don't ask the language server for indentations
+        lsp-enable-imenu nil
+        lsp-enable-xref t
+        lsp-headerline-breadcrumb-enable-diagnostics nil
+        lsp-diagnostic-package :none     ; disable lsp diagnostics for performance reasons (flycheck/flymake)
+        lsp-enable-on-type-formatting nil  ; using t funnily changes screen content whenever lsp thinks it can do "formatting"
+        lsp-enable-file-watchers nil       ; lsp server can do inotify itself, but that may slow emacs down (https://github.com/MaskRay/ccls/issues/354)
+        company-minimum-prefix-length 1  ;; lsp does the lookup :)
+        company-idle-delay 0.0)
 
   ;; default mode for new buffers
   (setq-default major-mode 'text-mode)
@@ -759,9 +764,6 @@ See the header of this file for more information."
   (remove-hook 'c-mode-common-hook 'spacemacs//c-toggle-auto-newline )
 
   ;; indentation defaults
-  ;;(setq-default indent-tabs-mode t)
-  ;;(setq-default indent-line-function 'insert-tab)
-  ;;(setq-default tab-width 4)
   (setq-default whitespace-line-column 400)
 
   ;; hide modeline indicators
@@ -775,10 +777,8 @@ See the header of this file for more information."
   (spacemacs|diminish global-whitespace-mode)
   (spacemacs|diminish company-mode)
 
-
   ;; whitespace crimes
   (jj/whitespace-highlight)
-
 
   ;; backup files
   (setq make-backup-files nil
@@ -794,7 +794,6 @@ See the header of this file for more information."
         ;;make-backup-files nil ; backup~ files
         ;;auto-save-default nil ; #autosave# files
         )
-
 
   ;; utf-8 ftw
   (prefer-coding-system 'utf-8)
@@ -1186,6 +1185,45 @@ nil : Otherwise, return nil and run next lineup function."
        'c-lineup-arglist-intro-after-paren))
 
 
+(defun jj/c-looking-at-statement-block ()
+  "workaround variant for brace lists that contain a keyword."
+  ;; Point is at an opening brace.  If this is a statement block (i.e. the
+  ;; elements in the block are terminated by semicolons, or the block is
+  ;; empty, or the block contains a keyword) return non-nil.  Otherwise,
+  ;; return nil.
+  (let ((here (point)))
+    (prog1
+        (if (c-go-list-forward)
+            (let ((there (point)))
+              (backward-char)
+              (c-syntactic-skip-backward "^;," here t)
+              (cond
+               ((eq (char-before) ?\;) t)
+               ((eq (char-before) ?,) nil)
+               (t                       ; We're at (1+ here).
+                (cond
+                 ((progn (c-forward-syntactic-ws)
+                         (eq (point) (1- there))))
+                 ;((c-syntactic-re-search-forward c-keywords-regexp there t)) ;; workaround here
+                 ((c-syntactic-re-search-forward "{" there t t)
+                  (backward-char)
+                  (jj/c-looking-at-statement-block))
+                 (t nil)))))
+          (forward-char)
+          (cond
+           ((c-syntactic-re-search-forward "[;,]" nil t t)
+            (eq (char-before) ?\;))
+           ((progn (c-forward-syntactic-ws)
+                   (eobp)))
+           ((c-syntactic-re-search-forward c-keywords-regexp nil t t))
+           ((c-syntactic-re-search-forward "{" nil t t)
+            (backward-char)
+            (jj/c-looking-at-statement-block))
+           (t nil)))
+      (goto-char here))))
+(advice-add 'c-looking-at-statement-block :override #'jj/c-looking-at-statement-block)
+
+
 (defun jj/create-codestyles ()
   ;; codestyle definitions
 
@@ -1250,6 +1288,7 @@ nil : Otherwise, return nil and run next lineup function."
                           ; argcont = indent to (stuff, |here
                           ; casecaded calls = ->lol\n->stuff
                           ; absolute offset: [0]
+                          ; defaults are defined in cc-vars.el
                           (access-label          . -)   ; public: or private:
                           (arglist-intro         . +)   ; first arg in newline
                           (arglist-cont          . 0)   ; wrapped function args: func(\nthisone
@@ -1275,7 +1314,7 @@ nil : Otherwise, return nil and run next lineup function."
                           (statement-case-open   . 0)   ; { after case 1337:
                           (statement-case-intro  . +)   ; code after case 1337:
                           (cpp-macro             . [0])   ; #define, etcetc
-                          (defun-block-intro     . +)   ; beginning of keyword (...) { stuff  }
+                          (defun-block-intro     . +)   ; code in block: keyword (...) {\nthisone
                           (inclass               . +)   ; members of struct or class
                           (inexpr-class          . 0)   ; class declaration within expression
                           (inexpr-statement      . 0)   ; statement block within expression
@@ -1291,12 +1330,11 @@ nil : Otherwise, return nil and run next lineup function."
                           (statement             . 0)
                           (statement-block-intro . +)   ; line in if () {\nthisline
                                                         ; int a =\nthisone or return B{\nthisone
-                                                        ; or B{asdf +\nthisone
-                                                        ; or return asdf +\nthisone
+                                                        ; or B{bla +\nthisone
+                                                        ; TODO: return bla+\nthis should be indented to bla
                           (statement-cont        . (first c-lineup-string-cont
                                                           c-lineup-cascaded-calls
-                                                          c-lineup-assignments
-                                                          +))
+                                                          c-lineup-assignments))
                           (stream-op             . c-lineup-streamop)
                           (substatement          . +)
                           (substatement-label    . 0)
@@ -1351,30 +1389,25 @@ nil : Otherwise, return nil and run next lineup function."
   )
 ;;; end coding style definitions
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; loading stuff
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun jj/loadpath-discover ()
+  "here manual elisp load paths can be defined"
+  (let ((paths '("~/.emacs.d/lisp/cc-mode")))
+    (dolist (path paths)
+      (when (file-directory-p path)
+        (add-to-list 'load-path path)))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; mode hooks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun jj/mode-hooks ()
-  ;; main coding configuration function
+  ;; config for all prog-modes
   (defun jj/coding-hook ()
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
-    (jj/lsp-enable)
-    )
-
-  (defun jj/lsp-enable ()
-    ;; for c++, use ccls-lsp
-    (setq lsp-mode t
-          lsp-prefer-flymake nil
-          lsp-enable-indentation nil       ; don't ask the language server for indentations
-          lsp-enable-imenu nil
-          lsp-enable-xref t
-          lsp-headerline-breadcrumb-enable-diagnostics nil
-          company-lsp-async t
-          company-lsp-cache-candidates 'auto
-          company-minimum-prefix-length 1  ;; lsp does the lookup :)
-          company-idle-delay 0.0) ;; default is 0.2
 
     (jj/codenav-keybinds)
     )
@@ -1413,6 +1446,8 @@ nil : Otherwise, return nil and run next lineup function."
     ;; keybindings for clike languages
     (jj/cstyle-keybinds)
 
+    (display-line-numbers-mode t)
+
     ;; smart tabs: mix tabs and spaces the right way
     (smart-tabs-mode)
     (smart-tabs-advice c-indent-line c-basic-offset)
@@ -1443,12 +1478,6 @@ nil : Otherwise, return nil and run next lineup function."
             ;; custom defined types
             ("\\<[A-Za-z_]+[A-Za-z_0-9]*_t\\>" . font-lock-type-face)
             ))
-
-    ;; fix cc-mode indentation engine which doesn't use 'throw' as expression statement keyword
-    ;; basically we amend the definition of c-return-kwds for c++
-    ;; better would be to use c-make-keywords-re but it crashes as it needs c-nonsymbol-key
-    ;; this will hopefully be fixed "correctly" upstream.
-    (setq c-return-key "\\(\\(?:return\\|throw\\)\\)\\([^[:alnum:]_$]\\|$\\)")
     )
 
   ;; py
@@ -1725,6 +1754,9 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
   ;; store customizations in extra file
   (setq custom-file "~/.spacemacs.d/custom.el")
+
+  ;; load external packages
+  (jj/loadpath-discover)
 
   ;; mode hooks need to be here since user-config is executed
   ;; after command-line-provided files' modes are initialized.
