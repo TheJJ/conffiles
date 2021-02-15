@@ -114,7 +114,7 @@ alias watch='watch -c'
 alias emacsnw='emacs -nw'
 alias emacsopen="emacsclient -n"      # reuse frame
 alias emacsopennew="emacsclient -n -c"  # new frame
-alias emacscc"emacs -batch -f batch-byte-compile"  # compile some file
+alias emacscc="emacs -batch -no-site-file -f batch-byte-compile"  # compile some file(s)
 
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
