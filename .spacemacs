@@ -48,7 +48,7 @@ This function should only modify configuration layer settings."
      bibtex
      (c-c++ :variables
             c-c++-default-mode-for-headers 'c++-mode
-            c-c++-backend 'lsp-ccls)
+            c-c++-backend 'lsp-clangd)
      (cmake :variables
             cmake-enable-cmake-ide-support nil)
      csv
@@ -75,7 +75,8 @@ This function should only modify configuration layer settings."
           lsp-ui-doc-enable nil)
      (markdown :variables
                markdown-live-preview-engine 'vmd)
-     multiple-cursors
+     (multiple-cursors :variables
+                       multiple-cursors-backend 'evil-mc)
      org
      python
      (ranger :variables
@@ -92,8 +93,7 @@ This function should only modify configuration layer settings."
                      spell-checking-enable-auto-dictionary t
                      enable-flyspell-auto-completion nil)
 
-     (sql :variables
-          sql-capitalize-keywords t)
+     sql
      systemd
      (syntax-checking :variables
                       syntax-checking-enable-by-default nil
@@ -260,11 +260,11 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-new-empty-buffer-major-mode 'text-mode
 
    ;; Default major mode of the scratch buffer (default `text-mode')
-   dotspacemacs-scratch-mode 'text-mode
+   dotspacemacs-scratch-mode 'lisp-interaction-mode
 
    ;; If non-nil, *scratch* buffer will be persistent. Things you write down in
    ;; *scratch* buffer will be saved and restored automatically.
-   dotspacemacs-scratch-buffer-persistent nil
+   dotspacemacs-scratch-buffer-persistent t
 
    ;; If non-nil, `kill-buffer' on *scratch* buffer
    ;; will bury it instead of killing.
@@ -692,6 +692,7 @@ See the header of this file for more information."
 ;; setup (un)funny modes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun jj/modes ()
+  (message "activating modes...")
   (column-number-mode t)
   (cua-selection-mode t)
   (delete-selection-mode t)
@@ -729,6 +730,7 @@ See the header of this file for more information."
         blink-cursor-mode nil            ; don't blink the cursor
         mouse-yank-at-point t            ; paste as cursor instead of mouse position
         inhibit-startup-screen t
+        tab-always-indent t
         python-fill-docstring-style 'symmetric
         scrollbar-mode 'right
         backward-delete-char-untabify-method nil
@@ -742,8 +744,14 @@ See the header of this file for more information."
         tramp-ssh-controlmaster-options    ; synced with .ssh/config ControlMaster settings
           (concat "-o ControlPath=/tmp/ssh_mux_%%u@%%l_%%r@%%h:%%p "
                   "-o ControlMaster=auto -o ControlPersist=10")
-        helm-ff-file-name-history-use-recentf t
         history-delete-duplicates t      ; helm history duplicate removal
+        recentf-max-saved-items 1000
+
+        helm-ff-file-name-history-use-recentf nil
+        ido-use-virtual-buffers t        ; use recentf-buffers as virtually "open"
+        ido-enable-flex-matching t
+        ido-case-fold t
+        ido-file-extensions-order '(".c" ".cpp" ".h" ".py" ".tex" ".bib" ".hs")
 
         ;; lsp settings
         lsp-enable-indentation nil       ; don't ask the language server for indentations
@@ -754,7 +762,7 @@ See the header of this file for more information."
         lsp-enable-on-type-formatting nil  ; using t funnily changes screen content whenever lsp thinks it can do "formatting"
         lsp-enable-file-watchers nil       ; lsp server can do inotify itself, but that may slow emacs down (https://github.com/MaskRay/ccls/issues/354)
         company-minimum-prefix-length 1  ;; lsp does the lookup :)
-        company-idle-delay 0.0)
+        company-idle-delay 0.1)
 
   ;; default mode for new buffers
   (setq-default major-mode 'text-mode)
@@ -1104,7 +1112,6 @@ See the header of this file for more information."
   (global-set-key (kbd "C-c g") 'magit-status)
   (global-set-key (kbd "C-x g") 'magit-status)
 
-  ;;(global-set-key (kbd "C-v") 'cua-set-rectangle-mark) ;rectangle-select
   (global-set-key (kbd "M-SPC") 'just-one-space) ;fold space to 1
 
   (global-set-key (kbd "M-p") (lambda ()
@@ -1161,67 +1168,6 @@ nil : Otherwise, return nil and run next lineup function."
     (beginning-of-line)
     (if (re-search-forward "^[\t ]*>" (line-end-position) t)
         0)))
-
-
-(defun jj/c-lineup-2nd-brace-entry-in-arglist (langelem)
-  "fixed version of c-lineup-2nd-brace-entry-in-arglist, waiting for upstream change."
-  ;; brace-list-intro and brace-list-entry are both present for the second
-  ;; entry of the list when the first entry is on the same line as the opening
-  ;; brace.
-  (and (assq 'brace-list-intro c-syntactic-context)
-       (assq 'brace-list-entry c-syntactic-context)
-       (or (assq 'arglist-cont-nonempty c-syntactic-context)       ; "(" earlier on the line
-           (save-excursion                                         ; "{" earlier on the line
-             (goto-char (c-langelem-pos
-                         (assq 'brace-list-entry c-syntactic-context)))
-             (and
-              (eq (c-backward-token-2
-                   1 nil
-                   (c-point 'bol (c-langelem-pos
-                                  (assq 'brace-list-entry
-                                        c-syntactic-context))))
-                  0)
-              (eq (char-after) ?{))))
-       'c-lineup-arglist-intro-after-paren))
-
-
-(defun jj/c-looking-at-statement-block ()
-  "workaround variant for brace lists that contain a keyword."
-  ;; Point is at an opening brace.  If this is a statement block (i.e. the
-  ;; elements in the block are terminated by semicolons, or the block is
-  ;; empty, or the block contains a keyword) return non-nil.  Otherwise,
-  ;; return nil.
-  (let ((here (point)))
-    (prog1
-        (if (c-go-list-forward)
-            (let ((there (point)))
-              (backward-char)
-              (c-syntactic-skip-backward "^;," here t)
-              (cond
-               ((eq (char-before) ?\;) t)
-               ((eq (char-before) ?,) nil)
-               (t                       ; We're at (1+ here).
-                (cond
-                 ((progn (c-forward-syntactic-ws)
-                         (eq (point) (1- there))))
-                 ;((c-syntactic-re-search-forward c-keywords-regexp there t)) ;; workaround here
-                 ((c-syntactic-re-search-forward "{" there t t)
-                  (backward-char)
-                  (jj/c-looking-at-statement-block))
-                 (t nil)))))
-          (forward-char)
-          (cond
-           ((c-syntactic-re-search-forward "[;,]" nil t t)
-            (eq (char-before) ?\;))
-           ((progn (c-forward-syntactic-ws)
-                   (eobp)))
-           ((c-syntactic-re-search-forward c-keywords-regexp nil t t))
-           ((c-syntactic-re-search-forward "{" nil t t)
-            (backward-char)
-            (jj/c-looking-at-statement-block))
-           (t nil)))
-      (goto-char here))))
-(advice-add 'c-looking-at-statement-block :override #'jj/c-looking-at-statement-block)
 
 
 (defun jj/create-codestyles ()
@@ -1302,7 +1248,7 @@ nil : Otherwise, return nil and run next lineup function."
                           (block-close           . 0)   ; } after a block
                           (brace-list-open       . 0)
                                                         ; first element in {\nthisone:
-                          (brace-list-intro      . (first jj/c-lineup-2nd-brace-entry-in-arglist
+                          (brace-list-intro      . (first c-lineup-2nd-brace-entry-in-arglist
                                                           c-lineup-class-decl-init-+
                                                           +))
                                                         ;; much improved through emacs commit aa1a4cceca2d93d83c721ce83950230739073727
@@ -1409,6 +1355,7 @@ nil : Otherwise, return nil and run next lineup function."
   (defun jj/coding-hook ()
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
 
+    (jj/modes)
     (jj/codenav-keybinds)
     )
 
@@ -1426,6 +1373,12 @@ nil : Otherwise, return nil and run next lineup function."
 
   ;; c-like-language setup
   (defun jj/cstyle-hook ()
+
+    ;; standalone cc cc-mode doesn't run prog-mode-hook
+    ;; since it doesn't derive prog-mode
+    (when (not (provided-mode-derived-p 'c-mode '(prog-mode)))
+      (spacemacs/run-prog-mode-hooks))
+
     ;; create codestyle
     (jj/create-codestyles)
 
@@ -1433,6 +1386,13 @@ nil : Otherwise, return nil and run next lineup function."
     (with-library
      clang-format
      (global-set-key (kbd "C-M-<tab>") 'clang-format-region))
+
+    ;; restore so we indent line or region.
+    ;; (does no completion since we set tab-always-indent)
+    ;; cc-mode replaces this the other way round.
+    (substitute-key-definition 'c-indent-command
+                               'indent-for-tab-command
+                               c-mode-base-map)
 
     ;; default to sft style
     (c-set-style "sftstyle")
@@ -1778,7 +1738,6 @@ Put your configuration code here, except for variables that should be set
 before packages are loaded."
 
   (message "loading user config...")
-  (jj/modes)
   (jj/defaults)
   (jj/display-setup)
   (jj/mousescroll)
