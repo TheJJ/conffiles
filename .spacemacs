@@ -875,12 +875,97 @@ See the header of this file for more information."
 ;; code symbol navigation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; xref--marker-ring rotation
+;; so you can navigate back and forward over xref findings.
+;; use-case: follow multiple definitions, go back to the beginning,
+;;           and then easily go forward to each definition.
+
+(defvar jj/xref-marker-slide 0
+  "seek position tracking in the xref marker ring.
+ a new xref finding resets the slide.
+ slide: 0 = current position
+        1 = previous position, i.e. last jump to xref mark
+        2 = xref mark position before that")
+
+(defvar jj/xref-marker-ring-has-backjump nil
+  "t if the last point position was pushed to xref marker ring.
+ this is done when moving backward the first time after doing
+ xref jumps.")
+
+(defun jj/xref-push-marker-stack-slide-reset (orig &rest args)
+  "forget the future xref jumps before storing the new xref jump position."
+  (dotimes (i jj/xref-marker-slide)
+    ;; remove all walked-backward marker ring entries
+    (ring-remove xref--marker-ring 0))
+  ;; reset the slides
+  (setq jj/xref-marker-slide 0)
+  (setq jj/xref-marker-ring-has-backjump nil)
+  (apply orig args))
+
+;; whenever we push, we drop the 'history'
+(advice-add 'xref-push-marker-stack :around 'jj/xref-push-marker-stack-slide-reset)
+
+
+(defun jj/xref-goto-marker-slide (slide)
+  (let* ((ring xref--marker-ring)
+         (marker (ring-ref ring slide)))
+    (switch-to-buffer (or (marker-buffer marker)
+                          (user-error "The marked buffer has been deleted")))
+    (goto-char (marker-position marker))
+    ;(set-marker marker nil nil)
+    (run-hooks 'xref-after-return-hook)))
+
+
+(defun jj/xref-jump-marker-ring-forward ()
+  (interactive)
+  (when (= jj/xref-marker-slide 0)
+    (user-error "Can't go xref-forward at front positon."))
+  (let ((ring xref--marker-ring))
+    (when (ring-empty-p ring)
+      (user-error "Marker stack is empty"))
+
+    (let ((newslide (- jj/xref-marker-slide 1)))
+      (jj/xref-goto-marker-slide newslide)
+      (setq jj/xref-marker-slide newslide))))
+
+
+(defun jj/xref-jump-marker-ring-backward ()
+  "Move one step backward in the xref marker ring, i.e. go to
+ where \\[xref-find-definitions] was last invoked."
+  (interactive)
+  (let ((ring xref--marker-ring))
+    (when (ring-empty-p ring)
+      (user-error "Marker stack is empty"))
+    (when (>= (+ jj/xref-marker-slide 1) (ring-length ring))
+      (user-error "Can't go xref-backward beyond marker stack."))
+
+    (when (not jj/xref-marker-ring-has-backjump)
+      ;; when we're at the latest jump point (which resets has-backjump to nil)
+      ;; push the current point marker to the ring so we can go back to it
+      (ring-insert xref--marker-ring (point-marker))
+      (setq jj/xref-marker-ring-has-backjump t))
+
+    (let ((newslide (+ jj/xref-marker-slide 1)))
+      (jj/xref-goto-marker-slide newslide)
+      (setq jj/xref-marker-slide newslide))))
+
+
 (defun jj/codenav-keybinds ()
   (interactive)
   (local-set-key [C-mouse-1] 'xref-find-definitions)
   (local-set-key (kbd "M-g d") 'xref-find-definitions)
   (local-set-key (kbd "M-g D") 'xref-find-definitions-other-frame)
   (local-set-key (kbd "M-g f") 'xref-find-references)
+
+  ;; default: m,: pop-tagmark in slime-nav-mode-map ->xref-pop-marker-stack
+  ;; m. evil-repeat-pop-next in evil-normal-state-map
+  ;; m. evil-slime-nav-find-elisp-thing-at-point
+  ;; m. xref-find-definitions in global-map
+  ;; navigation on marker ring to go back and forward by xrefs
+  (local-set-key (kbd "M-,") 'jj/xref-jump-marker-ring-backward)
+  (local-set-key (kbd "M-.") 'jj/xref-jump-marker-ring-forward)
+  ;; TODO: fix evil-normal map M-.
+
   ;; lsp-ui-peek-mode does not highlight the relevant line,
   ;; so it's currently rather useless, but may be cool in the future.
   ;(local-set-key (kbd "M-g D") 'lsp-ui-peek-find-definitions)
@@ -1131,9 +1216,6 @@ See the header of this file for more information."
 
   ;; force company completion:
   (global-set-key (kbd "S-<tab>") 'tab-indent-or-complete)
-
-  ;; TODO: wrap the xref--marker-ring so we can go back and forward with M-, and M-.
-  ;; also replace the evil-normal-state-map binding so we don't need to enter insert mode then...
 
   ;;unset unneeded keys
   ;;(global-unset-key (kbd "C-t")) ; annoying character swapping
@@ -1454,9 +1536,12 @@ nil : Otherwise, return nil and run next lineup function."
     (remove-hook 'anaconda-mode-response-read-fail-hook
                  'anaconda-mode-show-unreadable-response)
 
-    ;; limit docstring line count
-    (setq lsp-signature-doc-lines 1
-          lsp-signature-render-documentation t)
+    ;; https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
+    ;; disable docstring view
+    (setq lsp-signature-doc-lines 0
+          lsp-eldoc-enable-hover nil
+          lsp-signature-auto-activate nil
+          lsp-signature-render-documentation nil)
 
     ;; smart tabs
     (smart-tabs-mode)
