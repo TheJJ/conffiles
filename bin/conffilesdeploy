@@ -85,6 +85,9 @@ done
 echo "moving git dir..."
 mv -v .git "$HOME/.conffiles.git"
 
+# remove remaining empty directories
+find $CONFROOT/ -mindepth 1 -type d -empty -delete
+
 cd $HOME
 # it's empty now!
 rmdir $CONFROOT
