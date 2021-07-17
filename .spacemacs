@@ -99,7 +99,10 @@ This function should only modify configuration layer settings."
                       syntax-checking-enable-by-default nil
                       syntax-checking-enable-tooltips t)
      theming
-     treemacs
+     (treemacs :variables
+               treemacs-use-follow-mode nil
+               treemacs-use-filewatch-mode t
+               treemacs-collapse-dirs 3)
      version-control
      xclipboard
      yaml
@@ -561,6 +564,7 @@ This function defines the environment variables for your Emacs session. By
 default it calls `spacemacs/load-spacemacs-env' which loads the environment
 variables declared in `~/.spacemacs.env' or `~/.spacemacs.d/.spacemacs.env'.
 See the header of this file for more information."
+  (setq spacemacs-env-vars-file (locate-user-emacs-file ".cache/spacemacs.env"))
   (spacemacs/load-spacemacs-env))
 
 
@@ -678,6 +682,7 @@ See the header of this file for more information."
                     (let
                         (;;set tabwidth to really high value (fill-column)
                          (tab-width fill-column)
+                         ;; set the offset-variable to the same high thing
                          (,offset fill-column)
                          ;;(wstart (window-start))
                          )
@@ -698,7 +703,6 @@ See the header of this file for more information."
   (delete-selection-mode t)
   (display-battery-mode t)
   (xterm-mouse-mode t)
-  (editorconfig-mode t)
   (auto-revert-mode t)
   (idle-highlight-mode t)  ;; idle-highlight word under cursor
 
@@ -744,14 +748,17 @@ See the header of this file for more information."
         tramp-ssh-controlmaster-options    ; synced with .ssh/config ControlMaster settings
           (concat "-o ControlPath=/tmp/ssh_mux_%%u@%%l_%%r@%%h:%%p "
                   "-o ControlMaster=auto -o ControlPersist=10")
-        history-delete-duplicates t      ; helm history duplicate removal
         recentf-max-saved-items 1000
 
-        helm-ff-file-name-history-use-recentf nil
         ido-use-virtual-buffers t        ; use recentf-buffers as virtually "open"
         ido-enable-flex-matching t
         ido-case-fold t
         ido-file-extensions-order '(".c" ".cpp" ".h" ".py" ".tex" ".bib" ".hs")
+
+        history-delete-duplicates t      ; helm history duplicate removal
+        helm-adaptive-history-file (locate-user-emacs-file ".cache/helm-adaptive-history")
+        helm-adaptive-history-length 200
+        helm-ff-file-name-history-use-recentf nil  ; don't use recentf for helm find files
 
         ;; lsp settings
         lsp-enable-indentation nil       ; don't ask the language server for indentations
@@ -1073,6 +1080,37 @@ See the header of this file for more information."
   (interactive)
   (let ((sort-fold-case t))
     (call-interactively 'sort-lines)))
+
+(defun reload-dir-locals-current-buffer ()
+  "reload the .dir-locals.el for the current buffer"
+  (interactive)
+  (message (format "reloading dir-locals for %s (%s)..." (current-buffer) buffer-file-name))
+  (let ((enable-local-variables :all))
+    (hack-dir-local-variables-non-file-buffer)))
+
+(defun reload-dir-locals-projectile ()
+  "For every buffer in the current projectile project,
+reload dir-locals"
+  (interactive)
+  (let ((pdir (projectile-project-root)))
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+        (when (equal (projectile-project-root) pdir)
+          (reload-dir-locals-current-buffer))))))
+
+(defun reload-dir-locals-below-default-dir ()
+  "Reload dir-locals for all buffers that are potentially affected
+from a change in by prefix-matching the current buffer's `default-directory`"
+  (interactive)
+  (let ((cdir default-directory))
+    (message (format "reloading dir-locals below %s..." cdir))
+    (dolist (buffer (buffer-list))
+      (when (buffer-file-name buffer)
+        (with-current-buffer buffer
+          ;; todo: symlink resolving...
+          (when (string-prefix-p cdir buffer-file-name)
+            (reload-dir-locals-current-buffer)))))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; set kaschtomaisd key bindings
@@ -1437,7 +1475,6 @@ nil : Otherwise, return nil and run next lineup function."
   (defun jj/coding-hook ()
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
 
-    (jj/modes)
     (jj/codenav-keybinds)
     )
 
@@ -1554,7 +1591,20 @@ nil : Otherwise, return nil and run next lineup function."
     (jj/codenav-keybinds)
     (setq indent-tabs-mode nil)
     (setq tab-width 8)
-    (prettify-symbols-mode))
+    (prettify-symbols-mode)
+    (smart-tabs-advice lisp-indent-line lisp-indent-offset)
+
+    ;; when editing dir-locals, reload all affected files
+    (when (and (buffer-file-name)
+               (equal dir-locals-file  ;; doesn't support .dir-locals-2.el :)
+                      (file-name-nondirectory (buffer-file-name))))
+      (message (format "installing auto-refresh hook when saving %s" (current-buffer)))
+      (add-hook 'after-save-hook
+                'reload-dir-locals-below-default-dir
+                nil  ;; no insert offset
+                t ;; only for this buffer
+                ))
+    )
 
   ;; javascript / ecmascript
   (defun jj/javascript-coding-hook ()
@@ -1798,7 +1848,7 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; To debug on C-g, use M-x toggle-debug-on-quit
 
   ;; store customizations in extra file
-  (setq custom-file "~/.spacemacs.d/custom.el")
+  (setq custom-file (locate-user-emacs-file "custom.el"))
 
   ;; load external packages
   (jj/loadpath-discover)
@@ -1824,6 +1874,7 @@ before packages are loaded."
 
   (message "loading user config...")
   (jj/defaults)
+  (jj/modes)
   (jj/display-setup)
   (jj/mousescroll)
   (jj/keybindings)
