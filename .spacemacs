@@ -749,6 +749,7 @@ See the header of this file for more information."
           (concat "-o ControlPath=/tmp/ssh_mux_%%u@%%l_%%r@%%h:%%p "
                   "-o ControlMaster=auto -o ControlPersist=10")
         recentf-max-saved-items 1000
+        idle-highlight-idle-time 0.2
 
         ido-use-virtual-buffers t        ; use recentf-buffers as virtually "open"
         ido-enable-flex-matching t
@@ -1476,6 +1477,7 @@ nil : Otherwise, return nil and run next lineup function."
   (defun jj/coding-hook ()
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
 
+    (jj/modes)
     (jj/codenav-keybinds)
     )
 
@@ -1854,7 +1856,7 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; load external packages
   (jj/loadpath-discover)
 
-  ;; mode hooks need to be here since user-config is executed
+  ;; mode hooks need to be in user-init since user-config is executed
   ;; after command-line-provided files' modes are initialized.
   (jj/mode-hooks)
   )
@@ -1875,7 +1877,6 @@ before packages are loaded."
 
   (message "loading user config...")
   (jj/defaults)
-  (jj/modes)
   (jj/display-setup)
   (jj/mousescroll)
   (jj/keybindings)
