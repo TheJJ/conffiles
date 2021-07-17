@@ -180,6 +180,7 @@ alias lol="fortune | ponysay"
 alias nautilus="nautilus"
 alias sqlite="sqlite3"
 alias zerocat="xargs -0 -L1 -a"  # cat a file like /proc/pid/environ or comm in lines
+alias ldbind="LD_DEBUG=bindings ldd"  # show what symbols the linker binds
 
 alias l='ls'
 alias la='ls -A'
@@ -527,7 +528,7 @@ function catall() {
 			continue
 		fi
 
-		printf "+++ \x1b\x5b\x33\x32;10m${f}\x1b\x5bm +++\n"
+		printf "+++ \x1b\x5b\x33\x32m${f}\x1b\x5bm +++\n"
 
 		cat "$f";
 		printf "\n"
@@ -913,20 +914,18 @@ export LS_COLORS="rs=00:no=00:di=01;36:ln=01;04;33:mh=04:pi=40;33:so=01;35:do=01
 #export LS_COLORS='rs=00:no=00:'
 
 
-##########################################
-# termcap colors for man page highlights
-# also done in .Xresources to color italic and bold
-##########################################
+#################################################
+# termcap colors for man page highlights in less
+#################################################
 
 # man 5 termcap
-export TERMCAP_mb=$'\E[01;31m'       # begin blinking
-export TERMCAP_md=$'\E[01;38;5;74m'  # begin bold
-export TERMCAP_me=$'\E[0m'           # end mode
-export TERMCAP_se=$'\E[0m'           # end standout-mode
-export TERMCAP_so=$'\E[38;5;246m'    # begin standout-mode - info box
-export TERMCAP_ue=$'\E[0m'           # end underline
-export TERMCAP_us=$'\E[04;38;5;146m' # begin underline
-
+export LESS_TERMCAP_mb=$'\E[1;5;31m'           # begin blinking (actually bold red)
+export LESS_TERMCAP_md=$'\E[1;38;5;111m'       # begin bold
+export LESS_TERMCAP_me=$'\E[0m'                # end so, us, mb, md, mr mode
+export LESS_TERMCAP_so=$'\E[1;44;38;5;195m'    # begin standout-mode - info box, search string
+export LESS_TERMCAP_se=$'\E[0m'                # end standout-mode
+export LESS_TERMCAP_us=$'\E[4;38;5;155m'       # begin underline
+export LESS_TERMCAP_ue=$'\E[0m'                # end underline
 
 
 #############################
