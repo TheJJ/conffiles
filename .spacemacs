@@ -1214,6 +1214,7 @@ from a change in by prefix-matching the current buffer's `default-directory`"
             (spacemacs||set-helm-key "fF" helm-for-files)))
 
   (global-set-key (kbd "C-x b") 'helm-mini)
+  (global-set-key (kbd "C-x p") 'helm-projectile)
 
   (global-set-key (kbd "C-x B") 'bury-buffer)
   (global-set-key (kbd "C-x E") 'apply-macro-to-region-lines)
