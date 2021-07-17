@@ -101,7 +101,8 @@ def cyrun(args):
         exepath = tmpdir / pyxpath.stem
         gccinvoc = [os.environ.get("CXX", 'g++')]
         gccinvoc.extend(shlex.split(subprocess.check_output(
-            ["python-config", "--libs", "--includes", "--cflags"]
+            ["python-config", "--libs", "--includes", "--cflags", "--ldflags"]
+            + (["--embed"] if not args.module else [])
         ).decode()))
         if args.cxxflags:
             gccinvoc.append(args.cxxflags)
@@ -118,10 +119,13 @@ def cyrun(args):
         if args.keep or args.module:
             logging.info("$ cp %s %s", exepath, outpath)
             shutil.copy(str(exepath), str(outpath))
+            exepath = outpath
+            if not '/' in str(exepath):
+                exepath = f"./{exepath}"
 
         if not (args.norun or args.module):
             run_invoc = [str(exepath)] + args.pyargs
-            logging.info("$ %s", run_invoc)
+            logging.info("$ %s", ' '.join(run_invoc))
             sys.exit(subprocess.run(run_invoc).returncode)
 
 
