@@ -1525,7 +1525,6 @@ if __name__ == \"__main__\":
                  (insert snippet)
                  (push (yas--parse-template) snippet-defs)
                  ))
-             (debug (format "mode: %s snippetdefs: %s" snippet-mode snippet-defs))
              (when snippet-defs
                (yas-define-snippets snippet-mode snippet-defs)))))
 
