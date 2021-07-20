@@ -1472,6 +1472,63 @@ nil : Otherwise, return nil and run next lineup function."
 ;; mode hooks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defconst jj/snippets
+  '((python-mode
+     . ("\
+# -*- mode: snippet -*-
+# name: mainargparse
+# key: mainp
+# group: argparser
+# --
+\"\"\"
+${1:cool script}
+\"\"\"
+
+import argparse
+
+
+def main():
+    \"\"\"
+    ${2:entry point}
+    \"\"\"
+    cli = argparse.ArgumentParser(description='$3')
+    cli.add_argument($4)
+    args = cli.parse_args()
+    $0
+
+if __name__ == \"__main__\":
+    main()
+"
+        ;; -----
+"\
+# -*- mode: snippet -*-
+# name: mainfunction
+# key: mainf
+# --
+def main():
+    $0
+
+if __name__ == \"__main__\":
+    main()
+"
+))))
+
+(defun jj/yas-hook ()
+  "so we don't need to carry around snippet files"
+  (message "register jj-snippets")
+  (cl-loop for (snippet-mode . snippets) in jj/snippets
+           collect
+           (let* ((snippet-defs nil))
+             (dolist (snippet snippets)
+               (with-temp-buffer
+                 (insert snippet)
+                 (push (yas--parse-template) snippet-defs)
+                 ))
+             (debug (format "mode: %s snippetdefs: %s" snippet-mode snippet-defs))
+             (when snippet-defs
+               (yas-define-snippets snippet-mode snippet-defs)))))
+
+
 (defun jj/mode-hooks ()
   ;; config for all prog-modes
   (defun jj/coding-hook ()
@@ -1755,6 +1812,7 @@ nil : Otherwise, return nil and run next lineup function."
   (add-hook 'compilation-mode-hook       'jj/compilation-mode-hook)
   (add-hook 'sql-mode-hook               'jj/sql-mode-hook)
 
+  (add-hook 'yas-global-mode-hook        'jj/yas-hook)
   (add-hook 'doc-view-mode-hook          'auto-revert-mode)
   (add-hook 'server-visit-hook (lambda ()
                                  (prefer-coding-system 'utf-8)
