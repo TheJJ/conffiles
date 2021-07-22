@@ -750,6 +750,7 @@ See the header of this file for more information."
                   "-o ControlMaster=auto -o ControlPersist=10")
         recentf-max-saved-items 1000
         idle-highlight-idle-time 0.2
+        auto-window-vscroll nil          ; better scrolling performance...
 
         ido-use-virtual-buffers t        ; use recentf-buffers as virtually "open"
         ido-enable-flex-matching t
