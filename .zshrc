@@ -209,6 +209,14 @@ alias jsc="js -C ."  # json coloring
 hash colordiff 2>/dev/null && alias diff='colordiff' || alias diff='diff --color=auto'
 alias g++std20='g++ -std=c++20 -Wall -Wextra -pedantic -pthread -fcoroutines'
 
+# requires media-plugins/gst-plugins-ximagesrc:
+# https://gstreamer.freedesktop.org/documentation/ximagesrc/index.html
+function screenrecord() {
+	# TODO: record xid=0, i.e. the root window
+	echo "please click on the window to record..."
+	gst-launch-1.0 ximagesrc xid=$(xwininfo | grep -oP "Window id: \K0x([0-9a-f]+)") ! videoconvert ! av1enc ! webmmux ! filesink location=$1.webm
+}
+
 
 # vim
 hash nvim 2>/dev/null && alias vim='nvim'
@@ -1024,7 +1032,7 @@ RPROMPT="%3v%4v%{$reset_color%}[%{$fg[yellow]%}%?%{$reset_color%}]%1v%{$fg[blue]
 
 #############################################
 # machine-specific config files
-machineconfdir="$HOME/.config/sftmachine"
+machineconfdir="$HOME/.config/profile"
 if [[ -d $machineconfdir ]]; then
 	for f in $machineconfdir/*; do
 		source $f
