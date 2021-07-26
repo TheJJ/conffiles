@@ -53,6 +53,7 @@ This function should only modify configuration layer settings."
             cmake-enable-cmake-ide-support nil)
      csv
      dap
+     debug
      emacs-lisp
      major-modes  ;; qml-mode, openscad
      git
