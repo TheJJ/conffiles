@@ -132,7 +132,6 @@ This function should only modify configuration layer settings."
    '(
      sqlup-mode
      wolfram-mode
-     smartparens
      auto-highlight-symbol
      helm-company  ;; so C-/ is not mapped to it when completing...
      )
@@ -256,6 +255,12 @@ It should only modify the values of Spacemacs settings."
 
    ;; True if the home buffer should respond to resize events. (default t)
    dotspacemacs-startup-buffer-responsive t
+
+   ;; Show numbers before the startup list lines. (default t)
+   dotspacemacs-show-startup-list-numbers t
+
+   ;; The minimum delay in seconds between number key presses. (default 0.4)
+   dotspacemacs-startup-buffer-multi-digit-delay 0.4
 
    ;; Default major mode for a new empty buffer. Possible values are mode
    ;; names such as `text-mode'; and `nil' to use Fundamental mode.
@@ -440,6 +445,10 @@ It should only modify the values of Spacemacs settings."
    ;; when it reaches the top or bottom of the screen. (default t)
    dotspacemacs-smooth-scrolling t
 
+   ;; Show the scroll bar while scrolling. The auto hide time can be configured
+   ;; by setting this variable to a number. (default t)
+   dotspacemacs-scroll-bar-while-scrolling t
+
    ;; Control line numbers activation.
    ;; If set to `t', `relative' or `visual' then line numbers are enabled in all
    ;; `prog-mode' and `text-mode' derivatives. If set to `relative', line
@@ -464,9 +473,14 @@ It should only modify the values of Spacemacs settings."
    ;; (default 'evil)
    dotspacemacs-folding-method 'evil
 
-   ;; If non-nil `smartparens-strict-mode' will be enabled in programming modes.
+   ;; If non-nil and `dotspacemacs-activate-smartparens-mode' is also non-nil,
+   ;; `smartparens-strict-mode' will be enabled in programming modes.
    ;; (default nil)
    dotspacemacs-smartparens-strict-mode nil
+
+   ;; If non-nil smartparens-mode will be enabled in programming modes.
+   ;; (default t)
+   dotspacemacs-activate-smartparens-mode nil
 
    ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
    ;; over any automatically added closing parenthesis, bracket, quote, etc...
@@ -514,6 +528,9 @@ It should only modify the values of Spacemacs settings."
    ;; %n - Narrow if appropriate
    ;; %z - mnemonics of buffer, terminal, and keyboard coding systems
    ;; %Z - like %z, but including the end-of-line format
+   ;; If nil then Spacemacs uses default `frame-title-format' to avoid
+   ;; performance issues, instead of calculating the frame title by
+   ;; `spacemacs/title-prepare' all the time.
    ;; (default "%I@%S")
    dotspacemacs-frame-title-format "%I@%S"
 
@@ -538,6 +555,9 @@ It should only modify the values of Spacemacs settings."
    ;; (default t)
    dotspacemacs-use-clean-aindent-mode t
 
+   ;; Accept SPC as y for prompts if non nil. (default nil)
+   dotspacemacs-use-SPC-as-y nil
+
    ;; If non-nil shift your number row to match the entered keyboard layout
    ;; (only in insert state). Currently supported keyboard layouts are:
    ;; `qwerty-us', `qwertz-de' and `querty-ca-fr'.
@@ -556,7 +576,10 @@ It should only modify the values of Spacemacs settings."
 
    ;; If nil the home buffer shows the full path of agenda items
    ;; and todos. If non nil only the file name is shown.
-   dotspacemacs-home-shorten-agenda-source nil))
+   dotspacemacs-home-shorten-agenda-source nil
+
+   ;; If non-nil then byte-compile some of Spacemacs files.
+   dotspacemacs-byte-compile t))
 
 (defun dotspacemacs/user-env ()
   "Environment variables setup.
@@ -724,6 +747,7 @@ See the header of this file for more information."
 
   (setq indicate-empty-lines t
         transient-mark-mode t
+        package-native-compile nil       ; don't compile on install, instead on demand
         gud-tooltip-mode t
         lazy-highlight t                 ; highlight occurrences
         lazy-highlight-cleanup nil       ; keep search term highlighted
@@ -761,6 +785,10 @@ See the header of this file for more information."
         helm-adaptive-history-file (locate-user-emacs-file ".cache/helm-adaptive-history")
         helm-adaptive-history-length 200
         helm-ff-file-name-history-use-recentf nil  ; don't use recentf for helm find files
+
+        custom-unlispify-tag-names nil   ; view variable names in custom-mode
+
+        mime-edit-split-message nil      ; don't split large messages
 
         ;; lsp settings
         lsp-enable-indentation nil       ; don't ask the language server for indentations
@@ -1516,7 +1544,6 @@ if __name__ == \"__main__\":
 
 (defun jj/yas-hook ()
   "so we don't need to carry around snippet files"
-  (message "register jj-snippets")
   (cl-loop for (snippet-mode . snippets) in jj/snippets
            collect
            (let* ((snippet-defs nil))
