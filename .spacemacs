@@ -1899,7 +1899,7 @@ if __name__ == \"__main__\":
   ;; called after a new frame was created
   ;;(add-hook 'after-make-frame-functions 'jj/new-frame-setup)
 
-  (custom-set-faces
+  (custom-theme-set-faces 'user
     ;; in a terminal, set the background to black!
    '(default (
               (((type tty) (min-colors 256))
@@ -1938,6 +1938,7 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
   ;; store customizations in extra file
   (setq custom-file (locate-user-emacs-file "custom.el"))
+  (load custom-file)
 
   ;; load external packages
   (jj/loadpath-discover)
