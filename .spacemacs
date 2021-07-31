@@ -1841,6 +1841,10 @@ if __name__ == \"__main__\":
   ;; correct zsh coloring in shell:
   (ansi-color-for-comint-mode-on))
 
+(defun jj/eshell-mode-hook ()
+  (add-hook 'eshell-preoutput-filter-functions
+            'ansi-color-filter-apply))
+
 
 (defun jj/mode-hooks ()
   "hooks are registered here"
@@ -1870,6 +1874,7 @@ if __name__ == \"__main__\":
   (add-hook 'doc-view-mode-hook          'auto-revert-mode)
   (add-hook 'server-visit-hook           'jj/emacs-server-visit-hook)
   (add-hook 'shell-mode-hook             'jj/shell-mode-hook)
+  (add-hook 'eshell-mode-hook            'jj/eshell-mode-hook)
 
   ;; some modes don't inherit from prog-mode...
   (multi-hook-add
