@@ -718,27 +718,14 @@ See the header of this file for more information."
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; setup (un)funny modes
+;; mode setup and default config
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun jj/modes ()
-  (message "activating modes...")
-  (column-number-mode t)
-  (cua-selection-mode t)
-  (delete-selection-mode t)
-  (display-battery-mode t)
-  (xterm-mouse-mode t)
-  (auto-revert-mode t)
-  (idle-highlight-mode t)  ;; idle-highlight word under cursor
-
-  (put 'scroll-left 'disabled nil)
-  (put 'upcase-region 'disabled nil)
-  (put 'downcase-region 'disabled nil)
-  )
 
 
 (defun jj/defaults ()
+  "mode and default configuration"
 
-  (message "setting up 'sane' defaults")
+  (delete-selection-mode t)  ;; replace selection with typed text
 
   ;; push the mouse out of the way when the cursor approaches.
   (mouse-avoidance-mode 'cat-and-mouse)
@@ -807,7 +794,7 @@ See the header of this file for more information."
   (setq initial-major-mode 'text-mode)
 
   ;; don't enable auto-newline mode (c-toggle-auto-newline)
-  (remove-hook 'c-mode-common-hook 'spacemacs//c-toggle-auto-newline )
+  (remove-hook 'c-mode-common-hook 'spacemacs//c-toggle-auto-newline)
 
   ;; indentation defaults
   (setq-default whitespace-line-column 400)
@@ -992,22 +979,31 @@ See the header of this file for more information."
   (interactive)
   (local-set-key [C-mouse-1] 'xref-find-definitions)
   (local-set-key (kbd "M-g d") 'xref-find-definitions)
-  (local-set-key (kbd "M-g D") 'xref-find-definitions-other-frame)
   (local-set-key (kbd "M-g f") 'xref-find-references)
+  (local-set-key (kbd "M-g G") 'xref-find-definitions-other-frame)
 
-  ;; default: m,: pop-tagmark in slime-nav-mode-map ->xref-pop-marker-stack
-  ;; m. evil-repeat-pop-next in evil-normal-state-map
-  ;; m. evil-slime-nav-find-elisp-thing-at-point
-  ;; m. xref-find-definitions in global-map
+  (with-library
+    lsp-mode
+    (with-library
+      treemacs
+      (local-set-key (kbd "M-g e") 'lsp-treemacs-error-list))
+
+    ;; open inline popup with search results
+    (local-set-key (kbd "M-g D") 'lsp-ui-peek-find-definitions)
+    (local-set-key (kbd "M-g F") 'lsp-ui-peek-find-references))
+
+  ;; defaults:
+  ;; M-, pop-tagmark in slime-nav-mode-map ->xref-pop-marker-stack
+  ;; M-. evil-repeat-pop-next in evil-normal-state-map
+  ;; M-. evil-slime-nav-find-elisp-thing-at-point
+  ;; M-. xref-find-definitions in global-map
+
   ;; navigation on marker ring to go back and forward by xrefs
+  (with-eval-after-load 'evil
+    (define-key evil-normal-state-map (kbd "M-.") nil)
+    (define-key evil-normal-state-map (kbd "M-,") nil))
   (local-set-key (kbd "M-,") 'jj/xref-jump-marker-ring-backward)
   (local-set-key (kbd "M-.") 'jj/xref-jump-marker-ring-forward)
-  ;; TODO: fix evil-normal map M-.
-
-  ;; lsp-ui-peek-mode does not highlight the relevant line,
-  ;; so it's currently rather useless, but may be cool in the future.
-  ;(local-set-key (kbd "M-g D") 'lsp-ui-peek-find-definitions)
-  ;(local-set-key (kbd "M-g F") 'lsp-ui-peek-find-references)
   )
 
 
@@ -1287,8 +1283,8 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   ;; force company completion:
   (global-set-key (kbd "S-<tab>") 'tab-indent-or-complete)
 
-  ;;unset unneeded keys
-  ;;(global-unset-key (kbd "C-t")) ; annoying character swapping
+  ;; disable annoying character swapping
+  (global-unset-key (kbd "C-t"))
 
   (fset 'yes-or-no-p 'y-or-n-p) ; yes/no answering without <RET>
   )
@@ -1562,7 +1558,7 @@ if __name__ == \"__main__\":
   (defun jj/coding-hook ()
     (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
 
-    (jj/modes)
+    (idle-highlight-mode t)    ;; idle-highlight word under cursor
     (jj/codenav-keybinds)
     )
 
@@ -1883,8 +1879,11 @@ if __name__ == \"__main__\":
 ;; we're running on tty
 (defun jj/terminal-setup ()
   (message "spawned new frame in terminal mode")
-  (setq confirm-kill-emacs nil)
-  ;; TODO: disable hl-line-mode
+  ;; if oneday launch speed is vim-like,
+  ;; we could nil this so rapid open/closes are possible
+  (setq confirm-kill-emacs 'y-or-n-p)
+  ;; hl-line actually looks pretty with kitty
+  ;(setq global-hl-line-mode nil)
   )
 
 (defun jj/new-frame-setup (frame)
