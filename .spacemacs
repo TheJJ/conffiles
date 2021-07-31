@@ -5,6 +5,16 @@
 ;; Copyright (c) 2011-2021 Jonas Jelten <jj@sft.lol>
 ;; Licensed GPLv3 or later
 
+;; for project-specific configs, create a .dir-locals.el file:
+;; example .dir-locals.el file for a linux repo:
+;; (
+;;  (nil . ((indent-tabs-mode . t)
+;;          (tab-width . 8)))
+;;  (c-mode . ((c-file-style . "linux-kernel")))
+;;  (c++-mode . ((c-file-style . "linux-kernel")))
+;;  )
+
+
 (defun dotspacemacs/layers ()
   "Layer configuration:
 This function should only modify configuration layer settings."
@@ -593,7 +603,7 @@ See the header of this file for more information."
 
 
 ;;####################################################
-;; jj-improvements
+;; jj's addons to spacemacs start here
 ;;####################################################
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -651,6 +661,7 @@ See the header of this file for more information."
    (defun git-gutter+-remote-file-path (dir file)
      (let ((file (tramp-file-name-localname (tramp-dissect-file-name file))))
        (replace-regexp-in-string (concat "\\`" dir) "" file))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; smart tabs, mix tabs and spaces (fak yea)
@@ -853,6 +864,11 @@ See the header of this file for more information."
 
   ;; no shell path warning
   (setq exec-path-from-shell-check-startup-file nil)
+
+  ;; file suffix assignments to automatic mode loading
+  ;(add-to-list 'auto-mode-alist '("\\.nyan\\'" . nyan-mode))
+  (add-to-list 'auto-mode-alist '("\\.tex\\'" . LaTeX-mode))
+  (add-to-list 'auto-mode-alist '("\\.tikz\\'" . LaTeX-mode))
   )
 
 
@@ -1498,6 +1514,12 @@ nil : Otherwise, return nil and run next lineup function."
 ;; mode hooks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; add a function to multiple hooks
+(defun multi-hook-add (function hooks)
+  (mapc (lambda (hook)
+          (add-hook hook function))
+        hooks))
+
 (defconst jj/snippets
   '((python-mode
      . ("\
@@ -1552,271 +1574,280 @@ if __name__ == \"__main__\":
              (when snippet-defs
                (yas-define-snippets snippet-mode snippet-defs)))))
 
+;; config for all prog-modes
+(defun jj/coding-hook ()
+  (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
+
+  (idle-highlight-mode t)    ;; idle-highlight word under cursor
+  (jj/codenav-keybinds)
+  )
+
+;; c-like-language setup
+(defun jj/cstyle-hook ()
+
+  ;; standalone cc cc-mode doesn't run prog-mode-hook
+  ;; since it doesn't derive prog-mode
+  (when (not (provided-mode-derived-p 'c-mode '(prog-mode)))
+    (spacemacs/run-prog-mode-hooks))
+
+  ;; create codestyle
+  (jj/create-codestyles)
+
+  ;; magic region formatting
+  (with-library
+    clang-format
+    (global-set-key (kbd "C-M-<tab>") 'clang-format-region))
+
+  ;; restore so we indent line or region.
+  ;; (does no completion since we set tab-always-indent)
+  ;; cc-mode replaces this the other way round.
+  (substitute-key-definition 'c-indent-command
+                              'indent-for-tab-command
+                              c-mode-base-map)
+
+  ; TODO: make sure lsp is loaded..
+  ;(lsp-register-client
+  ;  (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
+  ;                   :major-modes '(c++-mode)
+  ;                   :remote? t
+  ;                   :server-id 'clangd-remote))
+
+  ;; default to sft style
+  (c-set-style "sftstyle")
+
+  (setq tab-width 4
+        indent-tabs-mode t)
+
+  (c-toggle-auto-newline nil) ; no automatic
+  (c-toggle-auto-state nil)   ; newlines
+
+  ;; keybindings for clike languages
+  (jj/cstyle-keybinds)
+
+  (display-line-numbers-mode t)
+
+  ;; smart tabs: mix tabs and spaces the right way
+  (smart-tabs-mode)
+  (smart-tabs-advice c-indent-line c-basic-offset)
+  (smart-tabs-advice c-indent-region c-basic-offset)
+  )
+
+
+;; hook for all c-like languages
+(defun jj/c-base-hook ()
+  (setq flycheck-gcc-language-standard "c++20")
+
+  ;; c-codingstyle
+  (jj/cstyle-hook)
+  )
+
+
+;; c++ special stuff
+(defun jj/c++-coding-hook ()
+  ;; comment parsing and word highlighting
+
+  ;; placing regexes into `c-mode-common-hook' may work but their
+  ;; evaluation order matters.
+  (font-lock-add-keywords
+    nil '(
+          ;; missing C++ keywords
+          ("\\<\\(static_assert\\|concept\\|requires\\|consteval\\|co_await\\|co_yield\\|co_return\\|export\\|import\\|module\\)\\>" . font-lock-keyword-face)
+
+          ;; custom defined types
+          ("\\<[A-Za-z_]+[A-Za-z_0-9]*_t\\>" . font-lock-type-face)
+          ))
+  )
+
+;; py
+(defun jj/python-coding-hook ()
+  (setq python-indent 4
+        indent-tabs-mode nil
+        tab-width 4
+        whitespace-line-column 79)
+
+  (setq flycheck-checker 'python-pylint
+        flycheck-checker-error-threshold 300)
+
+  ;; don't show anaconda mode error popup gaaarrhhgh
+  (remove-hook 'anaconda-mode-response-read-fail-hook
+                'anaconda-mode-show-unreadable-response)
+
+  ;; https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
+  ;; disable docstring view
+  (setq lsp-signature-doc-lines 0
+        lsp-eldoc-enable-hover nil
+        lsp-signature-auto-activate nil
+        lsp-signature-render-documentation nil)
+
+  ;; smart tabs
+  (smart-tabs-mode)
+  (smart-tabs-advice py-indent-line py-indent-offset)
+  (smart-tabs-advice py-newline-and-indent py-indent-offset)
+  (smart-tabs-advice py-indent-region py-indent-offset))
+
+;; elisp
+(defun jj/lisp-coding-hook ()
+  (jj/codenav-keybinds)
+  (setq indent-tabs-mode nil)
+  (setq tab-width 8)
+  (prettify-symbols-mode)
+  (smart-tabs-advice lisp-indent-line lisp-indent-offset)
+
+  ;; when editing dir-locals, reload all affected files
+  (when (and (buffer-file-name)
+              (equal dir-locals-file  ;; doesn't support .dir-locals-2.el :)
+                    (file-name-nondirectory (buffer-file-name))))
+    (message (format "installing auto-refresh hook when saving %s" (current-buffer)))
+    (add-hook 'after-save-hook
+              'reload-dir-locals-below-default-dir
+              nil  ;; no insert offset
+              t ;; only for this buffer
+              ))
+  )
+
+;; javascript / ecmascript
+(defun jj/javascript-coding-hook ()
+  (setq js-indent-level 2)
+  (setq tab-width 2)
+  (setq indent-tabs-mode nil))
+
+;; TeX
+(defun jj/latex-coding-hook ()
+
+  (message "custom latex config loading...")
+
+  ;; set latex indent offset so it doesn't fuck up
+  ;; (i.e. use values != n*tab-width)
+  (setq TeX-engine 'default    ;; or xetex
+        tab-width 4
+        fill-column 76
+        LaTeX-indent-level 4
+        LaTeX-item-indent 0
+        indent-tabs-mode nil
+        TeX-parse-self t  ;; enable parse on load
+        TeX-auto-save t   ;; enable parse on save
+        TeX-PDF-mode t
+        reftex-plug-into-AUCTeX t
+        company-minimum-prefix-length 2) ;; so completes start with 2 chars already
+
+  ;; don't highlight long lines
+  ;; whitespace-highlight may not be initialized yet, thus handle both cases..
+  (let ((no-lines-tail (lambda ()
+                          (setq whitespace-style (delete 'lines-tail whitespace-style)))))
+    (if (boundp 'whitespace-style)
+      (funcall no-lines-tail)
+      (progn
+        (add-hook 'global-whitespace-mode-hook no-lines-tail))))
+
+  (setq-default TeX-master nil) ; query for master file
+  (visual-line-mode t)
+  (LaTeX-math-mode t)
+  (turn-on-reftex)
+
+  ;; don't do non-company completions
+  ;; otherwise a funny new buffer appears with "useful" completions
+  (remove-hook 'completion-at-point-functions 'TeX--completion-at-point t)
+
+  ;; minted codehighlighting needs shell execution for pygments
+  (add-to-list 'TeX-command-list
+                '("LaTeX-shellescape" "%`%l -shell-escape %(mode) %(extraopts) %' %t" TeX-run-TeX nil
+                  (latex-mode doctex-mode) :help "Run LaTeX -shell-escape") t)
+  (add-to-list 'TeX-command-list
+                '("XeLaTeX" "%`xelatex %(mode) %(extraopts) %' %t" TeX-run-TeX nil
+                  (latex-mode doctex-mode) :help "Run XeLaTeX") t)
+  (add-to-list 'TeX-command-list
+                '("XeLaTeXMk" "latexmk -xelatex %(-PDF)%S%(mode) %(file-line-error) %(extraopts) %t" TeX-run-latexmk nil
+                  (plain-tex-mode latex-mode doctex-mode) :help "Run LaTeXMk with XeLaTeX") t))
+
+;; BibTeX
+(defun jj/bibtex-coding-hook ()
+  (setq tab-width 2
+        indent-tabs-mode nil
+        bibtex-comma-after-last-field t
+        bibtex-align-at-equal-sign t))
+
+
+;; html
+(defun jj/html-coding-hook ()
+  (setq sgml-basic-offset 4)
+  (setq indent-tabs-mode t))
+
+;; haskell
+(defun jj/haskell-coding-hook ()
+  ;; haskell interpreter: C-c C-z or C-c C-l
+  ;;(haskell-indentation-mode)
+  (setq indent-tabs-mode nil))
+
+;; vhdl
+(defun jj/vhdl-coding-hook ()
+  (setq indent-tabs-mode nil)
+  (smart-tabs-mode)
+  (smart-tabs-advice vhdl-indent-line vhdl-basic-offset)
+  (setq vhdl-indent-tabs-mode t))
+
+;; org-mode
+(defun jj/org-mode-hook ()
+  (setq org-log-done nil
+        indent-tabs-mode nil))
+
+;; markdown-mode
+(defun jj/markdown-mode-hook ()
+  (setq indent-tabs-mode nil
+        whitespace-line-column 400))
+
+(defun jj/cmake-mode-hook ()
+  (setq indent-tabs-mode t)
+  (setq cmake-tab-width 4))
+
+(defun jj/compilation-mode-hook ()
+  ;; colorized compilation
+  (require 'ansi-color)
+  (defun colorize-compilation-buffer ()
+    (when (eq major-mode 'compilation-mode)
+      (ansi-color-apply-on-region compilation-filter-start (point-max))))
+  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
+
+(defun jj/sql-mode-hook ()
+  (setq indent-tabs-mode t
+        tab-width 4
+        sqlind-basic-offset 4)
+  ;; TODO: detect psql prompt, or disable custom prompt
+  ;;(sql-set-product-feature 'postgres)
+
+  (smart-tabs-mode)
+  (smart-tabs-advice sqlind-indent-line sqlind-basic-offset))
+
+(defun jj/sql-interactive-mode-hook ()
+  (let ((lval 'sql-input-ring-file-name)
+        (rval 'sql-product))
+    (if (symbol-value rval)
+      (let ((filename
+              (concat "~/.emacs.d/sql/"
+                      (symbol-name (symbol-value rval))
+                      "-history.sql")))
+        (set (make-local-variable lval) filename))
+      (error
+        (format "SQL history will not be saved because %s is nil"
+                (symbol-name rval))))))
+
+(defun jj/emacs-server-visit-hook ()
+  (prefer-coding-system 'utf-8)
+  (setq locale-coding-system 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (set-selection-coding-system 'utf-8))
+
+(defun jj/shell-mode-hook ()
+  ;; correct zsh coloring in shell:
+  (ansi-color-for-comint-mode-on))
+
 
 (defun jj/mode-hooks ()
-  ;; config for all prog-modes
-  (defun jj/coding-hook ()
-    (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
-
-    (idle-highlight-mode t)    ;; idle-highlight word under cursor
-    (jj/codenav-keybinds)
-    )
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; special language-specific hooks
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  ;; example .dir-locals.el file for linux repos:
-  ;; (
-  ;;  (nil . ((indent-tabs-mode . t)
-  ;;          (tab-width . 8)))
-  ;;  (c-mode . ((c-file-style . "linux-kernel")))
-  ;;  (c++-mode . ((c-file-style . "linux-kernel")))
-  ;;  )
-
-  ;; c-like-language setup
-  (defun jj/cstyle-hook ()
-
-    ;; standalone cc cc-mode doesn't run prog-mode-hook
-    ;; since it doesn't derive prog-mode
-    (when (not (provided-mode-derived-p 'c-mode '(prog-mode)))
-      (spacemacs/run-prog-mode-hooks))
-
-    ;; create codestyle
-    (jj/create-codestyles)
-
-    ;; magic region formatting
-    (with-library
-     clang-format
-     (global-set-key (kbd "C-M-<tab>") 'clang-format-region))
-
-    ;; restore so we indent line or region.
-    ;; (does no completion since we set tab-always-indent)
-    ;; cc-mode replaces this the other way round.
-    (substitute-key-definition 'c-indent-command
-                               'indent-for-tab-command
-                               c-mode-base-map)
-
-    ;; default to sft style
-    (c-set-style "sftstyle")
-
-    (setq tab-width 4
-          indent-tabs-mode t)
-
-    (c-toggle-auto-newline nil) ; no automatic
-    (c-toggle-auto-state nil)   ; newlines
-
-    ;; keybindings for clike languages
-    (jj/cstyle-keybinds)
-
-    (display-line-numbers-mode t)
-
-    ;; smart tabs: mix tabs and spaces the right way
-    (smart-tabs-mode)
-    (smart-tabs-advice c-indent-line c-basic-offset)
-    (smart-tabs-advice c-indent-region c-basic-offset)
-    )
-
-
-  ;; hook for all c-like languages
-  (defun jj/c-base-hook ()
-    (setq flycheck-gcc-language-standard "c++20")
-
-    ;; c-codingstyle
-    (jj/cstyle-hook)
-    )
-
-
-  ;; c++ special stuff
-  (defun jj/c++-coding-hook ()
-    ;; comment parsing and word highlighting
-
-    ;; placing regexes into `c-mode-common-hook' may work but their
-    ;; evaluation order matters.
-    (font-lock-add-keywords
-      nil '(
-            ;; missing C++ keywords
-            ("\\<\\(static_assert\\|concept\\|requires\\|consteval\\|co_await\\|co_yield\\|co_return\\|export\\|import\\|module\\)\\>" . font-lock-keyword-face)
-
-            ;; custom defined types
-            ("\\<[A-Za-z_]+[A-Za-z_0-9]*_t\\>" . font-lock-type-face)
-            ))
-    )
-
-  ;; py
-  (defun jj/python-coding-hook ()
-    (setq python-indent 4
-          indent-tabs-mode nil
-          tab-width 4
-          whitespace-line-column 79)
-
-    (setq flycheck-checker 'python-pylint
-          flycheck-checker-error-threshold 300)
-
-    ;; don't show anaconda mode error popup gaaarrhhgh
-    (remove-hook 'anaconda-mode-response-read-fail-hook
-                 'anaconda-mode-show-unreadable-response)
-
-    ;; https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
-    ;; disable docstring view
-    (setq lsp-signature-doc-lines 0
-          lsp-eldoc-enable-hover nil
-          lsp-signature-auto-activate nil
-          lsp-signature-render-documentation nil)
-
-    ;; smart tabs
-    (smart-tabs-mode)
-    (smart-tabs-advice py-indent-line py-indent-offset)
-    (smart-tabs-advice py-newline-and-indent py-indent-offset)
-    (smart-tabs-advice py-indent-region py-indent-offset))
-
-  ;; elisp
-  (defun jj/lisp-coding-hook ()
-    (jj/codenav-keybinds)
-    (setq indent-tabs-mode nil)
-    (setq tab-width 8)
-    (prettify-symbols-mode)
-    (smart-tabs-advice lisp-indent-line lisp-indent-offset)
-
-    ;; when editing dir-locals, reload all affected files
-    (when (and (buffer-file-name)
-               (equal dir-locals-file  ;; doesn't support .dir-locals-2.el :)
-                      (file-name-nondirectory (buffer-file-name))))
-      (message (format "installing auto-refresh hook when saving %s" (current-buffer)))
-      (add-hook 'after-save-hook
-                'reload-dir-locals-below-default-dir
-                nil  ;; no insert offset
-                t ;; only for this buffer
-                ))
-    )
-
-  ;; javascript / ecmascript
-  (defun jj/javascript-coding-hook ()
-    (setq js-indent-level 2)
-    (setq tab-width 2)
-    (setq indent-tabs-mode nil))
-
-  ;; TeX
-  (defun jj/latex-coding-hook ()
-
-    (message "custom latex config loading...")
-
-    ;; set latex indent offset so it doesn't fuck up
-    ;; (i.e. use values != n*tab-width)
-    (setq TeX-engine 'default    ;; or xetex
-          tab-width 4
-          fill-column 76
-          LaTeX-indent-level 4
-          LaTeX-item-indent 0
-          indent-tabs-mode nil
-          TeX-parse-self t  ;; enable parse on load
-          TeX-auto-save t   ;; enable parse on save
-          TeX-PDF-mode t
-          reftex-plug-into-AUCTeX t
-          company-minimum-prefix-length 2) ;; so completes start with 2 chars already
-
-    ;; don't highlight long lines
-    ;; whitespace-highlight may not be initialized yet, thus handle both cases..
-    (let ((no-lines-tail (lambda ()
-                           (setq whitespace-style (delete 'lines-tail whitespace-style)))))
-      (if (boundp 'whitespace-style)
-        (funcall no-lines-tail)
-        (progn
-          (add-hook 'global-whitespace-mode-hook no-lines-tail))))
-
-    (setq-default TeX-master nil) ; query for master file
-    (visual-line-mode t)
-    (LaTeX-math-mode t)
-    (turn-on-reftex)
-
-    ;; don't do non-company completions
-    ;; otherwise a funny new buffer appears with "useful" completions
-    (remove-hook 'completion-at-point-functions 'TeX--completion-at-point t)
-
-    ;; minted codehighlighting needs shell execution for pygments
-    (add-to-list 'TeX-command-list
-                 '("LaTeX-shellescape" "%`%l -shell-escape %(mode) %(extraopts) %' %t" TeX-run-TeX nil
-                   (latex-mode doctex-mode) :help "Run LaTeX -shell-escape") t)
-    (add-to-list 'TeX-command-list
-                 '("XeLaTeX" "%`xelatex %(mode) %(extraopts) %' %t" TeX-run-TeX nil
-                   (latex-mode doctex-mode) :help "Run XeLaTeX") t)
-    (add-to-list 'TeX-command-list
-                 '("XeLaTeXMk" "latexmk -xelatex %(-PDF)%S%(mode) %(file-line-error) %(extraopts) %t" TeX-run-latexmk nil
-                   (plain-tex-mode latex-mode doctex-mode) :help "Run LaTeXMk with XeLaTeX") t))
-
-  ;; BibTeX
-  (defun jj/bibtex-coding-hook ()
-    (setq tab-width 2
-          indent-tabs-mode nil
-          bibtex-comma-after-last-field t
-          bibtex-align-at-equal-sign t))
-
-
-  ;; html
-  (defun jj/html-coding-hook ()
-    (setq sgml-basic-offset 4)
-    (setq indent-tabs-mode t))
-
-  ;; haskell
-  (defun jj/haskell-coding-hook ()
-    ;; haskell interpreter: C-c C-z or C-c C-l
-    ;;(haskell-indentation-mode)
-    (setq indent-tabs-mode nil))
-
-  ;; vhdl
-  (defun jj/vhdl-coding-hook ()
-    (setq indent-tabs-mode nil)
-    (smart-tabs-mode)
-    (smart-tabs-advice vhdl-indent-line vhdl-basic-offset)
-    (setq vhdl-indent-tabs-mode t))
-
-  ;; org-mode
-  (defun jj/org-mode-hook ()
-    (setq org-log-done nil
-          indent-tabs-mode nil))
-
-  ;; markdown-mode
-  (defun jj/markdown-mode-hook ()
-    (setq indent-tabs-mode nil
-          whitespace-line-column 400))
-
-  (defun jj/cmake-mode-hook ()
-    (setq indent-tabs-mode t)
-    (setq cmake-tab-width 4))
-
-  (defun jj/compilation-mode-hook ()
-    ;; colorized compilation
-    (require 'ansi-color)
-    (defun colorize-compilation-buffer ()
-      (when (eq major-mode 'compilation-mode)
-        (ansi-color-apply-on-region compilation-filter-start (point-max))))
-    (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
-
-  (defun jj/sql-mode-hook ()
-    (setq indent-tabs-mode t
-          tab-width 4
-          sqlind-basic-offset 4)
-
-    (smart-tabs-mode)
-    (smart-tabs-advice sqlind-indent-line sqlind-basic-offset))
-
-  (defun jj/sql-interactive-mode-hook ()
-    (let ((lval 'sql-input-ring-file-name)
-          (rval 'sql-product))
-      (if (symbol-value rval)
-        (let ((filename
-                (concat "~/.emacs.d/sql/"
-                        (symbol-name (symbol-value rval))
-                        "-history.sql")))
-          (set (make-local-variable lval) filename))
-        (error
-          (format "SQL history will not be saved because %s is nil"
-                  (symbol-name rval))))))
+  "hooks are registered here"
 
   ;; hooks to be inherited:
   ;;(add-hook 'text-mode-hook       'something)
   (add-hook 'prog-mode-hook       'jj/coding-hook)
-
 
   ;; language-specific hooks:
   (add-hook 'python-mode-hook            'jj/python-coding-hook)
@@ -1835,40 +1866,18 @@ if __name__ == \"__main__\":
   (add-hook 'cmake-mode-hook             'jj/cmake-mode-hook)
   (add-hook 'compilation-mode-hook       'jj/compilation-mode-hook)
   (add-hook 'sql-mode-hook               'jj/sql-mode-hook)
-
   (add-hook 'yas-global-mode-hook        'jj/yas-hook)
   (add-hook 'doc-view-mode-hook          'auto-revert-mode)
-  (add-hook 'server-visit-hook (lambda ()
-                                 (prefer-coding-system 'utf-8)
-                                 (setq locale-coding-system 'utf-8)
-                                 (set-terminal-coding-system 'utf-8)
-                                 (set-keyboard-coding-system 'utf-8)
-                                 (set-selection-coding-system 'utf-8)))
-
-  ;; correct zsh coloring in shell:
-  (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-
-  ;; add a function to multiple hooks
-  (defun multi-hook-add (function hooks)
-    (mapc (lambda (hook)
-            (add-hook hook function))
-          hooks))
+  (add-hook 'server-visit-hook           'jj/emacs-server-visit-hook)
+  (add-hook 'shell-mode-hook             'jj/shell-mode-hook)
 
   ;; some modes don't inherit from prog-mode...
   (multi-hook-add
    (lambda ()
      ;; TODO: (put 'something-mode 'derived-mode-parent 'prog-mode)
-     (run-hooks 'prog-mode-hook))
+     (spacemacs/run-prog-mode-hooks))
    '(python-mode-hook
      haskell-mode-hook))
-
-  ;(with-eval-after-load 'company
-  ;  (company-posframe-mode))
-
-  ;; file suffix assignments to automatic mode loading
-  ;(add-to-list 'auto-mode-alist '("\\.nyan\\'" . nyan-mode))
-  (add-to-list 'auto-mode-alist '("\\.tex\\'" . LaTeX-mode))
-  (add-to-list 'auto-mode-alist '("\\.tikz\\'" . LaTeX-mode))
   )
 
 ;; we have a graphical window
