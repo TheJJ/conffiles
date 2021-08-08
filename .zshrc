@@ -210,6 +210,11 @@ alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.
 alias jsc="js -C ."  # json coloring
 hash colordiff 2>/dev/null && alias diff='colordiff' || alias diff='diff --color=auto'
 alias g++std20='g++ -std=c++20 -Wall -Wextra -pedantic -pthread -fcoroutines'
+alias g++c='g++std20'
+function g++as20() {
+	g++ -std=c++20 -Wall -Wextra -pedantic -pthread -fcoroutines -S -masm=intel -o- $@ | c++filt
+}
+alias g++as='g++as20'
 
 # requires media-plugins/gst-plugins-ximagesrc:
 # https://gstreamer.freedesktop.org/documentation/ximagesrc/index.html
