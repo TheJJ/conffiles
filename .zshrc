@@ -118,7 +118,9 @@ alias emacscc="emacs -batch -no-site-file -f batch-byte-compile"  # compile some
 
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
-alias gdbs='gdbserver --once localhost:8888'
+alias gdbs='gdbserver localhost:8888'
+alias gdbso='gdbserver --once localhost:8888'
+alias gdbsm='gdbserver --multi localhost:8888'
 compdef gdbs=gdb 2>/dev/null
 alias gdbc='gdb -q -ex "target remote localhost:8888"'
 alias gdbcx64='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remote localhost:8888"'
