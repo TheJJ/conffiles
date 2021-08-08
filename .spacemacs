@@ -898,7 +898,7 @@ See the header of this file for more information."
 ;; better mouse scrolling
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun jj/mousescroll ()
+(defun jj/scrolling ()
   ;;mouse-wheel scrolling
   (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)
                                       ((control)))            ; one line at a time
@@ -1002,7 +1002,7 @@ See the header of this file for more information."
     lsp-mode
     (with-library
       treemacs
-      (local-set-key (kbd "M-g e") 'lsp-treemacs-error-list))
+      (local-set-key (kbd "M-g e") 'lsp-treemacs-errors-list))
 
     ;; open inline popup with search results
     (local-set-key (kbd "M-g D") 'lsp-ui-peek-find-definitions)
@@ -1258,6 +1258,7 @@ from a change in by prefix-matching the current buffer's `default-directory`"
 
   (global-set-key (kbd "C-x b") 'helm-mini)
   (global-set-key (kbd "C-x p") 'helm-projectile)
+  (global-set-key (kbd "C-x C-p") 'projectile-ag)
 
   (global-set-key (kbd "C-x B") 'bury-buffer)
   (global-set-key (kbd "C-x E") 'apply-macro-to-region-lines)
@@ -1978,7 +1979,7 @@ before packages are loaded."
   (message "loading user config...")
   (jj/defaults)
   (jj/display-setup)
-  (jj/mousescroll)
+  (jj/scrolling)
   (jj/keybindings)
 
   ;; load customization file if it exists.
