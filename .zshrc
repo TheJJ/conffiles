@@ -550,6 +550,13 @@ function catall() {
 	done
 }
 
+# cat a certificat chain, if you want the long version, pass -text
+function catchain() {
+	bundle="$1"
+	shift
+	openssl crl2pkcs7 -nocrl -certfile $bundle | openssl pkcs7 -print_certs -noout $@
+}
+
 
 function pytest() {
 	env python3 - <<-'EOF'
