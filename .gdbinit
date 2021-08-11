@@ -25,6 +25,9 @@ set python print-stack full
 set trace-commands off
 #set detach-on-fork off
 
+#(sizeof(void *) == 8)
+set $64BITS = 1
+
 #set prompt = gdb>> 
 #set extended-prompt \e[1;32m= gdb>>\e[0m 
 set prompt \001\033[1;32m\002= gdb>>\001\033[0m\002 
@@ -37,80 +40,120 @@ end
 
 
 # executed, whenever execution was stopped:
+# (alternatively, use `display` command)
 define hook-stop
 	#x /1i $pc
 end
 
-# kernel debugging
-add-auto-load-safe-path /usr/src/linux/scripts/gdb/vmlinux-gdb.py
-
 ##########################
-# utility functions
+
+# stepping and machine status
+
+define ip
+	x /10i $rip
+end
+document ip
+Dumps decoded instructions starting at instruction pointer.
+Usage: ip
+end
 
 define nip
 	ni
 	x /10i $rip
+end
+document nip
+Run next instruction and print 10 next instructions.
+Usage: nip
 end
 
 define nips
 	ni
 	status-info
 end
+document nips
+Run next instruction and print machine status.
+Usage: nips
+end
 
 define sip
 	si
 	x /10i $rip
 end
-
-define ip
-	x /10i $rip
+document sip
+Step into next instruction and print 10 next instructions.
+Usage: sip
 end
 
-define xxd
-	if $argc != 2
-		help xxd
+define sips
+	si
+	status-info
+end
+document sips
+Step into next instruction and print machine status.
+Usage: sips
+end
+
+
+define stack-base-dump64
+	set $_mempos = ($sp + $arg0)
+	if ($_mempos == $rbp)
+		printf "^"
 	else
-		set pagination off
-		dump binary memory /tmp/gdbdump.bin $arg0 $arg0+$arg1
-		shell xxd -g 4 /tmp/gdbdump.bin
-		shell rm -f /tmp/gdbdump.bin
-		set pagination on
+		if ($_mempos == $sp)
+			printf ">"
+		else
+			printf " "
+		end
 	end
+	printf "%#018lx", *((long*)$_mempos)
 end
-document xxd
-	Usage: xxd <startaddress> <length>
+document stack-base-dump64
+	internal usage. will dump *($sp+$arg0) and annotate $sp/$rbp
+end
 
-	Do a hexdump and try to show ascii-representations of each byte.
+define stack4-dump64
+	if ($arg0 == 0)
+		printf "="
+	else
+		printf " "
+	end
+	stack-base-dump64 $arg0+0
+	printf " "
+	stack-base-dump64 $arg0+1
+	printf " "
+	stack-base-dump64 $arg0+2
+	printf " "
+	stack-base-dump64 $arg0+3
+	printf "\n"
+end
+document stack4-dump64
+	internal usage. will dump *($sp+$arg0+{0,1,2,3})
 end
 
 define status-info
-	if sizeof(void*) == 8
+	printf "\n"
+	info symbol $pc
+	echo \033[33;1m
+	x/5i $pc
+	echo \033[0m
+	printf "\n"
+
+	if ($64BITS == 1)
 		# x86_64.
-		printf "\n"
-		echo \033[33;1m
-		x/5i $pc
-		echo \033[0m
-		printf "\n"
 		printf "rdi%16lx rsi%16lx rdx%16lx rcx%16lx\n", $rdi, $rsi, $rdx, $rcx
 		printf "rax%16lx rbx%16lx r8 %16lx r9 %16lx\n", $rax, $rbx, $r8,  $r9
 		printf "r10%16lx r11%16lx r12%16lx r13%16lx\n", $r10, $r11, $r12, $r13
 		printf "rbp%16lx rsp%16lx r14%16lx r15%16lx\n", $rbp, $rsp, $r14, $r15
 		info registers eflags
 		printf "\n"
-		printf "  %#018lx %#018lx %#018lx %#018lx\n", *((long*)$sp - 8),  *((long*)$sp - 7),  *((long*)$sp - 6),  *((long*)$sp - 5)
-		printf "  %#018lx %#018lx %#018lx %#018lx\n", *((long*)$sp - 4),  *((long*)$sp - 3),  *((long*)$sp - 2),  *((long*)$sp - 1)
-		printf "=>%#018lx %#018lx %#018lx %#018lx\n", *((long*)$sp + 0),  *((long*)$sp + 1),  *((long*)$sp + 2),  *((long*)$sp + 3)
-		printf "  %#018lx %#018lx %#018lx %#018lx\n", *((long*)$sp + 4),  *((long*)$sp + 5),  *((long*)$sp + 6),  *((long*)$sp + 7)
-		printf "  %#018lx %#018lx %#018lx %#018lx\n", *((long*)$sp + 8),  *((long*)$sp + 9),  *((long*)$sp + 10), *((long*)$sp + 11)
-		printf "  %#018lx %#018lx %#018lx %#018lx\n", *((long*)$sp + 12), *((long*)$sp + 13), *((long*)$sp + 14), *((long*)$sp + 15)
-		printf "\n"
+		stack4-dump64 -8
+		stack4-dump64 -4
+		stack4-dump64 0
+		stack4-dump64 4
+		stack4-dump64 8
+		stack4-dump64 12
 	else
 		# x86.
-		printf "\n"
-		echo \033[33;1m
-		x/5i $pc
-		echo \033[0m
-		printf "\n"
 		printf "eax: %8x      ebx: %8x      ecx: %8x      edx: %8x\n", $eax, $ebx, $ecx, $edx
 		printf "edi: %8x      esi: %8x      ebp: %8x      esp: %8x\n", $edi, $esi, $ebp, $esp
 		printf "\n"
