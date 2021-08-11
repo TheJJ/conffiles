@@ -247,6 +247,7 @@ end
 document ascii_char
 	Print ASCII value of byte at address ADDR.
 	Print "." if the value is unprintable.
+	Helper for `hexdump`.
 	Usage: ascii_char ADDR
 end
 
@@ -267,6 +268,7 @@ define dump_hextet
 end
 document dump_hextet
 	Print sixteen hexadecimal bytes starting at address ADDR.
+	Helper for `hexdump`.
 	Usage: dump_hextet ADDR
 end
 
@@ -287,6 +289,7 @@ define ascii_hextet
 end
 document ascii_hextet
 	Print sixteen bytes represented as ascii starting at address ADDR.
+	Helper for `hexdump`.
 	Usage: ascii_hextet ADDR
 end
 
@@ -313,6 +316,7 @@ define dump_hexcombo
 end
 document dump_hexcombo
 	Display a 16-byte hex/ASCII dump of memory at address ADDR.
+	Helper for `hexdump`.
 	Usage: dump_hexcombo ADDR
 end
 
@@ -418,6 +422,9 @@ document pyg
 	Print _PyGC_Dump(arg), arg must me a PyObject *.
 end
 
+
+### Random stuff
+
 define less
 python argc = $argc
 python
@@ -439,13 +446,13 @@ finally:
         f.close()
 end
 end
-document pyg
+document less
 	Run any gdb command piped into less.
 	So you can finally search and page the output nicely.
 end
 
 
-# qt debugging helpers
+### Qt debugging helpers
 
 define printqs4
 	printf "(Q4String)0x%x (length=%i): \"", &$arg0, $arg0.d->size
@@ -495,8 +502,23 @@ define printqs5dynamic
 	printf "\"\n"
 end
 
+### Debugging helper scripts
+# TODO: remove hardcoding...
 
-# enable voltron if found
+python
+
+# eigen
+import sys
+sys.path.insert(0, '/home/jj/devel/eigen/')
+from eigen_printers import register_eigen_printers
+register_eigen_printers(None)
+
+# kernel debugging
+gdb.execute('add-auto-load-safe-path /usr/src/linux/scripts/gdb/vmlinux-gdb.py')
+end
+
+
+### Voltron multi-window gdb
 python
 try:
     import voltron
