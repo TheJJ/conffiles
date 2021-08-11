@@ -356,6 +356,48 @@ document search
 	Usage: search <start> <end> <pattern>
 end
 
+define dis
+	if $argc == 0
+		disassemble
+	end
+	if $argc == 1
+		disassemble $arg0
+	end
+	if $argc == 2
+		disassemble $arg0 $arg1
+	end
+	if $argc > 2
+		help dis
+	end
+end
+document dis
+Disassemble something.
+dis <from> <to>
+
+Without arg, disassemble the whole function around PC.
+One arg, disassemble the whole function around this arg.
+Two args, disassemble this memory range.
+end
+
+define xxd
+	if $argc != 2
+		help xxd
+	else
+		set pagination off
+		dump binary memory /tmp/gdbdump.bin $arg0 $arg0+$arg1
+		shell xxd -g 4 /tmp/gdbdump.bin
+		shell rm -f /tmp/gdbdump.bin
+		set pagination on
+	end
+end
+document xxd
+Usage: xxd <startaddress> <length>
+
+Do a hexdump and try to show ascii-representations of each byte.
+end
+
+
+### Python helpers
 
 define pyo
 	# side effect of calling _PyObject_Dump is to dump the object's
