@@ -171,6 +171,59 @@ document status-info
 end
 
 
+### Break and watchpoints
+
+define sstart
+	tbreak __libc_start_main
+	run
+end
+document sstart
+Run program and until __libc_start_main().
+When there's no main e.g. in stripped executables.
+end
+
+define main
+	tbreak main
+	run
+end
+document main
+Run program and break on main().
+end
+
+
+define bpt
+	if $argc != 1
+		help bpt
+	else
+		tbreak $arg0
+	end
+end
+document bpt
+Set up break at given location, which is deleted as soon as it hits.
+Usage: bpt WHERE
+(or just use `tb` directly..)
+
+WHERE: line number, function name, or "*0x1234".
+end
+
+
+define bpm
+	if $argc != 1
+		help bpm
+	else
+		awatch $arg0
+	end
+end
+document bpm
+Memory read/write breakpoint
+Usage: bpm WHERE
+
+WHERE: $regval, or *address.
+end
+
+
+### Binary dumping and printing
+
 define ascii_char
 	if $argc != 1
 		help ascii_char
