@@ -1606,26 +1606,22 @@ if __name__ == \"__main__\":
                               'indent-for-tab-command
                               c-mode-base-map)
 
-  ; TODO: make sure lsp is loaded..
-  ;(lsp-register-client
-  ;  (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
-  ;                   :major-modes '(c++-mode)
-  ;                   :remote? t
-  ;                   :server-id 'clangd-remote))
+  (add-to-list 'lsp-before-initialize-hook
+               (lambda ()
+                 (add-to-list 'lsp-clients-clangd-args "--header-insertion=never")))  ; don't auto-insert #includes
 
   ;; default to sft style
   (c-set-style "sftstyle")
 
-  (setq tab-width 4
-        indent-tabs-mode t)
+  (setq-local
+    tab-width 4
+    indent-tabs-mode t)
 
   (c-toggle-auto-newline nil) ; no automatic
   (c-toggle-auto-state nil)   ; newlines
 
   ;; keybindings for clike languages
   (jj/cstyle-keybinds)
-
-  (display-line-numbers-mode t)
 
   ;; smart tabs: mix tabs and spaces the right way
   (smart-tabs-mode)
@@ -1661,10 +1657,11 @@ if __name__ == \"__main__\":
 
 ;; py
 (defun jj/python-coding-hook ()
-  (setq python-indent 4
-        indent-tabs-mode nil
-        tab-width 4
-        whitespace-line-column 79)
+  (setq-local
+    python-indent 4
+    indent-tabs-mode nil
+    tab-width 4
+    whitespace-line-column 79)
 
   (setq flycheck-checker 'python-pylint
         flycheck-checker-error-threshold 300)
@@ -1675,10 +1672,11 @@ if __name__ == \"__main__\":
 
   ;; https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
   ;; disable docstring view
-  (setq lsp-signature-doc-lines 0
-        lsp-eldoc-enable-hover nil
-        lsp-signature-auto-activate nil
-        lsp-signature-render-documentation nil)
+  (setq-local
+    lsp-signature-doc-lines 0
+    lsp-eldoc-enable-hover nil
+    lsp-signature-auto-activate nil
+    lsp-signature-render-documentation nil)
 
   ;; smart tabs
   (smart-tabs-mode)
@@ -1689,8 +1687,10 @@ if __name__ == \"__main__\":
 ;; elisp
 (defun jj/lisp-coding-hook ()
   (jj/codenav-keybinds)
-  (setq indent-tabs-mode nil)
-  (setq tab-width 8)
+  (setq-local
+    indent-tabs-mode nil
+    tab-width 8)
+
   (prettify-symbols-mode)
   (smart-tabs-advice lisp-indent-line lisp-indent-offset)
 
@@ -1708,28 +1708,27 @@ if __name__ == \"__main__\":
 
 ;; javascript / ecmascript
 (defun jj/javascript-coding-hook ()
-  (setq js-indent-level 2)
-  (setq tab-width 2)
-  (setq indent-tabs-mode nil))
+  (setq-local
+    js-indent-level 2
+    tab-width 2
+    indent-tabs-mode nil))
 
 ;; TeX
 (defun jj/latex-coding-hook ()
-
-  (message "custom latex config loading...")
-
   ;; set latex indent offset so it doesn't fuck up
   ;; (i.e. use values != n*tab-width)
-  (setq TeX-engine 'default    ;; or xetex
-        tab-width 4
-        fill-column 76
-        LaTeX-indent-level 4
-        LaTeX-item-indent 0
-        indent-tabs-mode nil
-        TeX-parse-self t  ;; enable parse on load
-        TeX-auto-save t   ;; enable parse on save
-        TeX-PDF-mode t
-        reftex-plug-into-AUCTeX t
-        company-minimum-prefix-length 2) ;; so completes start with 2 chars already
+  (setq-local
+    TeX-engine 'default    ;; or xetex
+    tab-width 4
+    fill-column 76
+    LaTeX-indent-level 4
+    LaTeX-item-indent 0
+    indent-tabs-mode nil
+    TeX-parse-self t  ;; enable parse on load
+    TeX-auto-save t   ;; enable parse on save
+    TeX-PDF-mode t
+    reftex-plug-into-AUCTeX t
+    company-minimum-prefix-length 2) ;; so completes start with 2 chars already
 
   ;; don't highlight long lines
   ;; whitespace-highlight may not be initialized yet, thus handle both cases..
@@ -1762,43 +1761,48 @@ if __name__ == \"__main__\":
 
 ;; BibTeX
 (defun jj/bibtex-coding-hook ()
-  (setq tab-width 2
-        indent-tabs-mode nil
-        bibtex-comma-after-last-field t
-        bibtex-align-at-equal-sign t))
-
+  (setq-local
+    tab-width 2
+    indent-tabs-mode nil
+    bibtex-comma-after-last-field t
+    bibtex-align-at-equal-sign t))
 
 ;; html
 (defun jj/html-coding-hook ()
-  (setq sgml-basic-offset 4)
-  (setq indent-tabs-mode t))
+  (setq-local
+    sgml-basic-offset 4
+    indent-tabs-mode t))
 
 ;; haskell
 (defun jj/haskell-coding-hook ()
   ;; haskell interpreter: C-c C-z or C-c C-l
   ;;(haskell-indentation-mode)
-  (setq indent-tabs-mode nil))
+  (setq-local
+    indent-tabs-mode nil))
 
 ;; vhdl
 (defun jj/vhdl-coding-hook ()
-  (setq indent-tabs-mode nil)
+  (setq-local
+    indent-tabs-mode nil)
   (smart-tabs-mode)
-  (smart-tabs-advice vhdl-indent-line vhdl-basic-offset)
-  (setq vhdl-indent-tabs-mode t))
+  (smart-tabs-advice vhdl-indent-line vhdl-basic-offset))
 
 ;; org-mode
 (defun jj/org-mode-hook ()
-  (setq org-log-done nil
-        indent-tabs-mode nil))
+  (setq-local
+    org-log-done nil
+    indent-tabs-mode nil))
 
 ;; markdown-mode
 (defun jj/markdown-mode-hook ()
-  (setq indent-tabs-mode nil
-        whitespace-line-column 400))
+  (setq-local
+    indent-tabs-mode nil
+    whitespace-line-column 400))
 
 (defun jj/cmake-mode-hook ()
-  (setq indent-tabs-mode t)
-  (setq cmake-tab-width 4))
+  (setq-local
+    indent-tabs-mode t
+    cmake-tab-width 4))
 
 (defun jj/compilation-mode-hook ()
   ;; colorized compilation
@@ -1809,9 +1813,10 @@ if __name__ == \"__main__\":
   (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
 
 (defun jj/sql-mode-hook ()
-  (setq indent-tabs-mode t
-        tab-width 4
-        sqlind-basic-offset 4)
+  (setq-local
+    indent-tabs-mode t
+    tab-width 4
+    sqlind-basic-offset 4)
   ;; TODO: detect psql prompt, or disable custom prompt
   ;;(sql-set-product-feature 'postgres)
 
