@@ -797,8 +797,49 @@ See the header of this file for more information."
         lsp-diagnostic-package :none     ; disable lsp diagnostics for performance reasons (flycheck/flymake)
         lsp-enable-on-type-formatting nil  ; using t funnily changes screen content whenever lsp thinks it can do "formatting"
         lsp-enable-file-watchers nil       ; lsp server can do inotify itself, but that may slow emacs down (https://github.com/MaskRay/ccls/issues/354)
+        lsp-eldoc-enable-hover t           ; display info about thing at cursor in minibuffer
+        lsp-eldoc-render-all nil
+        lsp-signature-auto-activate t
+        lsp-signature-render-documentation t
+        lsp-signature-doc-lines 1
         company-minimum-prefix-length 1  ;; lsp does the lookup :)
         company-idle-delay 0.1)
+
+  ;; don't persist clipboard accross sessions
+  (delete 'kill-ring savehist-additional-variables)
+
+  ;; adjust lsp-mode internals
+  (with-eval-after-load 'lsp-mode
+    (lsp-register-client
+      (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
+                      :major-modes '(c++-mode)
+                      :remote? t
+                      :server-id 'clangd-remote))
+    (lsp-register-client
+      (make-lsp-client :new-connection (lsp-tramp-connection "pylsp")
+                      :major-modes '(python-mode)
+                      :remote? t
+                      :server-id 'pylsp-remote)))
+
+
+  ;; wanderlust email \o/
+  (use-package wl
+    :defer t
+    :init (progn
+            (setq wl-stay-folder-window t                       ;; left folder pane
+                  wl-folder-window-width 25                     ;; toggle on/off with i
+                  elmo-localdir-folder-path "~/Mail"
+                  elmo-msgdb-directory "~/.wl/elmo/msgdb"
+                  elmo-network-session-idle-timeout 300
+                  elmo-imap4-use-modified-utf7 t
+
+                  wl-temporary-file-directory "~/.wl/tmp/"
+                  wl-init-file "~/.wl/config"
+                  wl-folders-file "~/.wl/folders"
+                  wl-alias-file "~/.wl/aliases"
+                  wl-x-face-file "~/.wl/xface"
+                  wl-address-file "~/.wl/addresses")))
+
 
   ;; default mode for new buffers
   (setq-default major-mode 'text-mode)
