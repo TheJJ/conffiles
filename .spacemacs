@@ -52,8 +52,11 @@ This function should only modify configuration layer settings."
 
      asm
      (auto-completion :variables
+                      auto-completion-enable-snippets-in-popup t
                       auto-completion-enable-sort-by-usage t
-                      auto-completion-enable-help-tooltip t)
+                      auto-completion-enable-help-tooltip nil
+                      ;; tui/gui switch + color fix needed:
+                      auto-completion-use-company-box nil)
      better-defaults
      bibtex
      (c-c++ :variables
@@ -297,8 +300,6 @@ It should only modify the values of Spacemacs settings."
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(afternoon
-                         deeper-blue
-                         reverse
                          spacemacs-dark
                          monokai)
 
@@ -319,10 +320,10 @@ It should only modify the values of Spacemacs settings."
    ;; a non-negative integer (pixel size), or a floating-point (point size).
    ;; Point size is recommended, because it's device independent. (default 10.0)
    dotspacemacs-default-font '("DejaVu Sans Mono"
-                               ;;:size 13
+                               :size 10.0
                                :weight normal
                                :width normal
-                               :powerline-scale 1.2)
+                               :powerline-scale 10.0)
 
    ;; The leader key (default "SPC")
    dotspacemacs-leader-key "SPC"
@@ -774,6 +775,7 @@ See the header of this file for more information."
         recentf-max-saved-items 1000
         idle-highlight-idle-time 0.2
         auto-window-vscroll nil          ; better scrolling performance...
+        confirm-kill-emacs 'y-or-n-p     ; always ask when exiting
 
         ido-use-virtual-buffers t        ; use recentf-buffers as virtually "open"
         ido-enable-flex-matching t
@@ -1553,6 +1555,32 @@ nil : Otherwise, return nil and run next lineup function."
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; theming
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defun jj/theming ()
+  "theme customizations"
+  ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Defining-Faces.html
+
+  ;; for default theme
+  (custom-theme-set-faces
+   'afternoon
+   ;; brighter tab circle
+   '(whitespace-tab ((t (:foreground "#206090"))) t)
+   ;; for alignment, space-after-tab is not evil
+   '(whitespace-space-after-tab ((t (:foreground "#103050"))) t)
+   )
+
+  ;; for all themes
+  (custom-theme-set-faces
+   'user
+   ;; set the idle-highlight face to only underline
+   '(idle-highlight ((((supports underline)) (:underline t))) t)
+   )
+  )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; mode hooks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1932,51 +1960,6 @@ if __name__ == \"__main__\":
      haskell-mode-hook))
   )
 
-;; we have a graphical window
-(defun jj/window-setup ()
-  (message "spawned new frame in windowed mode")
-  (setq confirm-kill-emacs 'y-or-n-p))
-
-;; we're running on tty
-(defun jj/terminal-setup ()
-  (message "spawned new frame in terminal mode")
-  ;; if oneday launch speed is vim-like,
-  ;; we could nil this so rapid open/closes are possible
-  (setq confirm-kill-emacs 'y-or-n-p)
-  ;; hl-line actually looks pretty with kitty
-  ;(setq global-hl-line-mode nil)
-  )
-
-(defun jj/new-frame-setup (frame)
-  (select-frame frame)
-  (if (window-system frame)
-    (jj/window-setup)
-    (jj/terminal-setup)))
-
-;; change colors according to display
-(defun jj/display-setup ()
-
-  ;; called after a new frame was created
-  ;;(add-hook 'after-make-frame-functions 'jj/new-frame-setup)
-
-  (custom-theme-set-faces 'user
-    ;; in a terminal, set the background to black!
-   '(default (
-              (((type tty) (min-colors 256))
-               (:background "black"))
-              (t
-               (:background "#181a26")))
-      )
-   ;; brighter tab circle
-   '(whitespace-tab ((t (:foreground "#206090"))))
-   ;; for alignment, space-after-tab is not evil
-   '(whitespace-space-after-tab ((t (:foreground "#103050"))))
-   ;; set the idle-highlight face to only underline
-   '(idle-highlight ((t (:underline t))))
-   )
-
-  (jj/new-frame-setup (selected-frame)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; spacemacs init hooks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2024,7 +2007,7 @@ before packages are loaded."
 
   (message "loading user config...")
   (jj/defaults)
-  (jj/display-setup)
+  (jj/theming)
   (jj/scrolling)
   (jj/keybindings)
 
