@@ -1,7 +1,7 @@
 # i3 config file (v4)
 #
 # JJ's i3 config
-# Copyright (c) 2011-2020 Jonas Jelten <jj@sft.mx>
+# Copyright (c) 2011-2021 Jonas Jelten <jj@sft.mx>
 #
 # hint: set unknown scancodes with `setkeycodes`
 #
@@ -58,7 +58,6 @@ bindsym $mod+p exec dpms off
 floating_modifier $mod
 
 bindsym $mod+Shift+Q kill
-bindsym mod1+F4 kill
 
 # jump to latest urgent window
 bindsym $mod+x [urgent=latest] focus
