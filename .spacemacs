@@ -1189,15 +1189,6 @@ Each of them will be indented as if it was opened in the editor."
   (shift-text (- count)))
 
 
-(defun tab-indent-or-complete ()
-  (interactive)
-  (if (minibufferp)
-    (minibuffer-complete)
-    (if (check-expansion)
-      (company-complete-common)
-      (indent-for-tab-command))))
-
-
 (defun sort-words (reverse beg end)
   "Sort words in region alphabetically, in REVERSE if negative.
   Prefixed with negative \\[universal-argument], sorts in reverse.
@@ -1360,8 +1351,6 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (global-set-key (kbd "C-x B") 'bury-buffer)
   (global-set-key (kbd "C-x E") 'apply-macro-to-region-lines)
   (global-set-key (kbd "C-x I") 'insert-buffer)
-  (global-set-key (kbd "C-c g") 'goto-line)
-  (global-set-key (kbd "C-c G") 'goto-char)
   (global-set-key (kbd "C-c w") 'delete-region) ; ala C-w and M-C-w
   (global-set-key (kbd "C-c c") 'comment-region)
   (global-set-key (kbd "C-c u") 'uncomment-region)
@@ -1393,9 +1382,6 @@ from a change in by prefix-matching the current buffer's `default-directory`"
 
   ;; really insert a fucking tab
   (global-set-key (kbd "C-<tab>") 'insert-tab)
-
-  ;; force company completion:
-  (global-set-key (kbd "S-<tab>") 'tab-indent-or-complete)
 
   ;; disable annoying character swapping
   (global-unset-key (kbd "C-t"))
