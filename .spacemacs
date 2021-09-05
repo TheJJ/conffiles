@@ -77,6 +77,7 @@ This function should only modify configuration layer settings."
      (helm :variables
            helm-enable-auto-resize nil)
      html
+     java
      javascript
      (latex :variables
             latex-enable-auto-fill nil
@@ -91,6 +92,7 @@ This function should only modify configuration layer settings."
                markdown-live-preview-engine 'vmd)
      (multiple-cursors :variables
                        multiple-cursors-backend 'evil-mc)
+     nginx
      org
      python
      (ranger :variables
