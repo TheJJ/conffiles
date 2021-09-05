@@ -778,6 +778,7 @@ See the header of this file for more information."
         idle-highlight-idle-time 0.2
         auto-window-vscroll nil          ; better scrolling performance...
         confirm-kill-emacs 'y-or-n-p     ; always ask when exiting
+        password-cache-expiry nil        ; tramp password cache
 
         ido-use-virtual-buffers t        ; use recentf-buffers as virtually "open"
         ido-enable-flex-matching t
@@ -1351,9 +1352,13 @@ from a change in by prefix-matching the current buffer's `default-directory`"
             (global-set-key (kbd "C-x C-S-f") 'helm-for-files)
             (spacemacs||set-helm-key "fF" helm-for-files)))
 
+  ;; open project/file/vc things
   (global-set-key (kbd "C-x b") 'helm-mini)
   (global-set-key (kbd "C-x p") 'helm-projectile)
-  (global-set-key (kbd "C-x C-p") 'projectile-ag)
+  (global-set-key (kbd "C-x C-b") 'bs-show) ; buffer selector
+  (global-set-key (kbd "C-x M-b") 'speedbar)
+  (global-set-key (kbd "C-c g") 'magit-status)
+  (global-set-key (kbd "C-x g") 'magit-status)
 
   (global-set-key (kbd "C-x B") 'bury-buffer)
   (global-set-key (kbd "C-x E") 'apply-macro-to-region-lines)
@@ -1364,14 +1369,10 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (global-set-key (kbd "C-c n") 'next-error)
   (global-set-key (kbd "C-c p") 'previous-error)
 
-  (global-set-key (kbd "C-x C-b") 'bs-show) ; buffer selector
-  (global-set-key (kbd "C-x M-b") 'speedbar)
+  (global-set-key (kbd "C-x C-p") 'projectile-ag)
 
   ;; align the current region to = or whatever
   (global-set-key (kbd "M-A") 'align-current)
-
-  (global-set-key (kbd "C-c g") 'magit-status)
-  (global-set-key (kbd "C-x g") 'magit-status)
 
   (global-set-key (kbd "M-SPC") 'just-one-space) ;fold space to 1
 
@@ -1918,6 +1919,7 @@ if __name__ == \"__main__\":
 (defun jj/cmake-mode-hook ()
   (setq-local
     indent-tabs-mode t
+    tab-width 4
     cmake-tab-width 4))
 
 (defun jj/compilation-mode-hook ()
