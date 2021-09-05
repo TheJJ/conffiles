@@ -978,7 +978,8 @@ See the header of this file for more information."
 
 (defun jj/xref-push-marker-stack-slide-reset (orig &rest args)
   "forget the future xref jumps before storing the new xref jump position."
-  (dotimes (i jj/xref-marker-slide)
+  (dotimes (i (min jj/xref-marker-slide
+                   (ring-length xref--marker-ring)))
     ;; remove all walked-backward marker ring entries
     (ring-remove xref--marker-ring 0))
   ;; reset the slides
@@ -1020,7 +1021,11 @@ See the header of this file for more information."
   (let ((ring xref--marker-ring))
     (when (ring-empty-p ring)
       (user-error "Marker stack is empty"))
-    (when (>= (+ jj/xref-marker-slide 1) (ring-length ring))
+
+    (when (>= (+ jj/xref-marker-slide
+                 (if jj/xref-marker-ring-has-backjump 1 0))
+              (ring-length ring))
+      ;; when we want to slide back, but slidepos+1 > ring-length
       (user-error "Can't go xref-backward beyond marker stack."))
 
     (when (not jj/xref-marker-ring-has-backjump)
