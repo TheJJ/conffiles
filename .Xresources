@@ -1,7 +1,7 @@
 ! .Xresources, optimized for urxvt, to make it vergil
 !
 ! Copyright (c) 2011 Michael Enßlin <michael@ensslin.cc>
-! Copyright (c) 2011-2018 Jonas Jelten <jj@sft.mx>
+! Copyright (c) 2011-2021 Jonas Jelten <jj@sft.lol>
 !
 ! released under GNU GPLv3 or later
 
@@ -11,7 +11,10 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! highdpi!
-!Xft.dpi: 108
+! changes the X font dpi,
+! not the Xserver dpi which apparently doesn't matter (it's the one from `xrandr --dpi`/`X -dpi`)
+! to my knowledge this is the easiest and best way to scale everything nicely.
+! except Qt, which needs env QT_AUTO_SCREEN_SCALE_FACTOR=0 so it doesn't scale again.
 Xft.dpi: 144
 
 ! subpixel hinting
@@ -99,7 +102,6 @@ URxvt.keysym.Shift-End:       command:\033]721;999999\007
 ! font size updating
 URxvt.keysym.M-Up:     perl:font-size:increase
 URxvt.keysym.M-Down:   perl:font-size:decrease
-!URxvt.keysym.M-C-7: command:\033]710;-*-terminus-medium-*-*-*-28-*-*-*-*-*-*-*\007\033]711;-*-terminus-bold-*-*-*-28-*-*-*-*-*-*-*\00
 
 ! window bell via white flash
 URxvt.visualBell: false
