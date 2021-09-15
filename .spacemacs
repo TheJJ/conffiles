@@ -2023,6 +2023,8 @@ if __name__ == \"__main__\":
   (add-hook 'server-visit-hook           'jj/emacs-server-visit-hook)
   (add-hook 'shell-mode-hook             'jj/shell-mode-hook)
   (add-hook 'eshell-mode-hook            'jj/eshell-mode-hook)
+  (add-hook 'compilation-filter-hook
+            (lambda () (ansi-color-apply-on-region (point-min) (point-max))))
 
   ;; some modes don't inherit from prog-mode...
   (multi-hook-add
