@@ -1355,6 +1355,9 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   ;; open project/file/vc things
   (global-set-key (kbd "C-x b") 'helm-mini)
   (global-set-key (kbd "C-x p") 'helm-projectile)
+  (global-set-key (kbd "C-x S-p") 'helm-projectile-switch-project)
+  (global-set-key (kbd "C-x C-p") 'projectile-ag)
+
   (global-set-key (kbd "C-x C-b") 'bs-show) ; buffer selector
   (global-set-key (kbd "C-x M-b") 'speedbar)
   (global-set-key (kbd "C-c g") 'magit-status)
@@ -1369,7 +1372,6 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (global-set-key (kbd "C-c n") 'next-error)
   (global-set-key (kbd "C-c p") 'previous-error)
 
-  (global-set-key (kbd "C-x C-p") 'projectile-ag)
 
   ;; align the current region to = or whatever
   (global-set-key (kbd "M-A") 'align-current)
