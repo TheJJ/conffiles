@@ -1441,6 +1441,18 @@ nil : Otherwise, return nil and run next lineup function."
                          ))
      ))
 
+  (c-add-style
+   "sft-java"
+   '("java" ;; based on the builtin java style
+     (c-offsets-alist . (
+                         (arglist-intro . +)
+                         (arglist-close . 0)
+                         (statement-cont        . (first c-lineup-string-cont
+                                                         c-lineup-cascaded-calls
+                                                         c-lineup-assignments))
+                         ))
+     ))
+
   ;; sft coding style
   (defconst sft-c-style
     '("linux"  ;; base it on linux code style
@@ -1557,7 +1569,7 @@ nil : Otherwise, return nil and run next lineup function."
       (c-echo-syntactic-information-p . nil))
     "The SFT C++ programming style"
     )
-  (c-add-style "sftstyle"     sft-c-style)
+  (c-add-style "sft-cpp"     sft-c-style)
 
   ;; https://github.com/llvm-mirror/llvm/blob/master/utils/emacs/emacs.el
   (defun llvm-lineup-statement (langelem)
@@ -1730,7 +1742,7 @@ if __name__ == \"__main__\":
                  (add-to-list 'lsp-clients-clangd-args "--header-insertion=never")))  ; don't auto-insert #includes
 
   ;; default to sft style
-  (c-set-style "sftstyle")
+  (c-set-style "sft-cpp")
 
   (setq-local
     tab-width 4
@@ -1773,6 +1785,15 @@ if __name__ == \"__main__\":
           ("\\<[A-Za-z_]+[A-Za-z_0-9]*_t\\>" . font-lock-type-face)
           ))
   )
+
+;; java
+(defun jj/java-coding-hook ()
+  (c-set-style "sft-java")
+
+  (setq-local
+   indent-tabs-mode t
+   tab-width 4
+   c-basic-offset 4))
 
 ;; py
 (defun jj/python-coding-hook ()
@@ -1988,6 +2009,7 @@ if __name__ == \"__main__\":
   (add-hook 'haskell-mode-hook           'jj/haskell-coding-hook)
   (add-hook 'c-mode-common-hook          'jj/c-base-hook)
   (add-hook 'c++-mode-hook               'jj/c++-coding-hook)
+  (add-hook 'java-mode-hook              'jj/java-coding-hook)
   (add-hook 'LaTeX-mode-hook             'jj/latex-coding-hook)
   (add-hook 'bibtex-mode-hook            'jj/bibtex-coding-hook)
   (add-hook 'vhdl-mode-hook              'jj/vhdl-coding-hook)
