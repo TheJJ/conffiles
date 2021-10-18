@@ -225,8 +225,8 @@ cmap wt4 cal WhitespaceTab(4)
 cmap wt8 cal WhitespaceTab(8)
 
 " language-specific stuff
-" python-specific
-au FileType python setlocal expandtab
+autocmd FileType python setlocal expandtab
+autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 
 " filetypes where whitespaces are preferred
 autocmd FileType python,perl,pyrex cal WhitespaceSpace(4)
