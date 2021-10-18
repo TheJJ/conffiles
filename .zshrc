@@ -683,6 +683,11 @@ function p12extract() {
 	done
 }
 
+function texformula() {
+	formula="$@"
+	pdflatex -output-directory=/tmp -jobname formula "\\def\\formula{$formula}\\documentclass[border=2pt]{standalone}\\usepackage{amsmath}\\usepackage{varwidth}\\begin{document}\\begin{varwidth}{\\linewidth}\\[ \\formula \\]\\end{varwidth}\\end{document}" || return 1
+	echo -e "formula written to:\n/tmp/formula.pdf"
+}
 
 ####################
 # shell setup
