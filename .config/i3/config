@@ -27,15 +27,15 @@ bindcode shift+107 exec ~/bin/screenshot --select
 #bindcode 161 exec sleep 0.3 && ~/bin/rscreen portrait
 
 # audio stuff
-bindcode 121 exec pactl set-sink-mute 0 toggle > /dev/null
-bindcode 198 exec pactl set-source-mute 1 toggle > /dev/null
+bindcode 121 exec pactl set-sink-mute @DEFAULT_SINK@ toggle > /dev/null
+bindcode 198 exec pactl set-source-mute @DEFAULT_SOURCE@ toggle > /dev/null
 
-bindcode shift+122 exec pactl set-source-volume 1 -5% > /dev/null
-bindcode shift+123 exec pactl set-source-volume 1 +5% > /dev/null
-bindcode 122 exec pactl set-sink-volume 0 -5% > /dev/null
-bindcode 123 exec pactl set-sink-volume 0 +5% > /dev/null
-bindcode control+122 exec pactl set-sink-volume 0 -15% > /dev/null
-bindcode control+123 exec pactl set-sink-volume 0 +15% > /dev/null
+bindcode shift+122 exec pactl set-source-volume @DEFAULT_SOURCE@ -5% > /dev/null
+bindcode shift+123 exec pactl set-source-volume @DEFAULT_SOURCE@ +5% > /dev/null
+bindcode 122 exec pactl set-sink-volume @DEFAULT_SINK@ -5% > /dev/null
+bindcode 123 exec pactl set-sink-volume @DEFAULT_SINK@ +5% > /dev/null
+bindcode control+122 exec pactl set-sink-volume @DEFAULT_SINK@ -15% > /dev/null
+bindcode control+123 exec pactl set-sink-volume @DEFAULT_SINK@ +15% > /dev/null
 
 bindcode 232 exec xbacklight -dec 10
 bindcode 233 exec xbacklight -inc 10
