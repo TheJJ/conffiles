@@ -58,7 +58,8 @@ This function should only modify configuration layer settings."
                       ;; tui/gui switch + color fix needed:
                       auto-completion-use-company-box nil)
      better-defaults
-     bibtex
+     (bibtex :variables
+             bibtex-enable-ebib-support t)
      (c-c++ :variables
             c-c++-default-mode-for-headers 'c++-mode
             c-c++-backend 'lsp-clangd)
@@ -93,7 +94,11 @@ This function should only modify configuration layer settings."
      (multiple-cursors :variables
                        multiple-cursors-backend 'evil-mc)
      nginx
-     org
+     (org :variables
+          org-enable-roam-support t
+          ;; org-roam-directory is customized!
+          org-roam-v2-ack t)
+     pdf
      python
      (ranger :variables
              ranger-show-preview t)
@@ -108,7 +113,6 @@ This function should only modify configuration layer settings."
                      spell-checking-enable-by-default nil
                      spell-checking-enable-auto-dictionary t
                      enable-flyspell-auto-completion nil)
-
      sql
      systemd
      (syntax-checking :variables
@@ -119,6 +123,7 @@ This function should only modify configuration layer settings."
                treemacs-use-follow-mode nil
                treemacs-use-filewatch-mode t
                treemacs-collapse-dirs 3)
+     typescript
      version-control
      xclipboard
      yaml
@@ -136,8 +141,10 @@ This function should only modify configuration layer settings."
      afternoon-theme
      ag
      bison-mode
+     citar
      google-c-style
      idle-highlight-mode
+     org-roam-bibtex
      pdf-tools
      )
    ;; A list of packages that cannot be updated.
@@ -467,8 +474,8 @@ It should only modify the values of Spacemacs settings."
    ;; If set to `t', `relative' or `visual' then line numbers are enabled in all
    ;; `prog-mode' and `text-mode' derivatives. If set to `relative', line
    ;; numbers are relative. If set to `visual', line numbers are also relative,
-   ;; but lines are only visual lines are counted. For example, folded lines
-   ;; will not be counted and wrapped lines are counted as multiple lines.
+   ;; but only visual lines are counted. For example, folded lines will not be
+   ;; counted and wrapped lines are counted as multiple lines.
    ;; This variable can also be set to a property list for finer control:
    ;; '(:relative nil
    ;;   :visual nil
@@ -562,14 +569,14 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-whitespace-cleanup nil
 
-   ;; If non nil activate `clean-aindent-mode' which tries to correct
-   ;; virtual indentation of simple modes. This can interfer with mode specific
+   ;; If non-nil activate `clean-aindent-mode' which tries to correct
+   ;; virtual indentation of simple modes. This can interfere with mode specific
    ;; indent handling like has been reported for `go-mode'.
    ;; If it does deactivate it here.
    ;; (default t)
    dotspacemacs-use-clean-aindent-mode t
 
-   ;; Accept SPC as y for prompts if non nil. (default nil)
+   ;; Accept SPC as y for prompts if non-nil. (default nil)
    dotspacemacs-use-SPC-as-y nil
 
    ;; If non-nil shift your number row to match the entered keyboard layout
@@ -589,7 +596,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-pretty-docs nil
 
    ;; If nil the home buffer shows the full path of agenda items
-   ;; and todos. If non nil only the file name is shown.
+   ;; and todos. If non-nil only the file name is shown.
    dotspacemacs-home-shorten-agenda-source nil
 
    ;; If non-nil then byte-compile some of Spacemacs files.
@@ -608,6 +615,19 @@ See the header of this file for more information."
 ;;####################################################
 ;; jj's addons to spacemacs start here
 ;;####################################################
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; load non-spacemacsed packages
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun jj/load-packages ()
+  "load and setup packages that are not yet nicely integrated in spacemacs"
+
+  (use-package org-roam-bibtex
+    :after org-roam
+    :config
+    (require 'org-ref)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; conditional package settings
@@ -750,6 +770,8 @@ See the header of this file for more information."
   (setq indicate-empty-lines t
         transient-mark-mode t
         package-native-compile nil       ; don't compile on install, instead on demand
+        native-comp-async-report-warnings-errors t
+        warning-minimum-level :error
         gud-tooltip-mode t
         lazy-highlight t                 ; highlight occurrences
         lazy-highlight-cleanup nil       ; keep search term highlighted
@@ -828,6 +850,7 @@ See the header of this file for more information."
 
 
   ;; wanderlust email \o/
+  ;; per-device config is in ~/.wl/config and folders
   (use-package wl
     :defer t
     :init (progn
@@ -1396,6 +1419,13 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   ;; disable annoying character swapping
   (global-unset-key (kbd "C-t"))
 
+  ;; runs evil-mouse-drag-region
+  ;; but when remains set, clicking in customize-mode doesn't work
+  (evil-set-initial-state 'Custom-mode 'insert)
+
+  ;; otherwise entry editing is kinda broken
+  (evil-set-initial-state 'ebib-entry-mode 'insert)
+
   (fset 'yes-or-no-p 'y-or-n-p) ; yes/no answering without <RET>
   )
 
@@ -1884,6 +1914,9 @@ if __name__ == \"__main__\":
   (LaTeX-math-mode t)
   (turn-on-reftex)
 
+  ;; so pdf-tools buffer gets reverted
+  (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
+
   ;; don't do non-company completions
   ;; otherwise a funny new buffer appears with "useful" completions
   (remove-hook 'completion-at-point-functions 'TeX--completion-at-point t)
@@ -2035,6 +2068,14 @@ if __name__ == \"__main__\":
      haskell-mode-hook))
   )
 
+(defun jj/load-device-settings ()
+  "include device-specific configuration"
+  (interactive)
+
+  (let ((device-config (locate-user-emacs-file "device.el")))
+    (when (file-exists-p device-config)
+      (load-file device-config))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; spacemacs init hooks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2081,6 +2122,8 @@ Put your configuration code here, except for variables that should be set
 before packages are loaded."
 
   (message "loading user config...")
+
+  (jj/load-packages)
   (jj/defaults)
   (jj/theming)
   (jj/scrolling)
@@ -2089,6 +2132,8 @@ before packages are loaded."
   ;; load customization file if it exists.
   (when (file-exists-p custom-file)
     (load-file custom-file))
+
+  (jj/load-device-settings)
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
