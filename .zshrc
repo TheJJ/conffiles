@@ -1,5 +1,5 @@
 # JJ's zshrc
-# Copyright (c) 2011 - 2020 Jonas Jelten
+# Copyright (c) 2011 - 2022 Jonas Jelten
 #
 # Released under GPLv3 or later.
 #
@@ -184,6 +184,7 @@ alias nautilus="nautilus"
 alias sqlite="sqlite3"
 alias zerocat="xargs -0 -L1 -a"  # cat a file like /proc/pid/environ or comm in lines
 alias ldbind="LD_DEBUG=bindings ldd"  # show what symbols the linker binds
+alias pdb="python3 -m pdb"
 
 alias l='ls'
 alias la='ls -A'
