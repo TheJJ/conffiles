@@ -2,7 +2,7 @@
 " JJ's vimrc
 "
 " released under the GPLv3 or later
-" (c) 2008 - 2021 Jonas Jelten
+" (c) 2008 - 2022 Jonas Jelten
 
 
 syntax on
@@ -212,9 +212,9 @@ function! WhitespaceTab(x)
 endfunction
 
 " default indentation scheme
-call WhitespaceTab(4)
+call WhitespaceSpace(4)
 
-" linux code looks really ugly without 8-sized tabs
+" linux code only aligns properly with 8-sized tabs
 autocmd BufRead /usr/src/linux* call WhitespaceTab(8)
 
 cmap ws2 cal WhitespaceSpace(2)
@@ -234,4 +234,6 @@ autocmd FileType lisp cal WhitespaceSpace(2)
 autocmd FileType lisp setlocal tabstop=8
 autocmd FileType rust cal WhitespaceSpace(4)
 autocmd FileType sql cal WhitespaceSpace(4)
+autocmd FileType cpp cal WhitespaceTab(4)
+autocmd FileType c cal WhitespaceTab(4)
 
