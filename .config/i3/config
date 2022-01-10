@@ -1,7 +1,7 @@
 # i3 config file (v4)
 #
 # JJ's i3 config
-# Copyright (c) 2011-2021 Jonas Jelten <jj@sft.mx>
+# Copyright (c) 2011-2022 Jonas Jelten <jj@sft.lol>
 #
 # hint: set unknown scancodes with `setkeycodes`
 #
@@ -9,7 +9,6 @@
 set $mod Mod4
 
 # font for window titles. ISO 10646 = Unicode
-#font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
 font pango:DejaVu Sans Mono 10
 
 # start a terminal
@@ -197,8 +196,8 @@ bar {
 	# hide or dock the statusbar
 	mode dock
 
-	# or none
-	#tray_output eDP-1
+	# xrandr --primary selects tray
+	tray_output primary
 
 	# font xcorefontname
 	# or no # show the numbered workspace buttons
