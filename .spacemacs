@@ -2,10 +2,11 @@
 ;; vim: ft=lisp
 
 ;; jj's spacemacs configuration
-;; Copyright (c) 2011-2021 Jonas Jelten <jj@sft.lol>
+;; Copyright (c) 2011-2022 Jonas Jelten <jj@sft.lol>
 ;; Licensed GPLv3 or later
-
-;; for project-specific configs, create a .dir-locals.el file:
+;;
+;; ====
+;; dir-locals: for project-specific configs, create a .dir-locals.el file:
 ;; example .dir-locals.el file for a linux repo:
 ;; (
 ;;  (nil . ((indent-tabs-mode . t)
@@ -13,6 +14,32 @@
 ;;  (c-mode . ((c-file-style . "linux-kernel")))
 ;;  (c++-mode . ((c-file-style . "linux-kernel")))
 ;;  )
+;;
+;;
+;; ====
+;; optional dependencies to make things better:
+;;
+;; * C++: clangd
+;;   for semantic indexing etc.
+;;
+;; ====
+;; useful customizations, stored in ~/.emacs.d/custom.el
+;;
+;; * org:
+;;   - org-agenda-files: directories and files to auto-load.
+;;                       can be added with `org-agenda-file-to-front` C-c [
+;;                       and removed with `org-remove-file` C-c ]
+;; * org-roam:
+;;   - org-roam-directory: path where the org-roam notes are
+;;
+;; * bibtex paths
+;;   - bibtex-completion-bibliography  (where are bib files)
+;;   - bibtex-completion-library-path  (where are pdfs)
+;;   => to edit notes of bibtex entries, use M-x helm-bibtex <search> C-z F8
+;;
+;; ====
+;; configuration todos:
+;; * helm-M-x should display documentation of functions/variables, ivy does that
 
 
 (defun dotspacemacs/layers ()
@@ -70,6 +97,7 @@ This function should only modify configuration layer settings."
      debug
      emacs-lisp
      major-modes  ;; qml-mode, openscad
+     meson
      git
      (gtags :variables
             gtags-enable-by-default nil)
@@ -77,10 +105,12 @@ This function should only modify configuration layer settings."
               haskell-completion-backend 'intero)
      (helm :variables
            helm-enable-auto-resize nil)
+     helpful
      html
      java
      javascript
      (latex :variables
+            latex-view-with-pdf-tools nil
             latex-enable-auto-fill nil
             latex-enable-magic nil
             latex-enable-folding nil)
@@ -95,7 +125,9 @@ This function should only modify configuration layer settings."
                        multiple-cursors-backend 'evil-mc)
      nginx
      (org :variables
+          org-enable-appear-support t
           org-enable-roam-support t
+          org-enable-github-support t
           ;; org-roam-directory is customized!
           org-roam-v2-ack t)
      pdf
@@ -157,6 +189,7 @@ This function should only modify configuration layer settings."
      wolfram-mode
      auto-highlight-symbol
      helm-company  ;; so C-/ is not mapped to it when completing...
+     importmagic
      )
 
    ;; Defines the behaviour of Spacemacs when installing packages.
@@ -331,8 +364,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-default-font '("DejaVu Sans Mono"
                                :size 10.0
                                :weight normal
-                               :width normal
-                               :powerline-scale 10.0)
+                               :width normal)
 
    ;; The leader key (default "SPC")
    dotspacemacs-leader-key "SPC"
@@ -630,7 +662,7 @@ See the header of this file for more information."
     (require 'org-ref)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; conditional package settings
+;; helper functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmacro with-library (symbol &rest body)
@@ -640,6 +672,16 @@ See the header of this file for more information."
      (error (message (format "package unavailable: %s" ',symbol))
             nil)))
 
+(defun sync-variable (destinationvar sourcevar)
+  "synchronize the state of a given variable to another one.
+the value is copied when setting up the sync."
+
+  (let ((updatefunc (lambda (symbol newval operation where)
+                      (set destinationvar newval))))
+    ;; install update-hook
+    (add-variable-watcher sourcevar updatefunc)
+    ;; call for initial update
+    (funcall updatefunc nil (symbol-value sourcevar) nil nil)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; advices
@@ -816,6 +858,19 @@ See the header of this file for more information."
 
         mime-edit-split-message nil      ; don't split large messages
 
+        bibtex-completion-pdf-open-function 'helm-open-file-with-default-tool  ; open with system viewer
+        bibtex-completion-pdf-field "file" ; field in bibtex file for pdf name
+        ebib-bibtex-dialect 'biblatex
+        ebib-index-default-sort '("Year" . descend)
+        ebib-file-associations '()         ; so find-file handles the opening
+
+        org-hide-emphasis-markers t  ; hide syntax elements
+        org-startup-with-inline-images t
+        org-startup-with-latex-preview t
+        org-format-latex-options (plist-put org-format-latex-options :scale 2.0)
+        org-appear-autolinks nil      ; let links be invisible because they expand to long lines
+        org-appear-autoentities t
+
         ;; lsp settings
         lsp-enable-indentation nil       ; don't ask the language server for indentations
         lsp-enable-imenu nil
@@ -829,6 +884,8 @@ See the header of this file for more information."
         lsp-signature-auto-activate t
         lsp-signature-render-documentation t
         lsp-signature-doc-lines 1
+        lsp-enable-snippet t
+
         company-minimum-prefix-length 1  ;; lsp does the lookup :)
         company-idle-delay 0.1)
 
@@ -838,16 +895,49 @@ See the header of this file for more information."
   ;; adjust lsp-mode internals
   (with-eval-after-load 'lsp-mode
     (lsp-register-client
-      (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
+     (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
                       :major-modes '(c++-mode)
                       :remote? t
                       :server-id 'clangd-remote))
     (lsp-register-client
-      (make-lsp-client :new-connection (lsp-tramp-connection "pylsp")
+     (make-lsp-client :new-connection (lsp-tramp-connection "pylsp")
                       :major-modes '(python-mode)
                       :remote? t
                       :server-id 'pylsp-remote)))
 
+  ;; tame org-open-file, which uses org-file-apps, and finally mailcap.el
+  ;; to determine how to open pdf files
+  ;; if we do not set this in mailcap-user-mime-data, it returns pdf-view-mode
+  ;; test with:
+  ;; (mailcap-mime-info (mailcap-extension-to-mime ".pdf"))
+  (eval-after-load "org"
+                   '(setcdr (assoc "\\.pdf\\'" org-file-apps) 'default))
+  (eval-after-load "mailcap"
+                   '(progn
+                      (add-to-list 'mailcap-user-mime-data
+                                   '("pdf"
+                                     (viewer . "xdg-open %s")
+                                     (type . "application/pdf")
+                                     (test . (eq window-system 'x))))
+                      (add-to-list 'mailcap-user-mime-data
+                                   '("html"
+                                     (viewer . "xdg-open %s")
+                                     (type . "text/html")
+                                     (test . (eq window-system 'x))))
+                      ))
+
+  ;; create hooks to redirect bibtex notes handling into org-roam
+  (eval-after-load "org-roam"
+    '(org-roam-bibtex-mode))
+
+  ;; synchronize bibliography customization settings to other packages
+  (eval-after-load "ebib"
+    '(progn
+       (sync-variable 'ebib-file-search-dirs 'bibtex-completion-library-path)
+       (sync-variable 'ebib-preload-bib-files 'bibtex-completion-bibliography)))
+  (eval-after-load "citar"
+    '(progn
+       (sync-variable 'citar-bibliography 'bibtex-completion-bibliography)))
 
   ;; wanderlust email \o/
   ;; per-device config is in ~/.wl/config and folders
@@ -889,6 +979,7 @@ See the header of this file for more information."
   (spacemacs|diminish yas-minor-mode)
   (spacemacs|diminish global-whitespace-mode)
   (spacemacs|diminish company-mode)
+  (spacemacs|diminish org-roam-bibtex-mode)
 
   ;; whitespace crimes
   (jj/whitespace-highlight)
@@ -1386,6 +1477,8 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (global-set-key (kbd "C-c g") 'magit-status)
   (global-set-key (kbd "C-x g") 'magit-status)
 
+  (global-set-key (kbd "C-x j b") 'helm-bibtex)
+
   (global-set-key (kbd "C-x B") 'bury-buffer)
   (global-set-key (kbd "C-x E") 'apply-macro-to-region-lines)
   (global-set-key (kbd "C-x I") 'insert-buffer)
@@ -1419,14 +1512,31 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   ;; disable annoying character swapping
   (global-unset-key (kbd "C-t"))
 
-  ;; runs evil-mouse-drag-region
-  ;; but when remains set, clicking in customize-mode doesn't work
-  (evil-set-initial-state 'Custom-mode 'insert)
+  ;; default C-M-arrow bindings are kinda useless,
+  ;; so we use them so M-arrow is free for window movements!
+  (define-key org-mode-map (kbd "C-M-<right>") 'org-metaright)
+  (define-key org-mode-map (kbd "C-M-<left>") 'org-metaleft)
+  (define-key org-mode-map (kbd "C-M-<up>") 'org-metaup)
+  (define-key org-mode-map (kbd "C-M-<down>") 'org-metaup)
+  ;; unset those in orgmodemap so the global window mappings are used
+  (define-key org-mode-map (kbd "M-<right>") nil)
+  (define-key org-mode-map (kbd "M-<left>") nil)
+  (define-key org-mode-map (kbd "M-<up>") nil)
+  (define-key org-mode-map (kbd "M-<down>") nil)
+
+  ;; fix button klicking etc in customize-mode
+  (evil-set-initial-state 'Custom-mode 'emacs)
+  (evil-set-initial-state 'custom-new-theme-mode 'emacs)
 
   ;; otherwise entry editing is kinda broken
-  (evil-set-initial-state 'ebib-entry-mode 'insert)
+  (evil-set-initial-state 'ebib-entry-mode 'emacs)
 
   (fset 'yes-or-no-p 'y-or-n-p) ; yes/no answering without <RET>
+
+  ;; todo: for M-S-: and others
+  ;; alternative to previous-line-or-history-element
+  ;; implemented like zsh's history-beginning-search-backward
+  ;; or readline's history-search-backward
   )
 
 
@@ -1653,7 +1763,14 @@ nil : Otherwise, return nil and run next lineup function."
 
 (defun jj/theming ()
   "theme customizations"
+  (interactive)
   ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Defining-Faces.html
+  ;; https://develop.spacemacs.org/layers/+themes/theming/README.html
+
+  ;;'((theme1 (face1 attributes...)
+  ;;          (face2 attributes...)
+  ;;          ...))
+  (setq theming-modifications '())
 
   ;; for default theme
   (custom-theme-set-faces
@@ -1665,11 +1782,15 @@ nil : Otherwise, return nil and run next lineup function."
    )
 
   ;; for all themes
+  ;; TODO: this basically behaves like customize-settings
+  ;; and is written to the customize file again...
   (custom-theme-set-faces
    'user
    ;; set the idle-highlight face to only underline
    '(idle-highlight ((((supports underline)) (:underline t))) t)
    )
+
+  (spacemacs/update-theme)
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1888,15 +2009,17 @@ if __name__ == \"__main__\":
   ;; set latex indent offset so it doesn't fuck up
   ;; (i.e. use values != n*tab-width)
   (setq-local
-    TeX-engine 'default    ;; or xetex
+    TeX-engine 'default  ;; or xetex, but conflicts with inputenc package
+    TeX-PDF-mode t
+
     tab-width 4
     fill-column 76
     LaTeX-indent-level 4
     LaTeX-item-indent 0
     indent-tabs-mode nil
+
     TeX-parse-self t  ;; enable parse on load
     TeX-auto-save t   ;; enable parse on save
-    TeX-PDF-mode t
     reftex-plug-into-AUCTeX t
     company-minimum-prefix-length 2) ;; so completes start with 2 chars already
 
@@ -2097,7 +2220,15 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
   ;; store customizations in extra file
   (setq custom-file (locate-user-emacs-file "custom.el"))
-  (load custom-file)
+  ;; load customization file if it exists.
+  (when (file-exists-p custom-file)
+    (load custom-file))
+
+  ;; https://github.com/Somelauw/evil-org-mode/issues/93
+  ;; https://github.com/syl20bnr/spacemacs/issues/15123
+  (when (not (boundp 'evil-redirect-digit-argument))
+  (defmacro evil-redirect-digit-argument (map keys target)
+     `(define-key ,map ,keys ,target)))
 
   ;; load external packages
   (jj/loadpath-discover)
@@ -2128,10 +2259,6 @@ before packages are loaded."
   (jj/theming)
   (jj/scrolling)
   (jj/keybindings)
-
-  ;; load customization file if it exists.
-  (when (file-exists-p custom-file)
-    (load-file custom-file))
 
   (jj/load-device-settings)
   )
