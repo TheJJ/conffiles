@@ -3,7 +3,7 @@
 """
 jj's pythonrc
 
-Copyright (c) 2012-2020 Jonas Jelten <jj@sft.mx>
+Copyright (c) 2012-2022 Jonas Jelten <jj@sft.lol>
 Licensed GPLv3 or later.
 """
 
@@ -194,6 +194,58 @@ def sh(*args, check=True, **kwargs):
     return True if the command exited with 0.
     """
     return run(args, check=check, **kwargs).returncode == 0
+
+
+def stopwatch(average=False):
+    """
+    keyboard-driven stopwatch lol
+    if average is True, print exponential moving average of all measurements.
+    """
+    import sys
+    import termios
+    import tty
+
+    stdin = sys.stdin.fileno()
+    tattr = termios.tcgetattr(stdin)
+
+    try:
+        tty.setcbreak(stdin, termios.TCSANOW)
+
+        if not average:
+            print('start')
+            t = time.time()
+        else:
+            t = 0
+            avg = None
+            samples = 0
+
+        while True:
+            char = sys.stdin.buffer.read(1)
+            if char == b'\x04':  # EOF
+                break
+
+            n = time.time()
+            duration = n - t
+
+            if not average:
+                print(duration)
+            else:
+                if t == 0:
+                    print('start with exponential smoothing')
+                else:
+                    samples += 1
+                    if avg is None:
+                        avg = duration
+                    else:
+                        smooth = 1 / samples
+                        avg = smooth * duration + (1-smooth) * avg
+
+                    print(avg)
+            t = n
+    except KeyboardInterrupt:
+        print("ciao!")
+    finally:
+        termios.tcsetattr(stdin, termios.TCSANOW, tattr)
 
 
 def _completion():
