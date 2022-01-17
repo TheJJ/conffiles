@@ -1517,7 +1517,7 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (define-key org-mode-map (kbd "C-M-<right>") 'org-metaright)
   (define-key org-mode-map (kbd "C-M-<left>") 'org-metaleft)
   (define-key org-mode-map (kbd "C-M-<up>") 'org-metaup)
-  (define-key org-mode-map (kbd "C-M-<down>") 'org-metaup)
+  (define-key org-mode-map (kbd "C-M-<down>") 'org-metadown)
   ;; unset those in orgmodemap so the global window mappings are used
   (define-key org-mode-map (kbd "M-<right>") nil)
   (define-key org-mode-map (kbd "M-<left>") nil)
