@@ -1,0 +1,18 @@
+# python pdb debugger config
+#
+# Copyright (c) 2022-2022 Jonas Jelten <jj@sft.lol>
+# Licensed GPLv3 or later.
+#
+#
+# srsly why is this just single-line-based python
+#
+# but fortunately we can just re-use .pythonrc.py
+# still, just importing it is pain (note the leading . in the filename)
+
+import os
+import sys
+import importlib
+
+_pyrc = os.environ.get("PYTHONSTARTUP")
+if os.path.isfile(_pyrc): sys._load_pdb = True; _spec = importlib.util.spec_from_file_location("pythonrc", _pyrc); _pythonrc = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(_pythonrc); locals().update(_pythonrc.__dict__); sys._load_pdb = False
+del _spec

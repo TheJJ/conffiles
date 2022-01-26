@@ -37,22 +37,11 @@ try:
 except ImportError:
     pass
 
-if 'bpython' not in sys.modules:
-    # fancy prompt. bpython doesn't like nor need this
-    # the \x01 and \x02 tell readline to ignore the chars
-    sys.ps1 = '\x01\x1b[36m\x02>>>\x01\x1b[m\x02 '
-    sys.ps2 = '\x01\x1b[36m\x02...\x01\x1b[m\x02 '
-
-
 PAGER_INVOCATION = os.environ.get("PAGER", "less -S -i -R -M --shift 5")
 HISTSIZE = 50000
 
 USE_PYGMENTS = True
 HAS_PYGMENTS = False
-
-# convenience variables
-loop = asyncio.get_event_loop()
-loop.set_debug(True)
 
 
 # cython on the fly compilation
@@ -272,16 +261,21 @@ def _completion():
     for rlcmd in readline_statements:
         readline.parse_and_bind(rlcmd)
 
-    history_file = (Path(os.path.expanduser('~')) /
-                    (".python%d_history" % sys.version_info.major))
+    # special-hack: when we're included from .pdbrc,
+    # this is set.
+    if getattr(sys, "_load_pdb", None):
+        hist_filename = ".python_pdbhistory"
+    else:
+        hist_filename = f".python{sys.version_info.major}_history"
+
+    history_file = Path(os.path.expanduser('~')) / hist_filename
 
     if history_file.exists():
         readline.read_history_file(str(history_file))
         h_len = readline.get_current_history_length()
     else:
         h_len = 0
-        with history_file.open("w") as fd:
-            pass
+        history_file.touch()
 
     def save(prev_h_len, histfile):
         new_h_len = readline.get_current_history_length()
@@ -297,36 +291,10 @@ def cororun(coro):
     """
     run the given coroutine and block until it's done
     """
-    loop = asyncio.get_event_loop()
-    loop.set_debug(True)
     try:
-        return loop.run_until_complete(coro)
+        return asyncio.run(coro, debug=True)
     except KeyboardInterrupt:
         print("cancelled coro run")
-
-
-def looprun():
-    """
-    run the main eventloop forever.
-    """
-    loop = asyncio.get_event_loop()
-    loop.set_debug(True)
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt:
-        print("cancelled loop run")
-
-
-# bpython has its own completion stuff
-if 'bpython' not in sys.modules:
-    try:
-        HISTFILE = _completion()
-        del _completion
-    except Exception as exc:
-        sys.stderr.write("failed history and completion init: %s\n" % exc)
-        import traceback
-        traceback.print_exc()
-        HISTFILE = None
 
 
 def _fancy_displayhook(item):
@@ -352,6 +320,23 @@ def _fancy_displayhook(item):
         print(output)
 
 
-# install the hook
+# format numbers and nested structures fancily
 sys.displayhook = _fancy_displayhook
 del _fancy_displayhook
+
+
+if 'bpython' not in sys.modules:
+    # fancy prompt. bpython doesn't like nor need this
+    # the \x01 and \x02 tell readline to ignore the chars
+
+    sys.ps1 = '\x01\x1b[36m\x02>>>\x01\x1b[m\x02 '
+    sys.ps2 = '\x01\x1b[36m\x02...\x01\x1b[m\x02 '
+
+    try:
+        HISTFILE = _completion()
+        del _completion
+    except Exception as exc:
+        sys.stderr.write("failed history and completion init: %s\n" % exc)
+        import traceback
+        traceback.print_exc()
+        HISTFILE = None
