@@ -32,15 +32,30 @@ if [[ -r $sshagentsocket ]]; then
 fi
 
 # environment variables
+# basic tool config
 export VISUAL="vim"
 export EDITOR=$VISUAL
 export LESS="-S -i -R -M --shift 5"
 export PAGER="less"
+
+# append cwd to java class path
+export CLASSPATH=.:$CLASSPATH
+# color gcc output
 export GCC_COLORS="yes"
-export NO_AT_BRIDGE=1     # silence funny gtk warnings
+# silence funny gtk warnings
+export NO_AT_BRIDGE=1
+# global python pycache directory
 export PYTHONPYCACHEPREFIX=$HOME/.cache/python/
+# this will log all ssl key exchanges
+#export SSLKEYLOGFILE=$HOME/.ssl-log
+
+pyrc="$HOME/.pythonrc.py"
+if [[ -r $pyrc ]]; then
+	export PYTHONSTARTUP=$pyrc
+fi
 
 # locales
+# test availability if these with `locale -a`
 export LANG="en_US.UTF-8"
 export LC_TIME="en_DK.UTF-8"
 export LC_MONETARY="de_DE.UTF-8"
@@ -48,20 +63,6 @@ export LC_MEASUREMENT="de_DE.UTF-8"
 export LC_ADDRESS="de_DE.UTF-8"
 export LC_TELEPHONE="de_DE.UTF-8"
 export LC_PAPER="de_DE.UTF-8"
-
-
-# append cwd to java class path
-export CLASSPATH=.:$CLASSPATH
-
-export GPSD_UNITS=metric
-
-pyrc="$HOME/.pythonrc.py"
-if [[ -r $pyrc ]]; then
-	export PYTHONSTARTUP=$pyrc
-fi
-
-# this will log all ssl key exchanges
-#export SSLKEYLOGFILE=$HOME/.ssl-log
 
 
 # see man zsh, reports cpu/system/etc usage if running longer then n secs
