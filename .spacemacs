@@ -407,7 +407,7 @@ It should only modify the values of Spacemacs settings."
 
    ;; If non-nil then the last auto saved layouts are resumed automatically upon
    ;; start. (default nil)
-   dotspacemacs-auto-resume-layouts nil
+   dotspacemacs-auto-resume-layouts t
 
    ;; If non-nil, auto-generate layout name when creating new layouts. Only has
    ;; effect when using the "jump to layout by number" commands. (default nil)
@@ -547,7 +547,7 @@ It should only modify the values of Spacemacs settings."
 
    ;; If non-nil, start an Emacs server if one is not already running.
    ;; (default nil)
-   dotspacemacs-enable-server nil
+   dotspacemacs-enable-server t
 
    ;; Set the emacs server socket location.
    ;; If nil, uses whatever the Emacs default is, otherwise a directory path
@@ -843,6 +843,8 @@ the value is copied when setting up the sync."
         auto-window-vscroll nil          ; better scrolling performance...
         confirm-kill-emacs 'y-or-n-p     ; always ask when exiting
         password-cache-expiry nil        ; tramp password cache
+
+        desktop-restore-eager 3          ; other buffers are restored lazily
 
         ido-use-virtual-buffers t        ; use recentf-buffers as virtually "open"
         ido-enable-flex-matching t
@@ -1512,7 +1514,7 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   ;; disable annoying character swapping
   (global-unset-key (kbd "C-t"))
 
-  ;; default C-M-arrow bindings are kinda useless,
+  ;; org's default C-M-arrow bindings are kinda useless,
   ;; so we use them so M-arrow is free for window movements!
   (define-key org-mode-map (kbd "C-M-<right>") 'org-metaright)
   (define-key org-mode-map (kbd "C-M-<left>") 'org-metaleft)
@@ -1523,6 +1525,16 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (define-key org-mode-map (kbd "M-<left>") nil)
   (define-key org-mode-map (kbd "M-<up>") nil)
   (define-key org-mode-map (kbd "M-<down>") nil)
+
+  ;; markdown mode default C-M-arrow can also be overridden for window movements.
+  (define-key markdown-mode-map (kbd "C-M-<right>") 'markdown-demote)
+  (define-key markdown-mode-map (kbd "C-M-<left>") 'markdown-promote)
+  (define-key markdown-mode-map (kbd "C-M-<up>") 'markdown-move-up)
+  (define-key markdown-mode-map (kbd "C-M-<down>") 'markdown-move-down)
+  (define-key markdown-mode-map (kbd "M-<right>") nil)
+  (define-key markdown-mode-map (kbd "M-<left>") nil)
+  (define-key markdown-mode-map (kbd "M-<up>") nil)
+  (define-key markdown-mode-map (kbd "M-<down>") nil)
 
   ;; fix button klicking etc in customize-mode
   (evil-set-initial-state 'Custom-mode 'emacs)
