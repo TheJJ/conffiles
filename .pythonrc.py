@@ -277,12 +277,12 @@ def _completion():
         h_len = 0
         history_file.touch()
 
-    def save(prev_h_len, histfile):
+    def save(h_size, prev_h_len, histfile):
         new_h_len = readline.get_current_history_length()
-        readline.set_history_length(HISTSIZE)
+        readline.set_history_length(h_size)
         readline.append_history_file(new_h_len - prev_h_len, histfile)
 
-    atexit.register(save, h_len, str(history_file))
+    atexit.register(save, HISTSIZE, h_len, str(history_file))
 
     return history_file
 
