@@ -1536,11 +1536,11 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (define-key markdown-mode-map (kbd "M-<up>") nil)
   (define-key markdown-mode-map (kbd "M-<down>") nil)
 
-  ;; fix button klicking etc in customize-mode
+  ;; fix button klicking etc in various modes due to evil
   (evil-set-initial-state 'Custom-mode 'emacs)
   (evil-set-initial-state 'custom-new-theme-mode 'emacs)
-
-  ;; otherwise entry editing is kinda broken
+  (evil-set-initial-state 'calendar-mode 'emacs)
+  (evil-set-initial-state 'org-agenda-mode 'emacs)
   (evil-set-initial-state 'ebib-entry-mode 'emacs)
 
   (fset 'yes-or-no-p 'y-or-n-p) ; yes/no answering without <RET>
