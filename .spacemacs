@@ -407,7 +407,7 @@ It should only modify the values of Spacemacs settings."
 
    ;; If non-nil then the last auto saved layouts are resumed automatically upon
    ;; start. (default nil)
-   dotspacemacs-auto-resume-layouts t
+   dotspacemacs-auto-resume-layouts nil
 
    ;; If non-nil, auto-generate layout name when creating new layouts. Only has
    ;; effect when using the "jump to layout by number" commands. (default nil)
@@ -872,6 +872,11 @@ the value is copied when setting up the sync."
         org-format-latex-options (plist-put org-format-latex-options :scale 2.0)
         org-appear-autolinks nil      ; let links be invisible because they expand to long lines
         org-appear-autoentities t
+        org-refile-use-outline-path 'file
+        org-outline-path-complete-in-steps nil
+        org-reverse-note-order t         ; new items at top
+        org-refile-targets '((org-agenda-files :maxlevel . 2))
+        org-enforce-todo-dependencies t
 
         ;; lsp settings
         lsp-enable-indentation nil       ; don't ask the language server for indentations
