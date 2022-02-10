@@ -11,6 +11,8 @@ set $mod Mod4
 # font for window titles. ISO 10646 = Unicode
 font pango:DejaVu Sans Mono 10
 
+# find symbol names with `xmodmap -pke`
+
 # start a terminal
 bindsym $mod+Return exec --no-startup-id kitty
 
@@ -18,6 +20,8 @@ bindsym $mod+Return exec --no-startup-id kitty
 bindsym $mod+d exec rofi -show run
 # run .desktop files
 bindsym $mod+shift+d exec rofi -show drun
+
+bindsym control+grave exec dunstctl history-pop
 
 bindcode 107 exec ~/bin/screenshot
 bindcode shift+107 exec ~/bin/screenshot --select
