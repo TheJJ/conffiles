@@ -826,7 +826,6 @@ the value is copied when setting up the sync."
         inhibit-startup-screen t
         tab-always-indent t
         python-fill-docstring-style 'symmetric
-        scrollbar-mode 'right
         backward-delete-char-untabify-method nil
         cua-auto-tabify-rectangles nil
         cua-enable-cua-keys nil
@@ -840,7 +839,6 @@ the value is copied when setting up the sync."
                   "-o ControlMaster=auto -o ControlPersist=10")
         recentf-max-saved-items 1000
         idle-highlight-idle-time 0.2
-        auto-window-vscroll nil          ; better scrolling performance...
         confirm-kill-emacs 'y-or-n-p     ; always ask when exiting
         password-cache-expiry nil        ; tramp password cache
 
@@ -1076,6 +1074,7 @@ the value is copied when setting up the sync."
         scroll-margin 4                                       ; start scrolling n lines before window borders
         scroll-conservatively 10                              ; scroll up to n lines to bring pointer back on screen
         scroll-step 0                                         ; try scrolling n lines when pointer moves out
+        scrollbar-mode 'right
         auto-window-vscroll nil))
 
 
