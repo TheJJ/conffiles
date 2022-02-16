@@ -178,6 +178,7 @@ This function should only modify configuration layer settings."
      idle-highlight-mode
      org-roam-bibtex
      pdf-tools
+     rainbow-mode
      )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -867,7 +868,6 @@ the value is copied when setting up the sync."
         org-hide-emphasis-markers t  ; hide syntax elements
         org-startup-with-inline-images t
         org-startup-with-latex-preview t
-        org-format-latex-options (plist-put org-format-latex-options :scale 2.0)
         org-appear-autolinks nil      ; let links be invisible because they expand to long lines
         org-appear-autoentities t
         org-refile-use-outline-path 'file
@@ -893,6 +893,10 @@ the value is copied when setting up the sync."
 
         company-minimum-prefix-length 1  ;; lsp does the lookup :)
         company-idle-delay 0.1)
+
+  (when (<= emacs-major-version 28)
+    ;; on emacs 29, the scaling seems correct :)
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0)))
 
   ;; don't persist clipboard accross sessions
   (delete 'kill-ring savehist-additional-variables)
@@ -1075,7 +1079,11 @@ the value is copied when setting up the sync."
         scroll-conservatively 10                              ; scroll up to n lines to bring pointer back on screen
         scroll-step 0                                         ; try scrolling n lines when pointer moves out
         scrollbar-mode 'right
-        auto-window-vscroll nil))
+        auto-window-vscroll nil)
+
+  (when (>= emacs-major-version 29)
+    (pixel-scroll-precision-mode t)
+    ))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1083,9 +1091,12 @@ the value is copied when setting up the sync."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; xref--marker-ring rotation
+;; only needed for emacs <= 28
 ;; so you can navigate back and forward over xref findings.
 ;; use-case: follow multiple definitions, go back to the beginning,
 ;;           and then easily go forward to each definition.
+
+;; in emacs 29 we directly have `xref-go-back` and `xref-go-forward` :)
 
 (defvar jj/xref-marker-slide 0
   "seek position tracking in the xref marker ring.
@@ -1111,7 +1122,8 @@ the value is copied when setting up the sync."
   (apply orig args))
 
 ;; whenever we push, we drop the 'history'
-(advice-add 'xref-push-marker-stack :around 'jj/xref-push-marker-stack-slide-reset)
+(when (<= emacs-major-version 28)
+  (advice-add 'xref-push-marker-stack :around 'jj/xref-push-marker-stack-slide-reset))
 
 
 (defun jj/xref-goto-marker-slide (slide)
@@ -1189,9 +1201,15 @@ the value is copied when setting up the sync."
   (with-eval-after-load 'evil
     (define-key evil-normal-state-map (kbd "M-.") nil)
     (define-key evil-normal-state-map (kbd "M-,") nil))
-  (local-set-key (kbd "M-,") 'jj/xref-jump-marker-ring-backward)
-  (local-set-key (kbd "M-.") 'jj/xref-jump-marker-ring-forward)
-  )
+
+  (if (<= emacs-major-version 28)
+      (progn
+        (local-set-key (kbd "M-,") 'jj/xref-jump-marker-ring-backward)
+        (local-set-key (kbd "M-.") 'jj/xref-jump-marker-ring-forward))
+    ;; emacs 29 has these features built-in in xref \o/
+    (progn
+      (local-set-key (kbd "M-,") 'xref-go-forward)
+      (local-set-key (kbd "M-.") 'xref-go-back))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
