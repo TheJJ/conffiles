@@ -1054,9 +1054,10 @@ RPROMPT="%3v%4v%{$reset_color%}[%{$fg[yellow]%}%?%{$reset_color%}]%1v%{$fg[blue]
 
 #############################################
 # machine-specific config files
-machineconfdir="$HOME/.config/profile"
-if [[ -d $machineconfdir ]]; then
-	for f in $machineconfdir/*; do
+_machineconfdir="$HOME/.config/profile"
+if [[ -d $_machineconfdir ]]; then
+	for f in $_machineconfdir/*; do
 		source $f
 	done
 fi
+unset _machineconfdir
