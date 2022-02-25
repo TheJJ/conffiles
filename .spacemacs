@@ -875,6 +875,9 @@ the value is copied when setting up the sync."
         org-reverse-note-order t         ; new items at top
         org-refile-targets '((org-agenda-files :maxlevel . 2))
         org-enforce-todo-dependencies t
+        org-src-window-setup 'current-window ; edit in current window
+        org-src-preserve-indentation t
+        org-edit-src-content-indentation 0
 
         ;; lsp settings
         lsp-enable-indentation nil       ; don't ask the language server for indentations
