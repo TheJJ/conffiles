@@ -835,9 +835,6 @@ the value is copied when setting up the sync."
         python-shell-interpreter "ipython3" ; tramp on remote-hosts needs ipython3 and python3-setuptools
         ;python-shell-interpreter-interactive-arg ""
         compilation-environment (quote ("TERM=xterm-256color"))
-        tramp-ssh-controlmaster-options    ; synced with .ssh/config ControlMaster settings
-          (concat "-o ControlPath=/tmp/ssh_mux_%%u@%%l_%%r@%%h:%%p "
-                  "-o ControlMaster=auto -o ControlPersist=10")
         recentf-max-saved-items 1000
         idle-highlight-idle-time 0.2
         confirm-kill-emacs 'y-or-n-p     ; always ask when exiting
