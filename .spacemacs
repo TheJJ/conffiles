@@ -1076,7 +1076,7 @@ the value is copied when setting up the sync."
 
   (setq scroll-preserve-screen-position t                     ; keep relative column position when scrolling
         scroll-margin 4                                       ; start scrolling n lines before window borders
-        scroll-conservatively 10                              ; scroll up to n lines to bring pointer back on screen
+        scroll-conservatively 25                              ; scroll up to n lines to bring pointer back on screen
         scroll-step 0                                         ; try scrolling n lines when pointer moves out
         scrollbar-mode 'right
         auto-window-vscroll nil)
@@ -1208,8 +1208,8 @@ the value is copied when setting up the sync."
         (local-set-key (kbd "M-.") 'jj/xref-jump-marker-ring-forward))
     ;; emacs 29 has these features built-in in xref \o/
     (progn
-      (local-set-key (kbd "M-,") 'xref-go-forward)
-      (local-set-key (kbd "M-.") 'xref-go-back))))
+      (local-set-key (kbd "M-.") 'xref-go-forward)
+      (local-set-key (kbd "M-,") 'xref-go-back))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1558,6 +1558,8 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (define-key markdown-mode-map (kbd "M-<up>") nil)
   (define-key markdown-mode-map (kbd "M-<down>") nil)
 
+  (define-key treemacs-mode-map (kbd "C-c C-p e") 'treemacs-edit-workspaces)
+
   ;; fix button klicking etc in various modes due to evil
   (evil-set-initial-state 'Custom-mode 'emacs)
   (evil-set-initial-state 'custom-new-theme-mode 'emacs)
@@ -1898,7 +1900,7 @@ if __name__ == \"__main__\":
 
 ;; config for all prog-modes
 (defun jj/coding-hook ()
-  (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\|TMP\\|FIXME\\|fixme\\)" 1 font-lock-warning-face t)))
+  (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\)" 1 font-lock-warning-face t)))
 
   (idle-highlight-mode t)    ;; idle-highlight word under cursor
   (jj/codenav-keybinds)
