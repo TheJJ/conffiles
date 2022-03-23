@@ -170,7 +170,6 @@ This function should only modify configuration layer settings."
    ;; Also include the dependencies as they will not be resolved automatically.
    dotspacemacs-additional-packages
    '(
-     afternoon-theme
      ag
      bison-mode
      citar
@@ -342,7 +341,7 @@ It should only modify the values of Spacemacs settings."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(afternoon
+   dotspacemacs-themes '(starlit
                          spacemacs-dark
                          monokai)
 
@@ -1812,24 +1811,6 @@ nil : Otherwise, return nil and run next lineup function."
   ;;          (face2 attributes...)
   ;;          ...))
   (setq theming-modifications '())
-
-  ;; for default theme
-  (custom-theme-set-faces
-   'afternoon
-   ;; brighter tab circle
-   '(whitespace-tab ((t (:foreground "#206090"))) t)
-   ;; for alignment, space-after-tab is not evil
-   '(whitespace-space-after-tab ((t (:foreground "#103050"))) t)
-   )
-
-  ;; for all themes
-  ;; TODO: this basically behaves like customize-settings
-  ;; and is written to the customize file again...
-  (custom-theme-set-faces
-   'user
-   ;; set the idle-highlight face to only underline
-   '(idle-highlight ((((supports underline)) (:underline t))) t)
-   )
 
   (spacemacs/update-theme)
   )
