@@ -679,11 +679,30 @@ function p12extract() {
 		echo -n "Password to extract $f: "
 		read -s password
 		echo "\nextracting..."
+		openssl pkcs12 -in "$f" -out "${f%.p12}.ca.pem"  -cacerts -nokeys -passin file:<(echo $password) || true
 		openssl pkcs12 -in "$f" -out "${f%.p12}.crt.pem" -clcerts -nokeys -passin file:<(echo $password) || return
 		openssl pkcs12 -in "$f" -out "${f%.p12}.key.pem" -clcerts -nodes -passin file:<(echo $password)
 		chmod 400 "${f%.p12}.key.pem"
 	done
 }
+
+# create a p12 file
+function p12pack() {
+	if [[ $# -lt 1 ]]; then
+		echo "usage: p12pack <pemfile> [cafile]"
+		return
+	fi
+
+	pemfile=$1
+
+	if [[ $# -eq 2 ]]; then
+		cafile=$2
+		caopts=('-CAfile' "$cafile")
+	fi
+	openssl pkcs12 -export -nodes ${caopts[@]} -in "$pemfile" -out "${pemfile%.pem}.p12"
+}
+
+alias pemcat="openssl x509 -text -nocert -in"
 
 function texformula() {
 	formula="$@"
