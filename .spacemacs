@@ -1461,71 +1461,71 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (interactive)
 
   ;; arrow key stuff
-  (global-set-key (kbd "M-<left>")  'windmove-left)
-  (global-set-key (kbd "M-<right>") 'windmove-right)
-  (global-set-key (kbd "M-<up>")    'windmove-up)
-  (global-set-key (kbd "M-<down>")  'windmove-down)
+  (global-set-key (kbd "M-<left>")  #'windmove-left)
+  (global-set-key (kbd "M-<right>") #'windmove-right)
+  (global-set-key (kbd "M-<up>")    #'windmove-up)
+  (global-set-key (kbd "M-<down>")  #'windmove-down)
 
-  (global-set-key (kbd "C-<left>")  'backward-word)
-  (global-set-key (kbd "C-<right>") 'forward-word)
-  (global-set-key (kbd "C-<up>")    'backward-paragraph)
-  (global-set-key (kbd "C-<down>")  'forward-paragraph)
+  (global-set-key (kbd "C-<left>")  #'backward-word)
+  (global-set-key (kbd "C-<right>") #'forward-word)
+  (global-set-key (kbd "C-<up>")    #'backward-paragraph)
+  (global-set-key (kbd "C-<down>")  #'forward-paragraph)
 
   ;; line nativation/deleteion
-  (global-set-key (kbd "C-k") 'jj/delete-line)
-  (global-set-key (kbd "C-S-k") 'jj/delete-line-backward)
-  (global-set-key (kbd "C-l") 'recenter-top-bottom)
-  (global-set-key (kbd "C-j") 'nowrap-newline-and-indent)
-  (global-set-key (kbd "C-S-<backspace>") 'jj/delete-whole-line)
+  (global-set-key (kbd "C-k") #'jj/delete-line)
+  (global-set-key (kbd "C-S-k") #'jj/delete-line-backward)
+  (global-set-key (kbd "C-l") #'recenter-top-bottom)
+  (global-set-key (kbd "C-j") #'nowrap-newline-and-indent)
+  (global-set-key (kbd "C-S-<backspace>") #'jj/delete-whole-line)
 
   ;; word deletion
-  (global-set-key (kbd "C-<delete>")    'jj/delete-word)
-  (global-set-key (kbd "C-<backspace>") 'jj/delete-word-backward)
+  (global-set-key (kbd "C-<delete>")    #'jj/delete-word)
+  (global-set-key (kbd "C-<backspace>") #'jj/delete-word-backward)
 
   ;; terminal fu
-  (global-set-key (kbd "M-[ d") 'left-word)  ;backward-word
-  (global-set-key (kbd "M-[ c") 'right-word) ;forward-word
-  (global-set-key (kbd "M-[ a") 'backward-paragraph)
-  (global-set-key (kbd "M-[ b") 'forward-paragraph)
+  (global-set-key (kbd "M-[ d") #'left-word)  ;backward-word
+  (global-set-key (kbd "M-[ c") #'right-word) ;forward-word
+  (global-set-key (kbd "M-[ a") #'backward-paragraph)
+  (global-set-key (kbd "M-[ b") #'forward-paragraph)
 
   ;; newline magic
-  (global-set-key (kbd "<C-return>") 'newline)
-  (global-set-key (kbd "C-c C-a") 'mark-whole-buffer)
+  (global-set-key (kbd "<C-return>") #'newline)
+  (global-set-key (kbd "C-c C-a") #'mark-whole-buffer)
 
   ;; the best™ file chooser!!11
   (use-package helm-for-files
     :defer t
     :init (progn
-            (global-set-key (kbd "C-x C-S-f") 'helm-for-files)
+            (global-set-key (kbd "C-x C-S-f") #'helm-for-files)
             (spacemacs||set-helm-key "fF" helm-for-files)))
 
   ;; open project/file/vc things
-  (global-set-key (kbd "C-x b") 'helm-mini)
-  (global-set-key (kbd "C-x p") 'helm-projectile)
-  (global-set-key (kbd "C-x S-p") 'helm-projectile-switch-project)
-  (global-set-key (kbd "C-x C-p") 'projectile-ag)
+  (global-set-key (kbd "C-x b") #'helm-mini)
+  (global-set-key (kbd "C-x p") #'helm-projectile)
+  (global-set-key (kbd "C-x S-p") #'helm-projectile-switch-project)
+  (global-set-key (kbd "C-x C-p") #'projectile-ag)
 
-  (global-set-key (kbd "C-x C-b") 'bs-show) ; buffer selector
-  (global-set-key (kbd "C-x M-b") 'speedbar)
-  (global-set-key (kbd "C-c g") 'magit-status)
-  (global-set-key (kbd "C-x g") 'magit-status)
+  (global-set-key (kbd "C-x C-b") #'bs-show) ; buffer selector
+  (global-set-key (kbd "C-x M-b") #'speedbar)
+  (global-set-key (kbd "C-c g") #'magit-status)
+  (global-set-key (kbd "C-x g") #'magit-status)
 
-  (global-set-key (kbd "C-x j b") 'helm-bibtex)
+  (global-set-key (kbd "C-x j b") #'helm-bibtex)
 
-  (global-set-key (kbd "C-x B") 'bury-buffer)
-  (global-set-key (kbd "C-x E") 'apply-macro-to-region-lines)
-  (global-set-key (kbd "C-x I") 'insert-buffer)
-  (global-set-key (kbd "C-c w") 'delete-region) ; ala C-w and M-C-w
-  (global-set-key (kbd "C-c c") 'comment-region)
-  (global-set-key (kbd "C-c u") 'uncomment-region)
-  (global-set-key (kbd "C-c n") 'next-error)
-  (global-set-key (kbd "C-c p") 'previous-error)
+  (global-set-key (kbd "C-x B") #'bury-buffer)
+  (global-set-key (kbd "C-x E") #'apply-macro-to-region-lines)
+  (global-set-key (kbd "C-x I") #'insert-buffer)
+  (global-set-key (kbd "C-c w") #'delete-region) ; ala C-w and M-C-w
+  (global-set-key (kbd "C-c c") #'comment-region)
+  (global-set-key (kbd "C-c u") #'uncomment-region)
+  (global-set-key (kbd "C-c n") #'next-error)
+  (global-set-key (kbd "C-c p") #'previous-error)
 
 
   ;; align the current region to = or whatever
-  (global-set-key (kbd "M-A") 'align-current)
+  (global-set-key (kbd "M-A") #'align-current)
 
-  (global-set-key (kbd "M-SPC") 'just-one-space) ;fold space to 1
+  (global-set-key (kbd "M-SPC") #'just-one-space) ;fold space to 1
 
   (global-set-key (kbd "M-p") (lambda ()
                                 (interactive)
@@ -1545,29 +1545,40 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   ;; disable annoying character swapping
   (global-unset-key (kbd "C-t"))
 
-  ;; org's default C-M-arrow bindings are kinda useless,
-  ;; so we use them so M-arrow is free for window movements!
-  (define-key org-mode-map (kbd "C-M-<right>") 'org-metaright)
-  (define-key org-mode-map (kbd "C-M-<left>") 'org-metaleft)
-  (define-key org-mode-map (kbd "C-M-<up>") 'org-metaup)
-  (define-key org-mode-map (kbd "C-M-<down>") 'org-metadown)
-  ;; unset those in orgmodemap so the global window mappings are used
-  (define-key org-mode-map (kbd "M-<right>") nil)
-  (define-key org-mode-map (kbd "M-<left>") nil)
-  (define-key org-mode-map (kbd "M-<up>") nil)
-  (define-key org-mode-map (kbd "M-<down>") nil)
+  (use-package org-mode
+    :defer t
+    :config
+    (progn
+      ;; org's default C-M-arrow bindings are kinda useless,
+      ;; so we use them so M-arrow is free for window movements!
+      (define-key org-mode-map (kbd "C-M-<right>") #'org-metaright)
+      (define-key org-mode-map (kbd "C-M-<left>") #'org-metaleft)
+      (define-key org-mode-map (kbd "C-M-<up>") #'org-metaup)
+      (define-key org-mode-map (kbd "C-M-<down>") #'org-metadown)
+      ;; unset those in orgmodemap so the global window mappings are used
+      (define-key org-mode-map (kbd "M-<right>") nil)
+      (define-key org-mode-map (kbd "M-<left>") nil)
+      (define-key org-mode-map (kbd "M-<up>") nil)
+      (define-key org-mode-map (kbd "M-<down>") nil)))
 
-  ;; markdown mode default C-M-arrow can also be overridden for window movements.
-  (define-key markdown-mode-map (kbd "C-M-<right>") 'markdown-demote)
-  (define-key markdown-mode-map (kbd "C-M-<left>") 'markdown-promote)
-  (define-key markdown-mode-map (kbd "C-M-<up>") 'markdown-move-up)
-  (define-key markdown-mode-map (kbd "C-M-<down>") 'markdown-move-down)
-  (define-key markdown-mode-map (kbd "M-<right>") nil)
-  (define-key markdown-mode-map (kbd "M-<left>") nil)
-  (define-key markdown-mode-map (kbd "M-<up>") nil)
-  (define-key markdown-mode-map (kbd "M-<down>") nil)
+  (use-package markdown-mode
+    :defer t
+    :config
+    (progn
+      ;; markdown mode default C-M-arrow can also be overridden for window movements.
+      (define-key markdown-mode-map (kbd "C-M-<right>") #'markdown-demote)
+      (define-key markdown-mode-map (kbd "C-M-<left>") #'markdown-promote)
+      (define-key markdown-mode-map (kbd "C-M-<up>") #'markdown-move-up)
+      (define-key markdown-mode-map (kbd "C-M-<down>") #'markdown-move-down)
+      (define-key markdown-mode-map (kbd "M-<right>") nil)
+      (define-key markdown-mode-map (kbd "M-<left>") nil)
+      (define-key markdown-mode-map (kbd "M-<up>") nil)
+      (define-key markdown-mode-map (kbd "M-<down>") nil)))
 
-  (define-key treemacs-mode-map (kbd "C-c C-p e") 'treemacs-edit-workspaces)
+  (use-package treemacs
+    :defer t
+    :config
+    (define-key treemacs-mode-map (kbd "C-c C-p e") #'treemacs-edit-workspaces))
 
   ;; fix button klicking etc in various modes due to evil
   (evil-set-initial-state 'Custom-mode 'emacs)
@@ -1587,7 +1598,7 @@ from a change in by prefix-matching the current buffer's `default-directory`"
 
 (defun jj/cstyle-keybinds ()
   (interactive)
-  (local-set-key (kbd "C-c C-c") 'helm-make-projectile))
+  (local-set-key (kbd "C-c C-c") #'helm-make-projectile))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
