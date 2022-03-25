@@ -671,6 +671,7 @@ See the header of this file for more information."
     :config
     (require 'org-ref)))
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; helper functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -692,6 +693,7 @@ the value is copied when setting up the sync."
     (add-variable-watcher sourcevar updatefunc)
     ;; call for initial update
     (funcall updatefunc nil (symbol-value sourcevar) nil nil)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; advices
@@ -923,58 +925,62 @@ the value is copied when setting up the sync."
                       :remote? t
                       :server-id 'pylsp-remote)))
 
+  ;; undo-tree with region-specific undos
+  (with-eval-after-load 'undo-tree
+    (setq undo-tree-auto-save-history nil
+          undo-tree-enable-undo-in-region t))
+
   ;; tame org-open-file, which uses org-file-apps, and finally mailcap.el
   ;; to determine how to open pdf files
   ;; if we do not set this in mailcap-user-mime-data, it returns pdf-view-mode
   ;; test with:
   ;; (mailcap-mime-info (mailcap-extension-to-mime ".pdf"))
-  (eval-after-load "org"
-                   '(setcdr (assoc "\\.pdf\\'" org-file-apps) 'default))
-  (eval-after-load "mailcap"
-                   '(progn
-                      (add-to-list 'mailcap-user-mime-data
-                                   '("pdf"
-                                     (viewer . "xdg-open %s")
-                                     (type . "application/pdf")
-                                     (test . (eq window-system 'x))))
-                      (add-to-list 'mailcap-user-mime-data
-                                   '("html"
-                                     (viewer . "xdg-open %s")
-                                     (type . "text/html")
-                                     (test . (eq window-system 'x))))
-                      ))
+  (with-eval-after-load 'org
+    (setcdr (assoc "\\.pdf\\'" org-file-apps) 'default))
+
+  (with-eval-after-load 'mailcap
+    (add-to-list 'mailcap-user-mime-data
+                 '("pdf"
+                   (viewer . "xdg-open %s")
+                   (type . "application/pdf")
+                   (test . (eq window-system 'x))))
+    (add-to-list 'mailcap-user-mime-data
+                 '("html"
+                   (viewer . "xdg-open %s")
+                   (type . "text/html")
+                   (test . (eq window-system 'x))))
+    )
 
   ;; create hooks to redirect bibtex notes handling into org-roam
-  (eval-after-load "org-roam"
-    '(org-roam-bibtex-mode))
+  (with-eval-after-load 'org-roam
+    (org-roam-bibtex-mode))
 
   ;; synchronize bibliography customization settings to other packages
-  (eval-after-load "ebib"
-    '(progn
-       (sync-variable 'ebib-file-search-dirs 'bibtex-completion-library-path)
-       (sync-variable 'ebib-preload-bib-files 'bibtex-completion-bibliography)))
-  (eval-after-load "citar"
-    '(progn
-       (sync-variable 'citar-bibliography 'bibtex-completion-bibliography)))
+  (with-eval-after-load 'ebib
+    (sync-variable 'ebib-file-search-dirs 'bibtex-completion-library-path)
+    (sync-variable 'ebib-preload-bib-files 'bibtex-completion-bibliography))
+  (with-eval-after-load 'citar
+    (sync-variable 'citar-bibliography 'bibtex-completion-bibliography))
 
   ;; wanderlust email \o/
   ;; per-device config is in ~/.wl/config and folders
   (use-package wl
     :defer t
-    :init (progn
-            (setq wl-stay-folder-window t                       ;; left folder pane
-                  wl-folder-window-width 25                     ;; toggle on/off with i
-                  elmo-localdir-folder-path "~/Mail"
-                  elmo-msgdb-directory "~/.wl/elmo/msgdb"
-                  elmo-network-session-idle-timeout 300
-                  elmo-imap4-use-modified-utf7 t
+    :init
+    (progn
+      (setq wl-stay-folder-window t                       ;; left folder pane
+            wl-folder-window-width 25                     ;; toggle on/off with i
+            elmo-localdir-folder-path "~/Mail"
+            elmo-msgdb-directory "~/.wl/elmo/msgdb"
+            elmo-network-session-idle-timeout 300
+            elmo-imap4-use-modified-utf7 t
 
-                  wl-temporary-file-directory "~/.wl/tmp/"
-                  wl-init-file "~/.wl/config"
-                  wl-folders-file "~/.wl/folders"
-                  wl-alias-file "~/.wl/aliases"
-                  wl-x-face-file "~/.wl/xface"
-                  wl-address-file "~/.wl/addresses")))
+            wl-temporary-file-directory "~/.wl/tmp/"
+            wl-init-file "~/.wl/config"
+            wl-folders-file "~/.wl/folders"
+            wl-alias-file "~/.wl/aliases"
+            wl-x-face-file "~/.wl/xface"
+            wl-address-file "~/.wl/addresses")))
 
 
   ;; default mode for new buffers
@@ -1923,7 +1929,7 @@ if __name__ == \"__main__\":
   ;; magic region formatting
   (with-library
     clang-format
-    (global-set-key (kbd "C-M-<tab>") 'clang-format-region))
+    (global-set-key (kbd "C-M-<tab>") #'clang-format-region))
 
   ;; restore so we indent line or region.
   ;; (does no completion since we set tab-always-indent)
