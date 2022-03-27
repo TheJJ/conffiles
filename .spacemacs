@@ -998,12 +998,12 @@ the value is copied when setting up the sync."
                  '("pdf"
                    (viewer . "xdg-open %s")
                    (type . "application/pdf")
-                   (test . (eq window-system 'x))))
+                   (test . window-system)))
     (add-to-list 'mailcap-user-mime-data
                  '("html"
                    (viewer . "xdg-open %s")
                    (type . "text/html")
-                   (test . (eq window-system 'x))))
+                   (test . window-system)))
     )
 
   ;; create hooks to redirect bibtex notes handling into org-roam
