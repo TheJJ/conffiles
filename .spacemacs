@@ -1867,13 +1867,13 @@ nil : Otherwise, return nil and run next lineup function."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun jj/loadpath-discover ()
   "here manual elisp load paths can be defined"
-  (let ((basedir "~/.emacs.d/themes/"))
+  (let ((basedir (locate-user-emacs-file "themes/")))
     (when (file-directory-p basedir)
       (dolist (f (directory-files basedir))
         (if (and (not (or (equal f ".") (equal f "..")))
                  (file-directory-p (concat basedir f)))
             (add-to-list 'custom-theme-load-path (concat basedir f))))))
-  (let ((paths '("~/.emacs.d/lisp/cc-mode")))
+  (let ((paths `(,(locate-user-emacs-file "lisp/cc-mode/"))))
     (dolist (path paths)
       (when (file-directory-p path)
         (add-to-list 'load-path path)))))
@@ -2230,9 +2230,10 @@ if __name__ == \"__main__\":
         (rval 'sql-product))
     (if (symbol-value rval)
       (let ((filename
-              (concat "~/.emacs.d/sql/"
+             (locate-user-emacs-file
+              (concat "sql/"
                       (symbol-name (symbol-value rval))
-                      "-history.sql")))
+                      "-history.sql"))))
         (set (make-local-variable lval) filename))
       (error
         (format "SQL history will not be saved because %s is nil"
