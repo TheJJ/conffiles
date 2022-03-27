@@ -12,24 +12,20 @@
 # * ssh-agent client
 # * colored prompt
 
-# if not running interactively, don't do anything!
-[[ $- != *i* ]] && return
-
-# if emacs tramp is using this shell,
-# abort everything and be as dumb as possible
-[[ $TERM == "dumb" ]] && unsetopt zle && PS1='$ ' && return
 
 # home bin dir path
-homebindir="$HOME/bin"
-if [[ -d $homebindir ]]; then
-	export PATH="$PATH:$homebindir"
+local homebin="$HOME/bin"
+if [[ -d $homebin ]]; then
+	export PATH="$PATH:$homebin"
 fi
+unset homebin
 
 # ssh-agent launched via systemd user service
 local sshagentsocket="$XDG_RUNTIME_DIR/ssh-agent.socket"
 if [[ -r $sshagentsocket ]]; then
 	export SSH_AUTH_SOCK=$sshagentsocket
 fi
+unset sshagentsocket
 
 # environment variables
 # basic tool config
@@ -53,6 +49,7 @@ pyrc="$HOME/.pythonrc.py"
 if [[ -r $pyrc ]]; then
 	export PYTHONSTARTUP=$pyrc
 fi
+unset pyrc
 
 # locales
 # test availability if these with `locale -a`
@@ -63,6 +60,19 @@ export LC_MEASUREMENT="de_DE.UTF-8"
 export LC_ADDRESS="de_DE.UTF-8"
 export LC_TELEPHONE="de_DE.UTF-8"
 export LC_PAPER="de_DE.UTF-8"
+
+
+### no more setting env vars after this point:
+### non-interactive mode does not process further.
+# we do this so for example `zsh -c env` prints the correct env,
+# even it is not interactive. this is used by emacs for example.
+
+[[ $- != *i* ]] && return
+
+# if emacs tramp is using this shell,
+# abort everything and be as dumb as possible
+[[ $TERM == "dumb" ]] && unsetopt zle && PS1='$ ' && return
+
 
 
 # see man zsh, reports cpu/system/etc usage if running longer then n secs
