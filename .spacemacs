@@ -981,6 +981,10 @@ the value is copied when setting up the sync."
     (setq undo-tree-auto-save-history nil
           undo-tree-enable-undo-in-region t))
 
+  (with-eval-after-load 'mmm-mode
+    ;; automatic sub-mode parsing
+    (setq mmm-parse-when-idle t))
+
   ;; tame org-open-file, which uses org-file-apps, and finally mailcap.el
   ;; to determine how to open pdf files
   ;; if we do not set this in mailcap-user-mime-data, it returns pdf-view-mode
