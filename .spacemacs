@@ -1606,7 +1606,7 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   ;; disable annoying character swapping
   (global-unset-key (kbd "C-t"))
 
-  (use-package org-mode
+  (use-package org
     :defer t
     :config
     (progn
