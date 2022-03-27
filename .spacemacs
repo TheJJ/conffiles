@@ -651,7 +651,58 @@ default it calls `spacemacs/load-spacemacs-env' which loads the environment
 variables declared in `~/.spacemacs.env' or `~/.spacemacs.d/.spacemacs.env'.
 See the header of this file for more information."
   (setq spacemacs-env-vars-file (locate-user-emacs-file ".cache/spacemacs.env"))
-  (spacemacs/load-spacemacs-env))
+  (setq spacemacs-ignored-environment-variables nil)
+  ;;(spacemacs/load-spacemacs-env t)
+
+  ;; execute the default shell twice and
+  ;; fetch the environment variables with `env'.
+  ;; this is a customized version of the spacemacs default
+  ;; which caches the environment vars in a file, and filters out
+  ;; things like ssh_auth_sock.
+  ;; in order to get them on each emacs launch, this variant exists.
+  ;; but why are we not happy with the env vars emacs got anyway from the kernel?
+  ;; because in .zshrc, .bashrc, ... users usually define more, and would expect emacs
+  ;; to know about them, even though they didn't launch emacs from their shell,
+  ;; but their desktop environment instead.
+  ;; we basically inject the shell-env into non-shell-launched emacs.
+  ;;
+  ;; important: the shell really has to export the env vars,
+  ;;            and not exit before env vars are set because the shell
+  ;;            is not interactive!
+  (with-temp-buffer
+    (let ((shell-command-switches (cond
+                                   ((or (eq system-type 'darwin)
+                                        (eq system-type 'cygwin)
+                                        (eq system-type 'gnu/linux))
+                                    ;; execute env twice, once with a
+                                    ;; non-interactive login shell and
+                                    ;; once with an interactive shell
+                                    ;; in order to capture all the init
+                                    ;; files possible.
+                                    '("-lc" "-ic"))
+                                   ((eq system-type 'windows-nt) '("-c"))))
+          (executable (cond ((or (eq system-type 'darwin)
+                                 (eq system-type 'cygwin)
+                                 (eq system-type 'gnu/linux))
+                             "env")
+                            ((eq system-type 'windows-nt)
+                             "set")
+                            (t (warn "unsupported system type for fetching env: %s" system-type)
+                               nil))))
+      (let ((process-environment initial-environment)
+            (env-point (point)))
+        (dolist (shell-command-switch shell-command-switches)
+          (call-process-shell-command executable nil t))
+        ;; sort envvars and remove duplicates
+        (sort-regexp-fields nil "^.*$" ".*?=" env-point (point-max))
+        (delete-duplicate-lines env-point (point-max) nil t)
+        ;; remove ignored environment variables
+        (dolist (v spacemacs-ignored-environment-variables)
+          (flush-lines v env-point (point-max)))))
+
+    ;; apply env vars into emacs
+    (let ((env-vars (load-env-vars-extract-env-vars)))
+      (load-env-vars-set-env env-vars))))
 
 
 ;;####################################################
