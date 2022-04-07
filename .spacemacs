@@ -1017,6 +1017,9 @@ the value is copied when setting up the sync."
   (with-eval-after-load 'citar
     (sync-variable 'citar-bibliography 'bibtex-completion-bibliography))
 
+  (with-eval-after-load 'ispell
+    (setq ispell-program-name "hunspell"))
+
   ;; wanderlust email \o/
   ;; per-device config is in ~/.wl/config and folders
   (use-package wl
