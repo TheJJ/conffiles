@@ -18,7 +18,6 @@ local homebin="$HOME/bin"
 if [[ -d $homebin ]]; then
 	export PATH="$PATH:$homebin"
 fi
-unset homebin
 
 # ssh-agent launched via systemd user service
 local sshagentsocket="$XDG_RUNTIME_DIR/ssh-agent.socket"
@@ -243,7 +242,7 @@ hash nvim 2>/dev/null && alias vim='nvim'
 hash nvim 2>/dev/null && alias vimdiff='nvim -d'
 
 # wrap vim to support file:linenumner
-if [[ -x $homebindir/viml ]]; then
+if [[ -x $homebin/viml ]]; then
 	alias vim=viml
 fi
 
@@ -1061,6 +1060,9 @@ unset _ssh_hosts
 unset _etc_hosts
 zstyle ':completion:*:hosts' hosts $_hosts
 unset _hosts
+
+# cleanup some vars
+unset homebin
 
 
 DONTSETRPROMPT=1
