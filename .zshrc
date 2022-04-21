@@ -379,6 +379,23 @@ function ftag() {
 	global -ix --result=grep --color=always --path-style=shorter $@
 }
 
+
+# dump some interface and trafic remotely over ssh
+# and live-display in wireshark-gui
+function wiresharkremote() {
+    if [[ $# -lt 2 ]]; then
+        echo "usage: $0 <hostname> <interface> [filter...]"
+        echo ""
+        echo "call tcpdump over ssh, and display results live in wireshark"
+        return
+    fi
+    server=$1
+    shift
+    interface=$1
+    shift
+    wireshark -kni <(ssh $server "sudo tcpdump -s 0 -n -w - -U -i $interface $@")
+}
+
 # ag for two strings in one line
 # agl lol rofl -> better than ag lol | ag rofl
 function agl() {
