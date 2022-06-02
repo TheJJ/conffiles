@@ -77,6 +77,7 @@ This function should only modify configuration layer settings."
      ;; active layers select which of the magic of spacemacs
      ;; shall be activated.
 
+     ansible
      asm
      (auto-completion :variables
                       auto-completion-enable-snippets-in-popup t
@@ -174,9 +175,12 @@ This function should only modify configuration layer settings."
      ag
      bison-mode
      citar
+     crdt
+     deadgrep
      google-c-style
      idle-highlight-mode
      org-roam-bibtex
+     org-super-agenda
      pdf-tools
      rainbow-mode
      )
