@@ -15,7 +15,8 @@
 ! not the Xserver dpi which apparently doesn't matter (it's the one from `xrandr --dpi`/`X -dpi`)
 ! to my knowledge this is the easiest and best way to scale everything nicely.
 ! except Qt, which needs env QT_AUTO_SCREEN_SCALE_FACTOR=0 so it doesn't scale again.
-Xft.dpi: 144
+! 144 is 1.5x96
+Xft.dpi: 125
 
 ! subpixel hinting
 ! only for non-fontconfig-aware applications, see .config/fontconfig and eselect fontconfig
