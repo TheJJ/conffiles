@@ -955,6 +955,7 @@ the value is copied when setting up the sync."
         org-latex-pdf-process '("xelatex -interaction nonstopmode %f" "xelatex -interaction nonstopmode %f")
         org-confirm-babel-evaluate nil   ; sure, just execute org code snippets, what can go wrong
         org-babel-default-header-args:cpp '((:flags . "-std=c++20 -Wall -Wextra"))
+        org-log-done nil
 
         ;; lsp settings
         lsp-enable-indentation nil       ; don't ask the language server for indentations
@@ -2233,14 +2234,16 @@ if __name__ == \"__main__\":
 
 ;; org-mode
 (defun jj/org-mode-hook ()
+  (visual-line-mode t)
   (setq-local
-    org-log-done nil
     indent-tabs-mode nil))
 
 ;; markdown-mode
 (defun jj/markdown-mode-hook ()
   (setq-local
     indent-tabs-mode nil
+    markdown-toc-indentation-space 2
+    markdown-toc-header-toc-start "<!-- markdown-toc start -->"
     whitespace-line-column 400))
 
 (defun jj/cmake-mode-hook ()
