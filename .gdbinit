@@ -26,7 +26,8 @@ set trace-commands off
 #set detach-on-fork off
 
 #(sizeof(void *) == 8)
-set $64BITS = 1
+set $arch64bit = 1
+
 
 #set prompt = gdb>> 
 #set extended-prompt \e[1;32m= gdb>>\e[0m 
@@ -50,7 +51,7 @@ end
 # stepping and machine status
 
 define ip
-	x /10i $rip
+	x /10i $pc
 end
 document ip
 Dumps decoded instructions starting at instruction pointer.
@@ -59,7 +60,7 @@ end
 
 define nip
 	ni
-	x /10i $rip
+	x /10i $pc
 end
 document nip
 Run next instruction and print 10 next instructions.
@@ -77,7 +78,7 @@ end
 
 define sip
 	si
-	x /10i $rip
+	x /10i $pc
 end
 document sip
 Step into next instruction and print 10 next instructions.
@@ -138,7 +139,7 @@ define status-info
 	echo \033[0m
 	printf "\n"
 
-	if ($64BITS == 1)
+	if ($arch64bit == 1)
 		# x86_64.
 		printf "rdi%16lx rsi%16lx rdx%16lx rcx%16lx\n", $rdi, $rsi, $rdx, $rcx
 		printf "rax%16lx rbx%16lx r8 %16lx r9 %16lx\n", $rax, $rbx, $r8,  $r9
