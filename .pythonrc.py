@@ -304,11 +304,17 @@ def _fancy_displayhook(item):
     global _
     _ = item
 
-    if isinstance(item, int) and not isinstance(item, bool) and item > 0:
+    if isinstance(item, (float, int)) and abs(item - time.time()) < (60 * 60 * 365 * 10):
+        # this is a UNIX timestamp within 10 years of today
+        dt = datetime.datetime.fromtimestamp(item, tz=datetime.timezone.utc).astimezone()
+        display_text = "%r (%r %s)" % (item, dt.isoformat(), dt.strftime("%Z"))
+
+    elif isinstance(item, int) and not isinstance(item, bool) and item > 0:
         if item >= 2**32:
             display_text = "{0}, 0x{0:x}".format(item)
         else:
             display_text = "{0}, 0x{0:x}, 0b{0:b}".format(item)
+
     else:
         term_width, term_height = shutil.get_terminal_size(fallback=(80, 24))
         display_text = pformat(item, width=term_width)
