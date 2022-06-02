@@ -1895,16 +1895,21 @@ nil : Otherwise, return nil and run next lineup function."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun jj/loadpath-discover ()
   "here manual elisp load paths can be defined"
-  (let ((basedir (locate-user-emacs-file "themes/")))
-    (when (file-directory-p basedir)
-      (dolist (f (directory-files basedir))
-        (if (and (not (or (equal f ".") (equal f "..")))
-                 (file-directory-p (concat basedir f)))
-            (add-to-list 'custom-theme-load-path (concat basedir f))))))
-  (let ((paths `(,(locate-user-emacs-file "lisp/cc-mode/"))))
-    (dolist (path paths)
-      (when (file-directory-p path)
-        (add-to-list 'load-path path)))))
+  (let ((load-specs `((,(locate-user-emacs-file "themes/") . "custom-theme-load-path")
+                      (,(locate-user-emacs-file "lisp/") . "load-path"))))
+    (dolist (load-spec load-specs)
+      (let ((load-dir (car load-spec))
+            (load-var (cdr load-spec)))
+
+        (when (file-directory-p load-dir)
+          (dolist (load-dir-file (directory-files load-dir))
+            (let ((load-dir-path (concat load-dir load-dir-file)))
+
+              (when (and (not (or (equal load-dir-file ".")
+                                  (equal load-dir-file "..")))
+                         (file-directory-p load-dir-path))
+
+                (add-to-list (intern load-var) load-dir-path)))))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
