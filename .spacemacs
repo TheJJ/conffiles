@@ -1553,6 +1553,12 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (global-set-key (kbd "C-<up>")    #'backward-paragraph)
   (global-set-key (kbd "C-<down>")  #'forward-paragraph)
 
+  ;; line+region movement (like in org :)
+  (global-set-key (kbd "M-S-<left>")  #'drag-stuff-left)
+  (global-set-key (kbd "M-S-<right>") #'drag-stuff-right)
+  (global-set-key (kbd "M-S-<up>")    #'drag-stuff-up)
+  (global-set-key (kbd "M-S-<down>")  #'drag-stuff-down)
+
   ;; line nativation/deleteion
   (global-set-key (kbd "C-k") #'jj/delete-line)
   (global-set-key (kbd "C-S-k") #'jj/delete-line-backward)
@@ -1593,6 +1599,7 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (global-set-key (kbd "C-x g") #'magit-status)
 
   (global-set-key (kbd "C-x j b") #'helm-bibtex)
+  (global-set-key (kbd "C-S-s") #'helm-occur)
 
   (global-set-key (kbd "C-x B") #'bury-buffer)
   (global-set-key (kbd "C-x E") #'apply-macro-to-region-lines)
