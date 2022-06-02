@@ -754,6 +754,17 @@ the value is copied when setting up the sync."
 ;; advices
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+;; search-replace the whole buffer if there's no active region
+(defun jj/goto-top-if-no-region (orig-func &rest args)
+  "if region is not active, go to the buffer start"
+  (save-excursion
+    (when (not (use-region-p))
+      (goto-char (point-min)))
+    (apply orig-func args)))
+(advice-add 'query-replace :around #'jj/goto-top-if-no-region)
+(advice-add 'query-replace-regexp :around #'jj/goto-top-if-no-region)
+
 ;; preserve undo-region selection
 (defadvice undo-tree-undo (around keep-region activate)
   (if (use-region-p)
