@@ -2120,6 +2120,16 @@ if __name__ == \"__main__\":
     indent-tabs-mode nil
     tab-width 8)
 
+  ;; so plists and other things are properly indented
+  (setq lisp-indent-function 'common-lisp-indent-function)
+  (put 'cl-flet 'common-lisp-indent-function
+       (get 'flet 'common-lisp-indent-function))
+  (put 'cl-labels 'common-lisp-indent-function
+       (get 'labels 'common-lisp-indent-function))
+  (put 'if 'common-lisp-indent-function 2)
+  (put 'dotimes-protect 'common-lisp-indent-function
+       (get 'when 'common-lisp-indent-function))
+
   (prettify-symbols-mode)
   (smart-tabs-advice lisp-indent-line lisp-indent-offset)
 
