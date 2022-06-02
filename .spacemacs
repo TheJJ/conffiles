@@ -952,6 +952,9 @@ the value is copied when setting up the sync."
         org-src-window-setup 'current-window ; edit in current window
         org-src-preserve-indentation t
         org-edit-src-content-indentation 0
+        org-latex-pdf-process '("xelatex -interaction nonstopmode %f" "xelatex -interaction nonstopmode %f")
+        org-confirm-babel-evaluate nil   ; sure, just execute org code snippets, what can go wrong
+        org-babel-default-header-args:cpp '((:flags . "-std=c++20 -Wall -Wextra"))
 
         ;; lsp settings
         lsp-enable-indentation nil       ; don't ask the language server for indentations
