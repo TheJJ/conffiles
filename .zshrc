@@ -138,6 +138,7 @@ alias gdbcx64='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remot
 alias bc='bc -q -l'
 (( $ON_LINUX )) && alias cp='cp --reflink=auto'
 alias grep='grep --color=auto'
+alias rg='rg -S'
 alias ip='ip --color'
 alias ipb='ip --color --brief'
 alias bridge='bridge --color'
