@@ -1823,7 +1823,7 @@ nil : Otherwise, return nil and run next lineup function."
                           (inher-intro           . +)   ; beginning of inheritance def
                           (inher-cont            . c-lineup-multi-inher)   ; inheritance continuation
                           (inlambda              . 0)   ; function body of a lambda
-                          (inline-open           . +)
+                          (inline-open           . 0)   ; brace opening in-class method definition a rolf()\n{<-
                           (innamespace           . 0)   ; namespace lol {\nthisstatement
                           (knr-argdecl-intro     . 0)
                           (label                 . 0)   ; gotolabel:
@@ -2012,9 +2012,6 @@ if __name__ == \"__main__\":
   (when (not (provided-mode-derived-p 'c-mode '(prog-mode)))
     (spacemacs/run-prog-mode-hooks))
 
-  ;; create codestyle
-  (jj/create-codestyles)
-
   ;; magic region formatting
   (with-library
     clang-format
@@ -2031,23 +2028,27 @@ if __name__ == \"__main__\":
                (lambda ()
                  (add-to-list 'lsp-clients-clangd-args "--header-insertion=never")))  ; don't auto-insert #includes
 
+  ;; keybindings for clike languages
+  (jj/cstyle-keybinds)
+
+  ;; create codestyles
+  (jj/create-codestyles)
+
   ;; default to sft style
   (c-set-style "sft-cpp")
 
+  ;; default to smart-tab indentation
   (setq-local
     tab-width 4
     indent-tabs-mode t)
-
-  (c-toggle-auto-newline nil) ; no automatic
-  (c-toggle-auto-state nil)   ; newlines
-
-  ;; keybindings for clike languages
-  (jj/cstyle-keybinds)
 
   ;; smart tabs: mix tabs and spaces the right way
   (smart-tabs-mode)
   (smart-tabs-advice c-indent-line c-basic-offset)
   (smart-tabs-advice c-indent-region c-basic-offset)
+
+  (c-toggle-auto-newline nil) ; no automatic
+  (c-toggle-auto-state nil)   ; newlines
   )
 
 
