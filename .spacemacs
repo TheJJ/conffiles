@@ -767,18 +767,6 @@ the value is copied when setting up the sync."
 (advice-add 'query-replace :around #'jj/goto-top-if-no-region)
 (advice-add 'query-replace-regexp :around #'jj/goto-top-if-no-region)
 
-;; preserve undo-region selection
-(defadvice undo-tree-undo (around keep-region activate)
-  (if (use-region-p)
-      (let ((m (set-marker (make-marker) (mark)))
-            (p (set-marker (make-marker) (point))))
-        ad-do-it
-        (goto-char p)
-        (set-mark m)
-        (set-marker p nil)
-        (set-marker m nil))
-    ad-do-it))
-
 ;; don't disable the window on pressing C-z
 (defadvice iconify-or-deiconify-frame (around disable-xframe-suspending))
 (ad-activate 'iconify-or-deiconify-frame)
