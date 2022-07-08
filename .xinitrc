@@ -12,6 +12,10 @@ if [ -d /etc/X11/xinit/xinitrc.d ]; then
     done
 fi
 
+# this is normally run in /etc/X11/xinit/xinitrc.d/50-systemd-user.sh:
+# systemctl --user import-environment DISPLAY XAUTHORITY
+
+
 CHASSISFORMAT=$(hostnamectl --json=pretty | jq -r .Chassis)
 export CHASSISFORMAT
 
