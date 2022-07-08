@@ -3,6 +3,10 @@
 #
 # Released under GPLv3 or later.
 #
+# this config is supposed to be _unpersonalized_!
+# it should run on any modern system,
+# and has no weird hardcoded things working on one device only.
+#
 # features of this config:
 # * completion
 # * history
@@ -20,6 +24,7 @@ if [[ -d $homebin ]]; then
 fi
 
 # ssh-agent launched via systemd user service
+# systemctl --user enable --now ssh-agent.service
 local sshagentsocket="$XDG_RUNTIME_DIR/ssh-agent.socket"
 if [[ -r $sshagentsocket ]]; then
 	export SSH_AUTH_SOCK=$sshagentsocket
@@ -124,9 +129,11 @@ alias watch='watch -c'
 alias emacsnw='emacs -nw'
 alias emacsopen="emacsclient -n"      # reuse frame
 alias emacsopennew="emacsclient -n -c"  # new frame
-alias emacscc="emacs -batch -no-site-file -f batch-byte-compile"  # compile some file(s)
+alias emacsterm='emacsclient --tty'   # connect in current tty
+alias emacscc="emacs -batch -no-site-file -f batch-byte-compile"  # compile some elisp file(s)
 alias indentemacs="emacs -batch -l ~/.emacs.d/init.el --eval '(batch-indent)'" # indent given files
 
+alias open='xdg-open'
 alias objdump='objdump -M intel-mnemonic -C'
 alias gdb='gdb -q'
 alias gdbs='gdbserver localhost:8888'
@@ -176,6 +183,7 @@ alias nemo='nemo --no-desktop'
 alias cal='cal -m -w'
 alias confgrep='grep -v -P "^\\s*($|#|;)"'   # good to strip conffile comments
 alias curlws='curl --no-buffer --header "Connection: Upgrade" --header "Upgrade: websocket" --header "Sec-WebSocket-Key: bG9sd2Vic29ja2V0Y29ubg==" --header "Sec-WebSocket-Version: 13"'
+alias mpvll='mpv --profile=low-latency --untimed'
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
@@ -208,6 +216,8 @@ alias lt='ll -rt'                   # sort by date
 alias lZ='ll -Z'                    # selinux
 alias ll='ls -lhtr'                 # magic
 alias lrandom="ls | sort -R | head -n 1"
+
+alias gap='git add -p'
 
 (( $ON_LINUX )) && alias rm='rm -I --one-file-system'
 alias chown='chown --preserve-root'
