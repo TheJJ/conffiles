@@ -998,7 +998,8 @@ the value is copied when setting up the sync."
   ;; undo-tree with region-specific undos
   (with-eval-after-load 'undo-tree
     (setq undo-tree-auto-save-history nil
-          undo-tree-enable-undo-in-region t))
+          ;; too buggy, hangs up emacs often with many -1 items in the buffer-undo-tree
+          undo-tree-enable-undo-in-region nil))
 
   (with-eval-after-load 'mmm-mode
     ;; automatic sub-mode parsing
