@@ -190,11 +190,13 @@ This function should only modify configuration layer settings."
    ;; A list of packages that will not be installed and loaded.
    dotspacemacs-excluded-packages
    '(
-     sqlup-mode
-     wolfram-mode
+     auto-complete
      auto-highlight-symbol
      helm-company  ;; so C-/ is not mapped to it when completing...
      importmagic
+     ox-pandoc
+     sqlup-mode
+     wolfram-mode
      )
 
    ;; Defines the behaviour of Spacemacs when installing packages.
