@@ -31,8 +31,8 @@ bindcode shift+107 exec ~/bin/screenshot --select
 #bindcode 161 exec sleep 0.3 && ~/bin/rscreen portrait
 
 # audio stuff
-bindsym XF86AudioPlay exec playerctl play-pause
-bindsym XF86AudioPause exec playerctl play-pause
+bindsym XF86AudioPlay exec playerctl play
+bindsym XF86AudioPause exec playerctl pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
@@ -201,16 +201,11 @@ bindsym $mod+i mode "resize"
 #0. bar, multiple bars possible
 bar {
 	status_command i3status
-	# position of bar: top or bottom
 	position top
-	# hide or dock the statusbar
 	mode dock
-
 	# xrandr --primary selects tray
 	tray_output primary
-
-	# font xcorefontname
-	# or no # show the numbered workspace buttons
+	#font xcorefontname
 	workspace_buttons yes
 	colors {
 		background #000000
@@ -241,11 +236,8 @@ client.background       #000000
 # us international
 #caps:none altwin:meta_alt lv3:rals_switch
 exec --no-startup-id setxkbmap us altgr-intl -option ctrl:nocaps
-# xmodmap -e "keycode 166 = Home"
-# xmodmap -e "keycode 167 = End"
 exec --no-startup-id xset -b
 exec --no-startup-id xset r rate 170 60
-
 exec --no-startup-id xsetroot -solid black
 
 # lol compositor (picom?)
