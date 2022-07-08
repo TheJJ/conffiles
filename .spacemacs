@@ -1488,7 +1488,7 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (interactive)
   (save-excursion
     (let ((orig-point (point)))
-      (move-end-of-line 1)
+      (end-of-line)
       (if (= orig-point (point))
         (jj/delete-whole-line)
         (delete-region
@@ -1867,7 +1867,7 @@ nil : Otherwise, return nil and run next lineup function."
       (c-echo-syntactic-information-p . nil))
     "The SFT C++ programming style"
     )
-  (c-add-style "sft-cpp"     sft-c-style)
+  (c-add-style "sft-cpp" sft-c-style)
 
   ;; https://github.com/llvm-mirror/llvm/blob/master/utils/emacs/emacs.el
   (defun llvm-lineup-statement (langelem)
@@ -1898,8 +1898,10 @@ nil : Otherwise, return nil and run next lineup function."
   ;; https://github.com/google/styleguide/blob/gh-pages/google-c-style.el
   ;; installed as melpa package
   ;(eval-when-compile (require 'google-c-style))
-  (require 'google-c-style)
-  (c-add-style "Google" google-c-style t)
+  (use-package google-c-style
+      :defer t
+      :config
+      (c-add-style "Google" google-c-style t))
   )
 ;;; end coding style definitions
 
@@ -2026,9 +2028,12 @@ if __name__ == \"__main__\":
 (defun jj/coding-hook ()
   (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\)" 1 font-lock-warning-face t)))
 
-  (idle-highlight-mode t)    ;; idle-highlight word under cursor
-  (jj/codenav-keybinds)
-  )
+  ;; idle-highlight word under cursor
+  (use-package idle-highlight-mode
+    :config
+    (idle-highlight-mode t))
+
+  (jj/codenav-keybinds))
 
 ;; c-like-language setup
 (defun jj/cstyle-hook ()
@@ -2047,8 +2052,8 @@ if __name__ == \"__main__\":
   ;; (does no completion since we set tab-always-indent)
   ;; cc-mode replaces this the other way round.
   (substitute-key-definition 'c-indent-command
-                              'indent-for-tab-command
-                              c-mode-base-map)
+                             'indent-for-tab-command
+                             c-mode-base-map)
 
   (add-to-list 'lsp-before-initialize-hook
                (lambda ()
