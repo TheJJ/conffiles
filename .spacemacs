@@ -1405,29 +1405,6 @@ Each of them will be indented as if it was opened in the editor."
   (end-of-line)
   (newline-and-indent))
 
-(defun shift-text (distance)
-  "Move a block of text to the right or left"
-  (if (use-region-p)
-    (let ((mark (mark)))
-      (save-excursion
-        (indent-rigidly (region-beginning)
-                        (region-end)
-                        distance)
-        (push-mark mark t t)
-        (setq deactivate-mark nil)))
-    (indent-rigidly (line-beginning-position)
-                    (line-end-position)
-                    distance)))
-
-(defun shift-right (count)
-  (interactive "p")
-  (shift-text count))
-
-(defun shift-left (count)
-  (interactive "p")
-  (shift-text (- count)))
-
-
 (defun sort-words (reverse beg end)
   "Sort words in region alphabetically, in REVERSE if negative.
   Prefixed with negative \\[universal-argument], sorts in reverse.
@@ -1537,9 +1514,47 @@ from a change in by prefix-matching the current buffer's `default-directory`"
     (delete-region
       (line-beginning-position)
       (line-end-position))
-    (delete-char 1) ; the newline
-    ))
+    (delete-char 1))) ; the newline
 
+(defun jj/shift-text (beg end shift-block-fun shift-line-fun)
+  "shift text in region or line using evil like S-v with < and > do in Vim.
+  It takes special care of preserving or even extending the region to the moved text lines."
+  (if (use-region-p)
+      (progn
+        (let ((point-at-end (< (mark) (point))))
+
+          ;; fix up current region end to grab the whole line
+          (if point-at-end
+              (end-of-line)
+            (beginning-of-line))
+
+          ;; then fix up the other region end
+          (exchange-point-and-mark)
+          (if point-at-end
+              (beginning-of-line)
+            (end-of-line))
+
+          ;; restore mark-point order
+          (exchange-point-and-mark)
+
+          (let ((linebeg (if point-at-end (mark) (point)))
+                (lineend (if point-at-end (point) (mark))))
+            ;; shift the text
+            (save-mark-and-excursion
+              (funcall shift-block-fun linebeg lineend)
+              ;; "In Transient Mark mode, every buffer-modifying primitive sets deactivate-mark"
+              ;; but we wanna keep it active :)
+              (setq deactivate-mark nil)))))
+
+    (funcall shift-line-fun 1)))
+
+(defun jj/shift-left (beg end)
+  (interactive "r")
+  (jj/shift-text beg end #'evil-shift-left #'evil-shift-left-line))
+
+(defun jj/shift-right (beg end)
+  (interactive "r")
+  (jj/shift-text beg end #'evil-shift-right #'evil-shift-right-line))
 
 (defun jj/keybindings ()
   (interactive)
@@ -1622,13 +1637,9 @@ from a change in by prefix-matching the current buffer's `default-directory`"
                                 (interactive)
                                 (join-line -1)))
 
-  ;; vim-like shifting
-  (global-set-key (kbd "M->") (lambda ()
-                                (interactive)
-                                (shift-right 4)))
-  (global-set-key (kbd "M-<") (lambda ()
-                                (interactive)
-                                (shift-left 4)))
+  ;; text shifting. evil-normal-state-map has these anyway.
+  (define-key evil-hybrid-state-map (kbd "M-<") #'jj/shift-left)
+  (define-key evil-hybrid-state-map (kbd "M->") #'jj/shift-right)
 
   ;; really insert a fucking tab
   (global-set-key (kbd "C-<tab>") 'insert-tab)
