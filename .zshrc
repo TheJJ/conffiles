@@ -513,6 +513,15 @@ function tryping() {
 	done
 }
 
+# ping the default gateway
+pingd () {
+	if [[ $# -eq 1 && $1 == "-6" ]]; then
+		ping -6 $(ip -6 route | awk '/^default via { print $3 }')
+	else
+		ping $(ip route | awk '/^default via/ { print $3 }')
+	fi
+}
+
 
 # test many hosts if they respond
 function isup() {
