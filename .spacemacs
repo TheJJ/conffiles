@@ -1040,6 +1040,26 @@ the value is copied when setting up the sync."
   (with-eval-after-load 'ispell
     (setq ispell-program-name "hunspell"))
 
+  (use-package org-super-agenda
+    :after org-agenda
+    :init
+    (setq org-super-agenda-groups
+          '((:name "Due today"
+             :deadline today)
+            (:name "Overdue"
+             :deadline past)
+            (:name "Upcoming Deadline"
+             :deadline future)
+            (:name "Scheduled Today"
+             :scheduled today)
+            (:name "Scheduled Past"
+             :scheduled past)
+            (:name "Future Tasks"
+             :scheduled future)
+            (:discard (:anything t))))
+    :config
+    (org-super-agenda-mode))
+
   ;; wanderlust email \o/
   ;; per-device config is in ~/.wl/config and folders
   (use-package wl
