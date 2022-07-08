@@ -923,12 +923,14 @@ the value is copied when setting up the sync."
 
         mime-edit-split-message nil      ; don't split large messages
 
+        ;; bibtex settings
         bibtex-completion-pdf-open-function 'helm-open-file-with-default-tool  ; open with system viewer
         bibtex-completion-pdf-field "file" ; field in bibtex file for pdf name
         ebib-bibtex-dialect 'biblatex
         ebib-index-default-sort '("Year" . descend)
         ebib-file-associations '()         ; so find-file handles the opening
 
+        ;; org settings
         org-hide-emphasis-markers t  ; hide syntax elements
         org-startup-with-inline-images t
         org-startup-with-latex-preview t
@@ -946,6 +948,14 @@ the value is copied when setting up the sync."
         org-confirm-babel-evaluate nil   ; sure, just execute org code snippets, what can go wrong
         org-babel-default-header-args:cpp '((:flags . "-std=c++20 -Wall -Wextra"))
         org-log-done nil
+
+        ;; LaTeX settings
+        TeX-engine 'default  ;; or xetex, but conflicts with inputenc package
+        TeX-PDF-mode t
+        TeX-save-query nil
+        TeX-parse-self t  ;; enable parse on load
+        TeX-auto-save t   ;; enable parse on save
+        reftex-plug-into-AUCTeX t
 
         ;; lsp settings
         lsp-enable-indentation nil       ; don't ask the language server for indentations
@@ -1971,7 +1981,21 @@ def main():
 if __name__ == \"__main__\":
     main()
 "
-))))
+))
+    (latex-mode . ("\
+# -*- mode: snippet -*-
+# name: two_columns
+# key: columns
+# --
+\\begin{columns}[T]
+    \\begin{column}{0.48\\textwidth}
+        $0
+    \\end{column}
+    \\begin{column}{0.48\\textwidth}
+    \\end{column}
+\\end{columns}
+")
+    )))
 
 (defun jj/yas-hook ()
   "so we don't need to carry around snippet files"
@@ -2149,18 +2173,12 @@ if __name__ == \"__main__\":
   ;; set latex indent offset so it doesn't fuck up
   ;; (i.e. use values != n*tab-width)
   (setq-local
-    TeX-engine 'default  ;; or xetex, but conflicts with inputenc package
-    TeX-PDF-mode t
-
     tab-width 4
     fill-column 76
     LaTeX-indent-level 4
     LaTeX-item-indent 0
     indent-tabs-mode nil
 
-    TeX-parse-self t  ;; enable parse on load
-    TeX-auto-save t   ;; enable parse on save
-    reftex-plug-into-AUCTeX t
     company-minimum-prefix-length 2) ;; so completes start with 2 chars already
 
   ;; don't highlight long lines
