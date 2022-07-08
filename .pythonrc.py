@@ -237,6 +237,32 @@ def stopwatch(average=False):
         termios.tcsetattr(stdin, termios.TCSANOW, tattr)
 
 
+def timer(duration, display=True, interval=1.0, notify=True):
+    """
+    countdown function
+    """
+    import time
+    start = time.time()
+
+    while time.time() < start + duration:
+        left = start + duration - time.time()
+        if display:
+            print(" %.02f\r" % left, end="")
+        wait = (left % interval) or interval
+        try:
+            time.sleep(wait)
+        except KeyboardInterrupt:
+            break
+
+    msg = "time of %.04fs has passed" % (time.time() - start)
+    if display:
+        print(msg)
+    if notify:
+        subprocess.run(["notify-send", msg])
+
+    return (time.time() - start)
+
+
 def _completion():
     """
     set up readline and history.
