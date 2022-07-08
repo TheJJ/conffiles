@@ -240,5 +240,9 @@ exec --no-startup-id xset -b
 exec --no-startup-id xset r rate 170 60
 exec --no-startup-id xsetroot -solid black
 
-# lol compositor (picom?)
-exec --no-startup-id xcompmgr
+# launch the graphical-session.target
+exec --no-startup-id systemctl start --user i3-session.service
+
+# further programs to launch are systemd user services wanted by graphical-session.target
+
+# TODO: create a ~/bin/autostart which launches dex for xdg-autostart)
