@@ -100,6 +100,7 @@ This function should only modify configuration layer settings."
      major-modes  ;; qml-mode, openscad
      meson
      git
+     go
      (gtags :variables
             gtags-enable-by-default nil)
      (haskell :variables
