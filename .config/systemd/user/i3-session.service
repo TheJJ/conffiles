@@ -1,0 +1,13 @@
+[Unit]
+Description=i3 window manager session
+PartOf=i3-session.target
+Wants=i3-session.target
+
+# this service is started by i3 in its config file
+# it's done like this so i3 and its launched child processes
+# are not a service itself, but in the regular session scope.
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/true
+Restart=on-failure
