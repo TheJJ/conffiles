@@ -2047,11 +2047,11 @@ if __name__ == \"__main__\":
 
 ;; config for all prog-modes
 (defun jj/coding-hook ()
+  ;; highlight important words
   (font-lock-add-keywords nil '(("\\<\\(TODO\\|todo\\|ASDF\\|asdf\\)" 1 font-lock-warning-face t)))
 
-  ;; idle-highlight word under cursor
-  (use-package idle-highlight-mode
-    :config
+  ;; highlight word under cursor
+  (when (fboundp 'idle-highlight-mode)
     (idle-highlight-mode t))
 
   (jj/codenav-keybinds))
