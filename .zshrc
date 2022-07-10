@@ -822,25 +822,6 @@ zstyle ':vcs_info:*'            formats         "[%r/%b]"       "%c%u"
 zstyle ':vcs_info:*'            actionformats   "[%r/%b =>%a]"  "%c%u"
 
 
-jj-copy-region-as-kill () {
-	zle copy-region-as-kill
-	print -rn $CUTBUFFER | xsel -i
-}
-zle -N jj-copy-region-as-kill
-
-jj-kill-region () {
-	zle kill-region
-	print -rn $CUTBUFFER | xsel -i
-}
-zle -N jj-kill-region
-
-jj-yank () {
-	CUTBUFFER=$(xsel -o)
-	zle yank
-}
-zle -N jj-yank
-
-
 ##############################
 # key binding
 ##############################
@@ -922,91 +903,19 @@ bindkey "\eOH"          beginning-of-line
 bindkey "^[d"           kill-word
 bindkey "^[[3^"         kill-word
 bindkey "^[[3;5~"       kill-word
-#bindkey '^[w'           jj-copy-region-as-kill
-#bindkey '^W'            jj-kill-region
-#bindkey '^Y'            jj-yank
 
 
 ###############################
 # dircolors for ls
 ###############################
 
-#no   NORMAL, NORM          Global default, although everything should be something
-#di   DIR                   Directory
-#fi   FILE                  Normal file
-#ln   SYMLINK, LINK, LNK    Symbolic link. If you set this to ‘target’ instead of a numerical value, the color is as for the file pointed to.
-#pi   FIFO, PIPE            Named pipe
-#so   SOCK                  Socket
-#bd   BLOCK, BLK            Block device
-#cd   CHAR, CHR             Character device
-#or   ORPHAN                Symbolic link pointing to a non-existent file
-#mi   MISSING               Non-existent file pointed to by a symbolic link (visible when you type ls -l)
-#ex   EXEC                  Executable file (i.e. has ‘x’ set in permissions)
-#su   SETUID                File that is setuid (u+s)
-#sg   SETGID                File that is setgid (g+s)
-#tw   STICKY_OTHER_WRITABLE Directory that is sticky and other-writable (+t,o+w)
-#ow   OTHER_WRITABLE        Directory that is other-writable (o+w) and not sticky
-#st   STICKY                Directory with the sticky bit set (+t) and not other-writable
-#lc   LEFTCODE, LEFT        Opening terminal code
-#rc   RIGHTCODE, RIGHT      Closing terminal code
-#ec   ENDCODE, END          Non-filename text
-#mh   MULTIHARDLINK         Regular file[s] with more than one link
-#ca   CAPABILITY            File with capability
-#*.extension                Every file using this extension e.g. *.jpg
-#
-#
-# 0   = default colour
-# 1   = bold
-# 4   = underlined
-# 5   = flashing text
-# 6   = no change
-# 7   = reverse field
-# 8   = hidden (black)
-# 9   = strikethrough (cool!)
-# 10 - 29 = no change
-# 30  = light green
-# 31  = red
-# 32  = green
-# 33  = orange
-# 34  = blue
-# 35  = purple
-# 36  = cyan
-# 37  = grey
-# 38  = underline
-# 39  = no change
-# 40  = black background
-# 41  = red background
-# 42  = green background
-# 43  = orange background
-# 44  = blue background
-# 45  = purple background
-# 46  = cyan background
-# 47  = grey background
-# 90  = dark grey
-# 91  = light red
-# 92  = light green
-# 93  = yellow
-# 94  = light blue
-# 95  = light purple
-# 96  = turquoise
-# 100 = dark grey background
-# 101 = light red background
-# 102 = light green background
-# 103 = yellow background
-# 104 = light blue background
-# 105 = light purple background
-# 106 = turquoise background
-#
-# combine parameters like:
-# di=5;31;42 => flashing red on green bg
-
+# man 5 dir_colors
 imgc="95"
 confc="91"
 arc="33"
 compc="92"
 rawc="47;34"
 export LS_COLORS="rs=00:no=00:di=01;36:ln=01;04;33:mh=04:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;35;01:or=01;09;31;40:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42;05:st=37;44:ex=32:*.xz=33:*.jpg=$imgc:*.png=$imgc:*.bmp=$imgc:*.gif=$imgc:*.cfg=$confc:*.ini=$confc:*.conf=$confc:*.cnf=$confc:*.pref=$confc:*rc=$confc:*.tar=$arc:*.zip=$arc:*.xz=$compc:*.gz=$compc:*.bz=$compc:*.lzma=$compc:*.gpg=44;93:*.img=$rawc:*.dat=$rawc:*core=31;04:*.bak=32"
-#export LS_COLORS='rs=00:no=00:'
 
 
 #################################################
@@ -1028,7 +937,6 @@ export LESS_TERMCAP_ue=$'\E[0m'                # end underline
 #############################
 
 zstyle ':completion::complete:*' use-cache=1
-#zstyle ':completion::complete:*' cache-path ~/.zshcompcache
 
 zstyle ':completion:*' auto-description '%d'
 zstyle ':completion:*' completer _expand _complete _ignored
@@ -1113,7 +1021,6 @@ precmd () {
 	psvar[2]="$vcs_info_msg_0_"
 	psvar[3]="$vcs_info_msg_1_"
 	psvar[4]="$vcs_info_msg_2_"
-	#test $vcs_info_msg_1_ && psvar[4]="$vcs_info_msg_1_" || psvar[4]=`pwd`
 }
 
 # best prompt ever!!11111
