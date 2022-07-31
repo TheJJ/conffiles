@@ -272,17 +272,38 @@ def _completion():
     import atexit
     import readline
 
-    readline_statements = (
-        r'"\e[A": history-search-backward',
-        r'"\e[B": history-search-forward',
-        r'"\e[C": forward-char',
-        r'"\e[D": backward-char',
-        r'"\eOd": backward-word',
-        r'"\eOc": forward-word',
-        r'"\e[3^": kill-word',
-        r'"\C-h": backward-kill-word',
-        'tab: complete',
-    )
+    # the same setuip is also done in stdlib/site.py
+    # in `enablerlcompleter()`, but with less cool history file names
+    # and keybindings.
+
+    libedit = "libedit" in readline.__doc__
+    if libedit:
+        print("libedit detected - history may not work at all...")
+
+        readline_statements = (
+            "bind '^[[A' ed-search-prev-history",
+            "bind '^[[B' ed-search-next-history",
+            "bind '^[[5C' vi-next-word",
+            "bind '^[[5D' vi-prev-word",
+            "bind '^B' ed-command",
+            "bind '^P' ed-search-prev-history",
+            "bind '^N' ed-search-next-history",
+            "bind '^l' ed-clear-screen",
+            "bind '^r' em-inc-search-prev",
+            "bind '^I' rl_complete",
+        )
+    else:
+        readline_statements = (
+            r'"\e[A": history-search-backward',
+            r'"\e[B": history-search-forward',
+            r'"\e[C": forward-char',
+            r'"\e[D": backward-char',
+            r'"\eOd": backward-word',
+            r'"\eOc": forward-word',
+            r'"\e[3^": kill-word',
+            r'"\C-h": backward-kill-word',
+            'tab: complete',
+        )
 
     for rlcmd in readline_statements:
         readline.parse_and_bind(rlcmd)
@@ -296,19 +317,31 @@ def _completion():
 
     history_file = Path(os.path.expanduser('~')) / hist_filename
 
+    histfile_ok = True
+    h_len = 0
+
     if history_file.exists():
-        readline.read_history_file(str(history_file))
-        h_len = readline.get_current_history_length()
+        try:
+            readline.read_history_file(str(history_file))
+            h_len = readline.get_current_history_length()
+        except OSError:
+            print(f"failed to read existing history file {history_file!r}!")
+            histfile_ok = False
     else:
-        h_len = 0
         history_file.touch()
+
+    if h_len == 0:
+        # if we have no history, force-add one entry so `site.py` doesn't
+        # create .python_history as second history file...
+        readline.add_history("lol")
 
     def save(h_size, prev_h_len, histfile):
         new_h_len = readline.get_current_history_length()
         readline.set_history_length(h_size)
         readline.append_history_file(new_h_len - prev_h_len, histfile)
 
-    atexit.register(save, HISTSIZE, h_len, str(history_file))
+    if histfile_ok:
+        atexit.register(save, HISTSIZE, h_len, str(history_file))
 
     return history_file
 
