@@ -522,13 +522,14 @@ end
 
 ### Voltron multi-window gdb
 python
-try:
-    import voltron
-    from path import Path
+if False:
+    try:
+        import voltron
+        from path import Path
 
-    entryfile = Path(voltron.__file__).dirname() / 'entry.py'
-    gdb.execute('source {}'.format(entryfile))
+        entryfile = Path(voltron.__file__).dirname() / 'entry.py'
+        gdb.execute('source {}'.format(entryfile))
 
-except ImportError:
-    pass
+    except ImportError:
+        pass
 end
