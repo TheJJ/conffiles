@@ -23,6 +23,7 @@ set print union on
 set print vtbl on
 set python print-stack full
 set trace-commands off
+set breakpoint pending on
 #set detach-on-fork off
 
 #(sizeof(void *) == 8)
