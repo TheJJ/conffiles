@@ -257,6 +257,7 @@ if [[ -x $homebin/viml ]]; then
 	alias vim=viml
 fi
 
+
 # conffiles management git stuff
 # the git bare repo is in ~/.conffiles.git
 alias conffiles="git --work-tree=$HOME --git-dir=$HOME/.conffiles.git"
@@ -369,6 +370,19 @@ alias gencrypthash="python3 -c 'import crypt, getpass; print(crypt.crypt(getpass
 # - check hash (either via argv0 or input) against given password
 alias checkcrypthash="python3 -c 'import crypt, hmac, getpass, sys; hash=(sys.argv[1] if len(sys.argv) > 1 else input(\"hash> \")); k=(\"kay\" if hmac.compare_digest(crypt.crypt(getpass.getpass(\"passwd> \"), hash), hash) else \"no\"); print(k); exit(0 if k == \"kay\" else 1)'"
 
+# communication with emacs vterm
+function vterm_printf() {
+    if [ -n "$TMUX" ] && ([ "${TERM%%-*}" = "tmux" ] || [ "${TERM%%-*}" = "screen" ] ); then
+        # Tell tmux to pass the escape sequences through
+        printf "\ePtmux;\e\e]%s\007\e\\" "$1"
+    elif [ "${TERM%%-*}" = "screen" ]; then
+        # GNU screen (screen, screen-256color, screen-256color-bce)
+        printf "\eP\e]%s\007\e\\" "$1"
+    else
+        printf "\e]%s\e\\" "$1"
+    fi
+}
+
 
 # find by name, optionally in dir
 # fname "search" ["startdiretories" ...]
@@ -412,7 +426,6 @@ function wiresharkremote() {
 function agl() {
 	ag "(($1.*$2)|($2.*$1))"
 }
-
 
 # mkdir and cd to it
 function mcd() { mkdir -p "$1" && cd "$1"; }
@@ -754,6 +767,22 @@ function texformula() {
 	formula="$@"
 	pdflatex -output-directory=/tmp -jobname formula "\\def\\formula{$formula}\\documentclass[border=2pt]{standalone}\\usepackage{amsmath}\\usepackage{varwidth}\\begin{document}\\begin{varwidth}{\\linewidth}\\[ \\formula \\]\\end{varwidth}\\end{document}" || return 1
 	echo -e "formula written to:\n/tmp/formula.pdf"
+}
+
+function git-authors() {
+	git blame -w -M -C -C --line-porcelain "$1" | grep '^author ' | sort -f | uniq -ic | sort -h
+}
+
+function git-repo-authors() {
+	git ls-tree -r -z --name-only HEAD -- "$1" | xargs -0 -n1 git blame -w -M -C -C --line-porcelain HEAD | grep  "^author " | sort -f | uniq -ic | sort -h
+}
+
+function supernice {
+    ionice --ignore --class 3 nice -n 19 $@ || return 1
+}
+
+function netjail {
+    supernice firejail --allow-debuggers --profile=nonet $@ || return 1
 }
 
 ####################
