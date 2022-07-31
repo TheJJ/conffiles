@@ -1,10 +1,11 @@
 # jj's .editrc
-# Copyright (c) 2018-2018 Jonas Jelten <jj@stusta.net>
+# Copyright (c) 2018-2022 Jonas Jelten <jj@sft.lol>
 #
-# used by all editline-enabled programs (e.g. lldb)
+# used by all libedit-enabled programs (e.g. lldb, or python)
+# see `man 5 editrc`
 
 edit on          # enable libedit stuff
-history size 0   # infinite history
+#history size 0   # infinite history (is default anyway)
 
 bind '^[[A' ed-search-prev-history
 bind '^[[B' ed-search-next-history
