@@ -100,7 +100,8 @@ This function should only modify configuration layer settings."
      major-modes  ;; qml-mode, openscad
      meson
      git
-     go
+     (go :variables
+         go-tab-width 4)
      (gtags :variables
             gtags-enable-by-default nil)
      (haskell :variables
@@ -143,6 +144,8 @@ This function should only modify configuration layer settings."
             shell-default-height 30
             shell-default-position 'bottom)
      shell-scripts
+     (spacemacs-editing :variables
+                        vim-style-enable-undo-region t)
      (spell-checking :variables
                      spell-checking-enable-by-default nil
                      spell-checking-enable-auto-dictionary t
@@ -999,8 +1002,9 @@ the value is copied when setting up the sync."
   ;; undo-tree with region-specific undos
   (with-eval-after-load 'undo-tree
     (setq undo-tree-auto-save-history nil
-          ;; too buggy, hangs up emacs often with many -1 items in the buffer-undo-tree
-          undo-tree-enable-undo-in-region nil))
+          ;; very buggy, hangs up emacs often with many -1 items in the buffer-undo-tree
+          ;; but spacemacs seems to mitigate it in spacemacs-editing layer
+          undo-tree-enable-undo-in-region t))
 
   (with-eval-after-load 'mmm-mode
     ;; automatic sub-mode parsing
@@ -2228,6 +2232,7 @@ if __name__ == \"__main__\":
       (progn
         (add-hook 'global-whitespace-mode-hook no-lines-tail))))
 
+  ;; other settings are in jj/defaults
   (setq-default TeX-master nil) ; query for master file
   (visual-line-mode t)
   (LaTeX-math-mode t)
@@ -2307,11 +2312,49 @@ if __name__ == \"__main__\":
       (ansi-color-apply-on-region compilation-filter-start (point-max))))
   (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
 
+
+(defun jj/sql-indent-begin-block (context offset)
+  "depending on the block kind, either do an indent, or not.
+  no indent for defun, all other block kinds are indented."
+  (let ((syntax (sqlind-syntax context))
+        (anchor (sqlind-anchor-point context))
+        (syntax-symbol (sqlind-syntax-symbol context)))
+
+    (when (not (eq syntax-symbol 'in-begin-block))
+      (error "indent-begin-block used for wrong syntax symbol '%s'"
+             syntax-symbol))
+    (let ((block-kind (nth 1 syntax))
+          (block-label (nth 2 syntax)))
+      (cond
+        ;; defun block content should not be indented
+        ((eq block-kind 'defun)
+         offset)
+        (t
+         ;; indent all other types by basic offset
+         (+ offset sqlind-basic-offset))
+        ))))
+
 (defun jj/sql-mode-hook ()
   (setq-local
-    indent-tabs-mode t
+    indent-tabs-mode nil
     tab-width 4
-    sqlind-basic-offset 4)
+    sqlind-basic-offset 4
+    sql-product 'postgres)
+
+  ;; customize indentation - very simple basic-offset based indents
+  (setq
+   sqlind-indentation-offsets-alist
+   `((select-clause 0)
+     (in-select-clause +)
+     (delete-clause 0)
+     (in-delete-clause +)
+     (update-clause 0)
+     (in-update-clause +)
+     (insert-clause 0)
+     (in-insert-clause +)
+     (in-begin-block jj/sql-indent-begin-block)
+     ,@sqlind-default-indentation-offsets-alist))
+
   ;; TODO: detect psql prompt, or disable custom prompt
   ;;(sql-set-product-feature 'postgres)
 
