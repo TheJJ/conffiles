@@ -64,9 +64,18 @@ scriptencoding utf-8
 " whitespace highlighting: eol:¬,
 set list listchars=tab:╺╴,trail:·,extends:→,precedes:←
 
-set background=dark
 " not totally crappy themes: elflord, ron, desert, murphy, slate, koehler
-colorscheme ron
+
+" vim broke the ron colorscheme https://github.com/vim/vim/issues/10449
+" now "default" looks like "ron".
+if has('nvim')
+	colorscheme ron
+else
+	colorscheme default
+endif
+" todo: detect terminal background (with t_RB?)
+set background=dark
+
 highlight SpecialKey ctermfg=darkblue
 highlight SpecialKey guifg=#808080
 
