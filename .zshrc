@@ -741,17 +741,18 @@ function p12extract() {
 # create a p12 file
 function p12pack() {
 	if [[ $# -lt 1 ]]; then
-		echo "usage: p12pack <pemfile> [cafile]"
+		echo "usage: p12pack <pemfile> <keyfile> [cafile]"
 		return
 	fi
 
 	pemfile=$1
+	keyfile=$2
 
-	if [[ $# -eq 2 ]]; then
-		cafile=$2
+	if [[ $# -eq 3 ]]; then
+		cafile=$3
 		caopts=('-CAfile' "$cafile")
 	fi
-	openssl pkcs12 -export -nodes ${caopts[@]} -in "$pemfile" -out "${pemfile%.pem}.p12"
+	openssl pkcs12 -export -nodes ${caopts[@]} -in "$pemfile" -inkey "$keyfile" -out "${pemfile%.pem}.p12"
 }
 
 alias pemcat="openssl x509 -text -nocert -in"
