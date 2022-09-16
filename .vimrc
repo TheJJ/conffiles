@@ -220,18 +220,18 @@ function! WhitespaceTab(x)
 	:2match evilws /^\t*\zs \+\|[^\t]\zs\t\+\|\s\+\%#\@<!$/
 endfunction
 
-" default indentation scheme
-call WhitespaceSpace(4)
-
-" linux code only aligns properly with 8-sized tabs
-autocmd BufRead /usr/src/linux* call WhitespaceTab(8)
-
 cmap ws2 cal WhitespaceSpace(2)
 cmap ws4 cal WhitespaceSpace(4)
 cmap ws8 cal WhitespaceSpace(8)
 cmap wt2 cal WhitespaceTab(2)
 cmap wt4 cal WhitespaceTab(4)
 cmap wt8 cal WhitespaceTab(8)
+
+" default indentation scheme
+call WhitespaceSpace(4)
+
+" linux code only aligns properly with 8-sized tabs
+autocmd BufRead /usr/src/linux* call WhitespaceTab(8)
 
 " language-specific stuff
 autocmd FileType python setlocal expandtab
