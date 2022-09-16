@@ -372,7 +372,9 @@ It should only modify the values of Spacemacs settings."
    ;; refer to the DOCUMENTATION.org for more info on how to create your own
    ;; spaceline theme. Value can be a symbol or list with additional properties.
    ;; (default '(spacemacs :separator wave :separator-scale 1.5))
-   dotspacemacs-mode-line-theme '(spacemacs :separator wave :separator-scale 1.5)
+   dotspacemacs-mode-line-theme '(spacemacs
+                                  :separator nil
+                                  :separator-scale 1.3)
 
    ;; If non-nil the cursor color matches the state color in GUI Emacs.
    ;; (default t)
@@ -910,6 +912,7 @@ the value is copied when setting up the sync."
         idle-highlight-idle-time 0.2
         confirm-kill-emacs 'y-or-n-p     ; always ask when exiting
         password-cache-expiry nil        ; tramp password cache
+        inhibit-compacting-font-caches t ; trade more memory with less lagging due to font compactions
 
         desktop-restore-eager 3          ; other buffers are restored lazily
 
@@ -1934,7 +1937,8 @@ nil : Otherwise, return nil and run next lineup function."
 ;; loading stuff
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun jj/loadpath-discover ()
-  "here manual elisp load paths can be defined"
+  "here manual elisp load paths can be defined.
+directories in themes/ and lisp/ are automatically added to the respective load-paths."
   (let ((load-specs `((,(locate-user-emacs-file "themes/") . "custom-theme-load-path")
                       (,(locate-user-emacs-file "lisp/") . "load-path"))))
     (dolist (load-spec load-specs)
@@ -1943,7 +1947,7 @@ nil : Otherwise, return nil and run next lineup function."
 
         (when (file-directory-p load-dir)
           (dolist (load-dir-file (directory-files load-dir))
-            (let ((load-dir-path (concat load-dir load-dir-file)))
+            (let ((load-dir-path (expand-file-name (concat load-dir load-dir-file))))
 
               (when (and (not (or (equal load-dir-file ".")
                                   (equal load-dir-file "..")))
@@ -1968,7 +1972,8 @@ nil : Otherwise, return nil and run next lineup function."
   ;;          ...))
   (setq theming-modifications '())
 
-  (spacemacs/update-theme)
+  ;; apply theming modifications from 'user' theme to current theme
+  ;;(spacemacs/update-theme)
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2457,6 +2462,9 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;(setq debug-on-error t)
   ;; to watch variable writes, there's M-x debug-watch
   ;(debug-watch 'indent-line-function)
+  ;; breakpoints
+  ;(debug-on-entry 'enable-theme)
+  ;; debug-on-event: sigusr2 also triggers debugger!
   ;; to debug slowness somewhere, use M-x profiler-start, and profiler-report!
   ;; To debug on C-g, use M-x toggle-debug-on-quit
 
