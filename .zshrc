@@ -73,14 +73,6 @@ export LC_PAPER="de_DE.UTF-8"
 
 [[ $- != *i* ]] && return
 
-# if emacs tramp is using this shell,
-# abort everything and be as dumb as possible
-[[ $TERM == "dumb" ]] && unsetopt zle && PS1='$ ' && return
-
-
-
-# see man zsh, reports cpu/system/etc usage if running longer then n secs
-REPORTTIME=1
 
 ########################################
 # init the zsh completion
@@ -233,6 +225,7 @@ alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.
 alias jsc="js -C ."  # json coloring
 hash colordiff 2>/dev/null && alias diff='colordiff' || alias diff='diff --color=auto'
 alias g++std20='g++ -std=c++20 -Wall -Wextra -pedantic -pthread -fcoroutines'
+alias g++std23='g++ -std=c++23 -Wall -Wextra -pedantic -pthread -fcoroutines'
 alias g++c='g++std20'
 function g++as20() {
 	g++ -std=c++20 -Wall -Wextra -pedantic -pthread -fcoroutines -S -masm=intel -o- $@ | c++filt
@@ -786,8 +779,15 @@ function netjail {
 }
 
 ####################
-# shell setup
+# shell behavior and completion setup
 ####################
+
+# if emacs tramp is using this shell,
+# abort everything and be as dumb as possible
+[[ $TERM == "dumb" ]] && unsetopt zle && PS1='$ ' && return
+
+# reports cpu/system/etc usage if running longer then n secs
+REPORTTIME=1
 
 # general shell options
 setopt extended_glob longlistjobs completeinword completealiases hashlistall bash_rematch nohup nobeep
