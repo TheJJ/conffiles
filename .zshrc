@@ -960,6 +960,7 @@ export LESS_TERMCAP_so=$'\E[1;44;38;5;195m'    # begin standout-mode - info box,
 export LESS_TERMCAP_se=$'\E[0m'                # end standout-mode
 export LESS_TERMCAP_us=$'\E[4;38;5;155m'       # begin underline
 export LESS_TERMCAP_ue=$'\E[0m'                # end underline
+export LESS_TERMCAP_zzzreset="$reset_color"    # to make `env` output cleaner...
 
 
 #############################
