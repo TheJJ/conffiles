@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# lock the screen with i3lock
+# optionally display a lockscreen image if it exists
+
+lockimage="$HOME/.config/lockscreen/1.png"
+
+if [[ -r "$lockimage" ]]; then
+    i3lock -c 000000 -i "$lockimage" -f
+else
+    i3lock -c 000000 -f
+fi
