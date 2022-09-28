@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-(c) 2016-2019 Jonas Jelten <jj@sft.mx>
+(c) 2016-2022 Jonas Jelten <jj@sft.mx>
 GPLv3 or any later version.
 
 Wrapper for vim.
@@ -27,6 +27,10 @@ def main():
     nvim_exe = shutil.which("nvim")
 
     vim_exe = nvim_exe or old_vim_exe
+
+    if not vim_exe:
+        print("no vim or nvim executable found :(")
+        exit(1)
 
     invocation = []
     if sys.argv:
