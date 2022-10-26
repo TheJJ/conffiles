@@ -97,9 +97,11 @@ This function should only modify configuration layer settings."
      dap
      debug
      emacs-lisp
+     emoji
      major-modes  ;; qml-mode, openscad
      meson
      git
+     gpu
      (go :variables
          go-tab-width 4)
      (gtags :variables
@@ -187,6 +189,7 @@ This function should only modify configuration layer settings."
      org-super-agenda
      pdf-tools
      rainbow-mode
+     ripgrep
      )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
