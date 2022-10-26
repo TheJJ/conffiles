@@ -2168,8 +2168,8 @@ if __name__ == \"__main__\":
   (smart-tabs-advice c-indent-line c-basic-offset)
   (smart-tabs-advice c-indent-region c-basic-offset)
 
-  (c-toggle-auto-newline nil) ; no automatic
-  (c-toggle-auto-state nil)   ; newlines
+  (c-toggle-auto-newline -1) ; no automatic newlines
+  (c-toggle-electric-state -1) ; no auto reformatting
   )
 
 
