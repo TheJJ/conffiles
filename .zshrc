@@ -7,6 +7,11 @@
 # it should run on any modern system,
 # and has no weird hardcoded things working on one device only.
 #
+# if you need special device-specific settings (env vars, functions, etc)
+# use shell files in $HOME/.config/profile/...
+#
+# custom programs can be placed in $HOME/bin/...
+#
 # features of this config:
 # * completion
 # * history
@@ -110,8 +115,9 @@ alias py3='p3'
 alias py2='p2'
 alias py='p3'
 alias p='py'
+alias ipy='ipython'
 alias pytrace='python3 -m trace -g -t'
-compdef py=python3 p3=python3 p=python3 p2=python2 py2=python2 pytrace=python3 2>/dev/null
+compdef py=python3 p3=python3 p=python3 p2=python2 py2=python2 pytrace=python3 ipy=ipython 2>/dev/null
 
 alias bpy='bpython'
 alias b='bpy'
@@ -359,6 +365,8 @@ alias git-die="git diff --word-diff-regex=. "
 
 # unix shadow password checking
 # - generate a new hash with random seed for given password
+# mksalt determines the algorithm: crypt.mksalt(crypt.METHOD_$x)
+# {'SHA512': '6', 'SHA256': '5', 'BLOWFISH': '2b', 'MD5': '1'}
 alias gencrypthash="python3 -c 'import crypt, getpass; print(crypt.crypt(getpass.getpass(\"passwd> \"), crypt.mksalt()))'"
 # - check hash (either via argv0 or input) against given password
 alias checkcrypthash="python3 -c 'import crypt, hmac, getpass, sys; hash=(sys.argv[1] if len(sys.argv) > 1 else input(\"hash> \")); k=(\"kay\" if hmac.compare_digest(crypt.crypt(getpass.getpass(\"passwd> \"), hash), hash) else \"no\"); print(k); exit(0 if k == \"kay\" else 1)'"
