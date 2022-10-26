@@ -797,21 +797,53 @@ the value is copied when setting up the sync."
                                     regexp-search-ring
                                     search-ring)) 'lazy-highlight))
 
-;; git-gutter+ doesn't properly handle tramp-connections
-;; https://github.com/nonsequitur/git-gutter-plus/issues/42
-(with-eval-after-load 'git-gutter+
-   (defun git-gutter+-remote-default-directory (dir file)
-     (let* ((vec (tramp-dissect-file-name file))
-            (method (tramp-file-name-method vec))
-            (user (tramp-file-name-user vec))
-            (domain (tramp-file-name-domain vec))
-            (host (tramp-file-name-host vec))
-            (port (tramp-file-name-port vec)))
-       (tramp-make-tramp-file-name method user domain host port dir)))
 
-   (defun git-gutter+-remote-file-path (dir file)
-     (let ((file (tramp-file-name-localname (tramp-dissect-file-name file))))
-       (replace-regexp-in-string (concat "\\`" dir) "" file))))
+(defun jj/org-renumber-environment (orig-func &rest args)
+  "track org-mode latex equation numbers so they are continuous.
+equations can get manual tags with \tag{$id}
+equation* and align* is not numbered.
+multiline equations with \\\n get separate numbers."
+  (let ((results '())
+        (counter -1)
+        (numberp))
+
+    (setq results
+          (cl-loop for (begin .  env) in
+                (org-element-map (org-element-parse-buffer) 'latex-environment
+                  (lambda (env)
+                    (cons
+                     (org-element-property :begin env)
+                     (org-element-property :value env))))
+                collect
+                (cond
+                 ((and (string-match "\\\\begin{equation}" env)
+                       (not (string-match "\\\\tag{" env)))
+                  (cl-incf counter)
+                  (cons begin counter))
+
+                 ((string-match "\\\\begin{align}" env)
+                  (prog2 (cl-incf counter) (cons begin counter)
+                    (with-temp-buffer
+                      (insert env)
+                      (goto-char (point-min))
+                      ;; equations with \\ on newlines are new ids
+                      (cl-incf counter (count-matches "\\\\$"))
+                      ;; skip them if marked with \nonumber
+                      (goto-char (point-min))
+                      (cl-decf counter (count-matches "\\nonumber")))))
+
+                 (t
+                  (cons begin nil)))))
+
+    (when (setq numberp (cdr (assoc (point) results)))
+      (setf (car args)
+            (concat
+             (format "\\setcounter{equation}{%s}\n" numberp)
+             (car args)))))
+
+  (apply orig-func args))
+
+(advice-add 'org-create-formula-image :around #'jj/org-renumber-environment)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
