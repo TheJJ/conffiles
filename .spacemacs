@@ -2011,6 +2011,10 @@ directories in themes/ and lisp/ are automatically added to the respective load-
 
                 (add-to-list (intern load-var) load-dir-path)))))))))
 
+(defun jj/backward-compat ()
+  "early injection and fixing of bugs"
+  ;; git-gutter checks this, but linum.el is no longer in >=emacs-29 it seems.
+  (defvar global-linum-mode nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; theming
@@ -2538,6 +2542,9 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
   ;; load external packages
   (jj/loadpath-discover)
+
+  ;; tweak and unbreak stuff
+  (jj/backward-compat)
 
   ;; mode hooks need to be in user-init since user-config is executed
   ;; after command-line-provided files' modes are initialized.
