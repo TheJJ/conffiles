@@ -1680,11 +1680,13 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (global-set-key (kbd "C-c C-a") #'mark-whole-buffer)
 
   ;; the best™ file chooser!!11
-  (use-package helm-for-files
-    :defer t
-    :init (progn
-            (global-set-key (kbd "C-x C-S-f") #'helm-for-files)
-            (spacemacs||set-helm-key "fF" helm-for-files)))
+  (with-eval-after-load 'helm-for-files
+    (global-set-key (kbd "C-x C-S-f") #'helm-for-files)
+    (spacemacs||set-helm-key "fF" helm-for-files))
+
+  (with-eval-after-load 'helm-files
+    ;; otherwise it would do helm-ff-run-toggle-auto-update wat
+    (define-key helm-find-files-map (kbd "C-<backspace>") nil))
 
   ;; open project/file/vc things
   (global-set-key (kbd "C-x b") #'helm-mini)
