@@ -1531,6 +1531,15 @@ from a change in by prefix-matching the current buffer's `default-directory`"
           (when (string-prefix-p cdir buffer-file-name)
             (reload-dir-locals-current-buffer)))))))
 
+(defun jj/projectsearch ()
+  "Search for something in the current project."
+  (interactive)
+  (cond ((executable-find "rg")
+         (call-interactively #'projectile-ripgrep))
+        ((executable-find "ag")
+         (call-interactively #'projectile-ag))
+        (t (call-interactively #'projectile-grep))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; set kaschtomaisd key bindings
@@ -1681,7 +1690,7 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (global-set-key (kbd "C-x b") #'helm-mini)
   (global-set-key (kbd "C-x p") #'helm-projectile)
   (global-set-key (kbd "C-x S-p") #'helm-projectile-switch-project)
-  (global-set-key (kbd "C-x C-p") #'projectile-ag)
+  (global-set-key (kbd "C-x C-p") #'jj/projectsearch)
 
   (global-set-key (kbd "C-x C-b") #'bs-show) ; buffer selector
   (global-set-key (kbd "C-x M-b") #'speedbar)
