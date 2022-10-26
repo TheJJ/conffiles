@@ -18,9 +18,9 @@ bindsym $mod+Return exec --no-startup-id kitty
 bindsym $mod+shift+Return exec --no-startup-id cool-retro-term
 
 # start something in PATH
-bindsym $mod+d exec rofi -show run
+bindsym $mod+d exec rofi -show run -show-icons
 # run .desktop files
-bindsym $mod+shift+d exec rofi -show drun
+bindsym $mod+shift+d exec rofi -show drun -show-icons
 
 bindsym control+grave exec dunstctl history-pop
 
