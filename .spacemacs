@@ -1090,7 +1090,8 @@ multiline equations with \\\n get separate numbers."
     (sync-variable 'citar-bibliography 'bibtex-completion-bibliography))
 
   (with-eval-after-load 'ispell
-    (setq ispell-program-name "hunspell"))
+    (setq ispell-program-name "hunspell"
+          ispell-dictionary "de_DE,en_US"))
 
   (use-package org-super-agenda
     :after org-agenda
