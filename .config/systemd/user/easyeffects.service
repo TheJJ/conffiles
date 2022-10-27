@@ -1,0 +1,10 @@
+[Unit]
+Description=easyeffects sound transformers
+BindsTo=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/easyeffects --gapplication-service
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target
