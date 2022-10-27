@@ -1,0 +1,10 @@
+[Unit]
+Description=xcompmgr
+BindsTo=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/xcompmgr
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target
