@@ -1016,7 +1016,8 @@ multiline equations with \\\n get separate numbers."
 
   (when (<= emacs-major-version 28)
     ;; on emacs 29, the scaling seems correct :)
-    (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0)))
+    (with-eval-after-load 'org
+      (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))))
 
   ;; don't persist clipboard accross sessions
   (delete 'kill-ring savehist-additional-variables)
