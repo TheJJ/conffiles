@@ -97,7 +97,6 @@ This function should only modify configuration layer settings."
      dap
      debug
      emacs-lisp
-     emoji
      major-modes  ;; qml-mode, openscad
      meson
      git
