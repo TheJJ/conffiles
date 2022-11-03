@@ -1080,9 +1080,14 @@ multiline equations with \\\n get separate numbers."
   (with-eval-after-load 'citar
     (sync-variable 'citar-bibliography 'bibtex-completion-bibliography))
 
+  ;; spell check. toggle with SPC-t-S, configure with SPC-S-...
   (with-eval-after-load 'ispell
-    (setq ispell-program-name "hunspell"
-          ispell-dictionary "de_DE,en_US"))
+    (setq ispell-program-name "hunspell")
+    (ispell-set-spellchecker-params)
+    (let ((dicts "de_DE,en_GB"))
+      ;; create a combo-dict
+      (ispell-hunspell-add-multi-dic dicts)
+      (setq ispell-local-dictionary dicts)))
 
   (use-package org-super-agenda
     :after org-agenda
