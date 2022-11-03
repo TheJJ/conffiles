@@ -45,12 +45,17 @@ export PAGER="less"
 
 # append cwd to java class path
 export CLASSPATH=.:$CLASSPATH
-# color gcc output
+
+# color gcc & cmake output
 export GCC_COLORS="yes"
+export CMAKE_COLOR_DIAGNOSTICS="ON"
+
 # silence funny gtk warnings
 export NO_AT_BRIDGE=1
+
 # global python pycache directory
 export PYTHONPYCACHEPREFIX=$HOME/.cache/python/
+
 # this will log all ssl key exchanges
 #export SSLKEYLOGFILE=$HOME/.ssl-log
 
