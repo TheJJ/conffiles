@@ -1010,6 +1010,8 @@ multiline equations with \\\n get separate numbers."
         lsp-signature-render-documentation t
         lsp-signature-doc-lines 1
         lsp-enable-snippet t
+        lsp-warn-no-matched-clients nil    ; don't warn if there's no lsp client.
+        dap-python-debugger 'debugpy
 
         company-minimum-prefix-length 1  ;; lsp does the lookup :)
         company-idle-delay 0.1)
