@@ -2443,6 +2443,12 @@ if __name__ == \"__main__\":
   (set-keyboard-coding-system 'utf-8)
   (set-selection-coding-system 'utf-8))
 
+(defun jj/sh-mode-hook ()
+  (setq-local
+   tab-width 4
+   sh-basic-offset 4
+   indent-tabs-mode nil))
+
 (defun jj/shell-mode-hook ()
   ;; correct zsh coloring in shell:
   (ansi-color-for-comint-mode-on))
@@ -2480,6 +2486,7 @@ if __name__ == \"__main__\":
   (add-hook 'yas-global-mode-hook        'jj/yas-hook)
   (add-hook 'doc-view-mode-hook          'auto-revert-mode)
   (add-hook 'server-visit-hook           'jj/emacs-server-visit-hook)
+  (add-hook 'sh-mode-hook                'jj/sh-mode-hook)
   (add-hook 'shell-mode-hook             'jj/shell-mode-hook)
   (add-hook 'eshell-mode-hook            'jj/eshell-mode-hook)
   (add-hook 'compilation-filter-hook
