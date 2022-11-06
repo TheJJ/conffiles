@@ -1221,7 +1221,10 @@ multiline equations with \\\n get separate numbers."
         whitespace-style '(face tabs trailing
                                 newline indentation
                                 space-before-tab space-after-tab
-                                space-mark tab-mark newline-mark lines-tail))
+                                space-mark tab-mark newline-mark lines-tail)
+        ;; emacs-builtin trailing space highlight
+        show-trailing-whitespace t)
+
   (global-whitespace-mode t))
 
 
@@ -1243,6 +1246,7 @@ multiline equations with \\\n get separate numbers."
         scrollbar-mode 'right
         auto-window-vscroll nil)
 
+  ;; so smooth!
   (when (>= emacs-major-version 29)
     (pixel-scroll-precision-mode t)
     ))
@@ -2457,6 +2461,10 @@ if __name__ == \"__main__\":
   (add-hook 'eshell-preoutput-filter-functions
             'ansi-color-filter-apply))
 
+(defun jj/artist-mode-hook ()
+  ;; disable whitespace highlighting as long as artist mode is active.
+  (setq show-trailing-whitespace (not artist-mode)))
+
 
 (defun jj/mode-hooks ()
   "hooks are registered here"
@@ -2489,6 +2497,7 @@ if __name__ == \"__main__\":
   (add-hook 'sh-mode-hook                'jj/sh-mode-hook)
   (add-hook 'shell-mode-hook             'jj/shell-mode-hook)
   (add-hook 'eshell-mode-hook            'jj/eshell-mode-hook)
+  (add-hook 'artist-mode-hook            'jj/artist-mode-hook)
   (add-hook 'compilation-filter-hook
             (lambda () (ansi-color-apply-on-region (point-min) (point-max))))
 
