@@ -29,6 +29,7 @@ import traceback
 
 from pathlib import Path
 from pprint import pprint, pformat
+from pydoc import doc, describe, locate
 from subprocess import call, run
 
 try:
@@ -68,6 +69,7 @@ if USE_PYGMENTS:
 
 
 def pager(txt):
+    # pydoc.getpager() may be better for some cases
     if not isinstance(txt, bytes):
         txt = txt.encode()
     subprocess.run(shlex.split(PAGER_INVOCATION) + ['-'], input=txt)
@@ -349,6 +351,8 @@ def _completion():
 def cororun(coro):
     """
     run the given coroutine and block until it's done
+    when we're in a coro already, we can't run the event loop again
+    except when continuing execution normally...
     """
     try:
         return asyncio.run(coro, debug=True)
