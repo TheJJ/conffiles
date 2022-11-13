@@ -78,6 +78,7 @@ set background=dark
 
 highlight SpecialKey ctermfg=darkblue
 highlight SpecialKey guifg=#808080
+highlight Search guibg=lightblue cterm=NONE ctermbg=lightblue
 
 if has('nvim')
 	" neovim SHAred DAta
