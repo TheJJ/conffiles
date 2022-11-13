@@ -131,7 +131,9 @@ alias watch='watch -c'
 
 alias emacsnw='emacs -nw'
 alias emacsopen="emacsclient -n"      # reuse frame
+alias eo=emacsopen
 alias emacsopennew="emacsclient -n -c"  # new frame
+alias eon=emacsopennew
 alias emacsterm='emacsclient --tty'   # connect in current tty
 alias emacscc="emacs -batch -no-site-file -f batch-byte-compile"  # compile some elisp file(s)
 alias indentemacs="emacs -batch -l ~/.emacs.d/init.el --eval '(batch-indent)'" # indent given files
