@@ -519,6 +519,7 @@ function tryping() {
 	local interval=1
 	local srv="$1"
 
+	echo -e "starting   $(date -Is)"
 	local i=0
 	while true; do
 		ping -q -W "$timeout" -c1 "$srv" > /dev/null
@@ -528,7 +529,7 @@ function tryping() {
 			echo -e "$srv is back!"
 			break;
 		fi
-		echo -en "\rtry $i "
+		printf "\rtry %3d at $(date -Is)" $i
 		sleep "$interval"
 		i=$((i + 1))
 	done
