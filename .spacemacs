@@ -184,6 +184,7 @@ This function should only modify configuration layer settings."
      deadgrep
      google-c-style
      idle-highlight-mode
+     org-modern
      org-roam-bibtex
      org-super-agenda
      pdf-tools
@@ -639,7 +640,7 @@ It should only modify the values of Spacemacs settings."
    ;; indent handling like has been reported for `go-mode'.
    ;; If it does deactivate it here.
    ;; (default t)
-   dotspacemacs-use-clean-aindent-mode nil
+   dotspacemacs-use-clean-aindent-mode t
 
    ;; Accept SPC as y for prompts if non-nil. (default nil)
    dotspacemacs-use-SPC-as-y nil
@@ -918,8 +919,9 @@ multiline equations with \\\n get separate numbers."
   (setq indicate-empty-lines t
         transient-mark-mode t
         package-native-compile nil       ; don't compile on install, instead on demand
-        native-comp-async-report-warnings-errors t
+        native-comp-async-report-warnings-errors 'silent
         warning-minimum-level :error
+        load-prefer-newer t              ; don't load older .elc files than .el
         gud-tooltip-mode t
         lazy-highlight t                 ; highlight occurrences
         lazy-highlight-cleanup nil       ; keep search term highlighted
@@ -945,7 +947,7 @@ multiline equations with \\\n get separate numbers."
         confirm-kill-emacs 'y-or-n-p     ; always ask when exiting
         password-cache-expiry nil        ; tramp password cache
         inhibit-compacting-font-caches t ; trade more memory with less lagging due to font compactions
-
+        isearch-wrap-function '(lambda nil)   ; no overwrapping in search
         desktop-restore-eager 3          ; other buffers are restored lazily
 
         ido-use-virtual-buffers t        ; use recentf-buffers as virtually "open"
@@ -1129,6 +1131,10 @@ multiline equations with \\\n get separate numbers."
             wl-x-face-file "~/.wl/xface"
             wl-address-file "~/.wl/addresses")))
 
+  ;; global modes
+  (global-auto-revert-mode t)
+  (setq global-auto-revert-non-file-buffers t
+        auto-revert-verbose nil)
 
   ;; default mode for new buffers
   (setq-default major-mode 'text-mode)
@@ -1179,6 +1185,10 @@ multiline equations with \\\n get separate numbers."
   ;; require a ending newline
   (setq require-final-newline t) ; 'query will ask
 
+  (when (>= emacs-major-version 29)
+    ;; only the emacs background is transparent then
+    (add-to-list 'default-frame-alist '(alpha-background . nil)))
+
   ;; display various non-editing buffers in their own frames
   (setq special-display-buffer-names
         (nconc '("*VC-log*" "*compilation*" "*grep*")
@@ -1186,12 +1196,6 @@ multiline equations with \\\n get separate numbers."
 
   ;; no tool bar for these buffers
   (add-to-list 'special-display-frame-alist '(tool-bar-lines . 0))
-
-  ;; don't echo passwords when using interactive terminal programs
-  (add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
-
-  ;; man pages with clickable links
-  (add-hook 'Man-mode-hook 'goto-address)
 
   ;; no shell path warning
   (setq exec-path-from-shell-check-startup-file nil)
@@ -1766,12 +1770,14 @@ from a change in by prefix-matching the current buffer's `default-directory`"
     :config
     (define-key treemacs-mode-map (kbd "C-c C-p e") #'treemacs-edit-workspaces))
 
+  ;; evil-state fixing
   ;; fix button klicking etc in various modes due to evil
   (evil-set-initial-state 'Custom-mode 'emacs)
   (evil-set-initial-state 'custom-new-theme-mode 'emacs)
   (evil-set-initial-state 'calendar-mode 'emacs)
   (evil-set-initial-state 'org-agenda-mode 'emacs)
   (evil-set-initial-state 'ebib-entry-mode 'emacs)
+  (evil-set-initial-state 'deadgrep-mode 'emacs)
 
   (fset 'yes-or-no-p 'y-or-n-p) ; yes/no answering without <RET>
 
@@ -2352,6 +2358,7 @@ if __name__ == \"__main__\":
 ;; org-mode
 (defun jj/org-mode-hook ()
   (visual-line-mode t)
+  (org-modern-mode t)
   (setq-local
     indent-tabs-mode nil))
 
@@ -2492,7 +2499,6 @@ if __name__ == \"__main__\":
   (add-hook 'compilation-mode-hook       'jj/compilation-mode-hook)
   (add-hook 'sql-mode-hook               'jj/sql-mode-hook)
   (add-hook 'yas-global-mode-hook        'jj/yas-hook)
-  (add-hook 'doc-view-mode-hook          'auto-revert-mode)
   (add-hook 'server-visit-hook           'jj/emacs-server-visit-hook)
   (add-hook 'sh-mode-hook                'jj/sh-mode-hook)
   (add-hook 'shell-mode-hook             'jj/shell-mode-hook)
@@ -2500,6 +2506,11 @@ if __name__ == \"__main__\":
   (add-hook 'artist-mode-hook            'jj/artist-mode-hook)
   (add-hook 'compilation-filter-hook
             (lambda () (ansi-color-apply-on-region (point-min) (point-max))))
+  ;; don't echo passwords when using interactive terminal programs
+  (add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
+  ;; man pages with clickable links
+  (add-hook 'Man-mode-hook 'goto-address)
+  (add-hook 'org-agenda-finalize-hook #'org-modern-agenda)
 
   ;; some modes don't inherit from prog-mode...
   (multi-hook-add
