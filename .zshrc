@@ -538,9 +538,9 @@ function tryping() {
 # ping the default gateway
 pingd () {
 	if [[ $# -eq 1 && $1 == "-6" ]]; then
-		ping -6 $(ip -6 route | awk '/^default via { print $3 }')
+		ping -6 "$(ip -6 -j route list match ::/0 | jq '.[0].gateway' -r)"
 	else
-		ping $(ip route | awk '/^default via/ { print $3 }')
+		ping "$(ip -j route list match 0.0.0.0/0 | jq '.[0].gateway' -r)"
 	fi
 }
 
