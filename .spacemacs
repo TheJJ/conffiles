@@ -985,7 +985,9 @@ multiline equations with \\\n get separate numbers."
         org-src-window-setup 'current-window ; edit in current window
         org-src-preserve-indentation t
         org-edit-src-content-indentation 0
-        org-latex-pdf-process '("xelatex -interaction nonstopmode %f" "xelatex -interaction nonstopmode %f")
+        org-latex-compiler "xelatex"
+        org-latex-pdf-process '("latexmk -f -%latex -interaction=nonstopmode -shell-escape -output-directory=%o %f")
+        org-latex-listings 'minted
         org-confirm-babel-evaluate nil   ; sure, just execute org code snippets, what can go wrong
         org-babel-default-header-args:cpp '((:flags . "-std=c++20 -Wall -Wextra"))
         org-log-done nil
@@ -1057,6 +1059,9 @@ multiline equations with \\\n get separate numbers."
   ;; (mailcap-mime-info (mailcap-extension-to-mime ".pdf"))
   (with-eval-after-load 'org
     (setcdr (assoc "\\.pdf\\'" org-file-apps) 'default))
+
+  (with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-packages-alist '("newfloat" "minted")))
 
   (with-eval-after-load 'mailcap
     (add-to-list 'mailcap-user-mime-data
@@ -2511,6 +2516,9 @@ if __name__ == \"__main__\":
   ;; man pages with clickable links
   (add-hook 'Man-mode-hook 'goto-address)
   (add-hook 'org-agenda-finalize-hook #'org-modern-agenda)
+
+  ;; tangle before exporting: https://orgmode.org/manual/Extracting-Source-Code.html
+  (add-hook 'org-export-before-processing-hook #'org-babel-tangle)
 
   ;; some modes don't inherit from prog-mode...
   (multi-hook-add
