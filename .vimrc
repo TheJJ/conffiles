@@ -76,9 +76,15 @@ endif
 " todo: detect terminal background (with t_RB?)
 set background=dark
 
-highlight SpecialKey ctermfg=darkblue
-highlight SpecialKey guifg=#808080
-highlight Search guibg=lightblue cterm=NONE ctermbg=lightblue
+" unprintable chars
+highlight SpecialKey ctermfg=darkblue guifg=#808080
+
+" last search pattern highlight (hlsearch)
+highlight Search guibg=lightblue ctermfg=0 ctermbg=lightblue
+" search pattern under cursor
+highlight CurSearch cterm=standout
+" incsearch highlighting (also for confirm-replace text)
+highlight IncSearch guibg=lightblue cterm=underline ctermfg=0 ctermbg=lightyellow
 
 if has('nvim')
 	" neovim SHAred DAta
