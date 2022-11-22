@@ -1713,12 +1713,6 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (global-set-key (kbd "C-x B") #'bury-buffer)
   (global-set-key (kbd "C-x E") #'apply-macro-to-region-lines)
   (global-set-key (kbd "C-x I") #'insert-buffer)
-  (global-set-key (kbd "C-c w") #'delete-region) ; ala C-w and M-C-w
-  (global-set-key (kbd "C-c c") #'comment-region)
-  (global-set-key (kbd "C-c u") #'uncomment-region)
-  (global-set-key (kbd "C-c n") #'next-error)
-  (global-set-key (kbd "C-c p") #'previous-error)
-
 
   ;; align the current region to = or whatever
   (global-set-key (kbd "M-A") #'align-current)
