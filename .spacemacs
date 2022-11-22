@@ -1699,9 +1699,8 @@ from a change in by prefix-matching the current buffer's `default-directory`"
 
   ;; open project/file/vc things
   (global-set-key (kbd "C-x b") #'helm-mini)
-  (global-set-key (kbd "C-x p") #'helm-projectile)
-  (global-set-key (kbd "C-x S-p") #'helm-projectile-switch-project)
-  (global-set-key (kbd "C-x C-p") #'jj/projectsearch)
+  (global-set-key (kbd "C-x p C-p") #'jj/projectsearch)
+  (global-set-key (kbd "C-x p /") #'jj/projectsearch)
 
   (global-set-key (kbd "C-x C-b") #'bs-show) ; buffer selector
   (global-set-key (kbd "C-x M-b") #'speedbar)
