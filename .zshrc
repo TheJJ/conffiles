@@ -263,17 +263,27 @@ if [[ -x $homebin/viml ]]; then
 	alias vim=viml
 fi
 
+## external tools
+# z -> jump to directory.
+# recommender system for directories through cd
+command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
 
-# conffiles management git stuff
+## conffiles management - the whole $HOME is a git repo :)
+# usual setup:
+# - clone conffiles git repo
+# - run bin/conffilesdeploy
+#
 # the git bare repo is in ~/.conffiles.git
 alias conffiles="git --work-tree=$HOME --git-dir=$HOME/.conffiles.git"
 compdef conffiles=git 2> /dev/null
+
+# clone and deploy conffiles from some git url
 function confclone() {
 	test -d "$HOME/.conffiles.git" && echo "you already have ~/.conffiles.git repo" && return
 	echo "cloning and deploying config files..."
 	# --separate-git-dir=$HOME/.conffiles.git
 	git clone $1 /tmp/conffiles-workdir  && \
-		/tmp/conffiles-workdir/conffilesdeploy
+		/tmp/conffiles-workdir/bin/conffilesdeploy
 }
 
 alias conffilestig="GIT_DIR=$HOME/.conffiles.git tig"
