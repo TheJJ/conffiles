@@ -66,13 +66,9 @@ set list listchars=tab:╺╴,trail:·,extends:→,precedes:←
 
 " not totally crappy themes: elflord, ron, desert, murphy, slate, koehler
 
-" vim broke the ron colorscheme https://github.com/vim/vim/issues/10449
+" vim and neovim broke the ron colorscheme https://github.com/vim/vim/issues/10449
 " now "default" looks like "ron".
-if has('nvim')
-	colorscheme ron
-else
-	colorscheme default
-endif
+colorscheme default
 " todo: detect terminal background (with t_RB?)
 set background=dark
 
