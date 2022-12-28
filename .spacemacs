@@ -775,6 +775,16 @@ the value is copied when setting up the sync."
     (funcall updatefunc nil (symbol-value sourcevar) nil nil)))
 
 
+(defun display-dpi ()
+  "return the display dpi, but xorg lies to us and reports 96 dpi,
+because of 35af1299e73483eaf93d913a960e1d1738bc7de6"
+  (let ((pixel-width (display-pixel-width))
+        (mm-width (display-mm-width)))
+    (if (and pixel-width mm-width)
+      (round (/ pixel-width (/ mm-width 25.4)))
+      96)))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; advices
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
