@@ -83,8 +83,9 @@ This function should only modify configuration layer settings."
                       auto-completion-enable-snippets-in-popup t
                       auto-completion-enable-sort-by-usage t
                       auto-completion-enable-help-tooltip nil
-                      ;; tui/gui switch + color fix needed:
-                      auto-completion-use-company-box nil)
+                      auto-completion-use-company-box nil
+                      auto-completion-use-company-posframe t
+                      company-posframe-quickhelp-delay 0.6)
      better-defaults
      (bibtex :variables
              bibtex-enable-ebib-support t)
