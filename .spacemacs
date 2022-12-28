@@ -196,20 +196,9 @@ This function should only modify configuration layer settings."
      rainbow-mode
      ripgrep
      )
+
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
-
-   ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages
-   '(
-     auto-complete
-     auto-highlight-symbol
-     helm-company  ;; so C-/ is not mapped to it when completing...
-     importmagic
-     ox-pandoc
-     sqlup-mode
-     wolfram-mode
-     )
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
@@ -218,7 +207,21 @@ This function should only modify configuration layer settings."
    ;; installs only the used packages but won't delete unused ones. `all'
    ;; installs *all* packages supported by Spacemacs and never uninstalls them.
    ;; (default is `used-only')
-   dotspacemacs-install-packages 'used-only))
+   dotspacemacs-install-packages 'used-only)
+
+  ;; A list of packages that will not be installed and loaded.
+  ;; we can also set this in device specific configs for development.
+  (append-to-list
+   'dotspacemacs-excluded-packages
+   '(
+     auto-complete
+     auto-highlight-symbol
+     helm-company  ;; so C-/ is not mapped to it when completing...
+     importmagic
+     ox-pandoc
+     sqlup-mode
+     wolfram-mode
+     )))
 
 (defun dotspacemacs/init ()
   "Initialization:
@@ -773,6 +776,19 @@ the value is copied when setting up the sync."
     (add-variable-watcher sourcevar updatefunc)
     ;; call for initial update
     (funcall updatefunc nil (symbol-value sourcevar) nil nil)))
+
+
+(defun append-to-list (list-var elements)
+  "Append ELEMENTS to the end of LIST-VAR.
+
+The return value is the new value of LIST-VAR."
+  (unless (consp elements)
+    (error "ELEMENTS must be a list"))
+  (let ((list (symbol-value list-var)))
+    (if list
+        (setcdr (last list) elements)
+      (set list-var elements)))
+  (symbol-value list-var))
 
 
 (defun display-dpi ()
@@ -2557,11 +2573,10 @@ if __name__ == \"__main__\":
      haskell-mode-hook))
   )
 
-(defun jj/load-device-settings ()
-  "include device-specific configuration"
-  (interactive)
-
-  (let ((device-config (locate-user-emacs-file "device.el")))
+(defun jj/load-device-settings (pre-layers)
+  "include device-specific configuration.
+pre-layers says if we want to load the pre-layer-init config variant"
+  (let ((device-config (locate-user-emacs-file (if pre-layers "device-pre.el" "device.el"))))
     (when (file-exists-p device-config)
       (load-file device-config))))
 
@@ -2602,6 +2617,9 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; load external packages
   (jj/loadpath-discover)
 
+  ;; load device settings before layer init
+  (jj/load-device-settings t)
+
   ;; tweak and unbreak stuff
   (jj/backward-compat)
 
@@ -2632,7 +2650,7 @@ before packages are loaded."
   (jj/scrolling)
   (jj/keybindings)
 
-  (jj/load-device-settings)
+  (jj/load-device-settings nil)
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
