@@ -148,6 +148,8 @@ This function should only modify configuration layer settings."
      shell-scripts
      (spacemacs-editing :variables
                         vim-style-enable-undo-region t)
+     spacemacs-project
+     spacemacs-purpose
      (spell-checking :variables
                      spell-checking-enable-by-default nil
                      spell-checking-enable-auto-dictionary t
@@ -159,8 +161,10 @@ This function should only modify configuration layer settings."
                       syntax-checking-enable-tooltips t)
      theming
      (treemacs :variables
+               treemacs-use-scope-type 'Perspectives
+               treemacs-use-git-mode 'deferred
                treemacs-use-follow-mode nil
-               treemacs-use-filewatch-mode t
+               treemacs-project-follow-mode t
                treemacs-collapse-dirs 3)
      typescript
      version-control
@@ -1021,10 +1025,10 @@ multiline equations with \\\n get separate numbers."
         company-minimum-prefix-length 1  ;; lsp does the lookup :)
         company-idle-delay 0.1)
 
-  (when (<= emacs-major-version 28)
-    ;; on emacs 29, the scaling seems correct :)
-    (with-eval-after-load 'org
-      (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))))
+  ;; TODO: scale according to display dpi and zoom!
+  ;;       i.e. Xft.dpi/96 * zoomfactor
+  (with-eval-after-load 'org
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5)))
 
   ;; don't persist clipboard accross sessions
   (delete 'kill-ring savehist-additional-variables)
@@ -1040,7 +1044,10 @@ multiline equations with \\\n get separate numbers."
      (make-lsp-client :new-connection (lsp-tramp-connection "pylsp")
                       :major-modes '(python-mode)
                       :remote? t
-                      :server-id 'pylsp-remote)))
+                      :server-id 'pylsp-remote))
+    (with-eval-after-load 'treemacs
+      (add-hook 'lsp-after-initialize-hook (lambda () (lsp-treemacs-sync-mode t))))
+    )
 
   ;; undo-tree with region-specific undos
   (with-eval-after-load 'undo-tree
@@ -1052,6 +1059,22 @@ multiline equations with \\\n get separate numbers."
   (with-eval-after-load 'mmm-mode
     ;; automatic sub-mode parsing
     (setq mmm-parse-when-idle t))
+
+  (with-eval-after-load 'treemacs
+    (setq treemacs-project-follow-cleanup t
+          treemacs-follow-after-init t
+          treemacs-width 30)
+    (defun jj/treemacs-ignore-file-predicate (file _)
+      (or (string= file ".gitignore")
+          (string-suffix-p ".pyc" file)
+          (string= file "__pycache__")
+          (string-prefix-p ".cache" file)))
+    (push #'jj/treemacs-ignore-file-predicate treemacs-ignored-file-predicates))
+
+  (with-eval-after-load 'desktop
+    ;; don't record posframe frames in desktop capture
+    (push '(company-posframe-mode . nil)
+          desktop-minor-mode-table))
 
   ;; tame org-open-file, which uses org-file-apps, and finally mailcap.el
   ;; to determine how to open pdf files
@@ -1148,9 +1171,6 @@ multiline equations with \\\n get separate numbers."
 
   ;; don't enable auto-newline mode (c-toggle-auto-newline)
   (remove-hook 'c-mode-common-hook 'spacemacs//c-toggle-auto-newline)
-
-  ;; indentation defaults
-  (setq-default whitespace-line-column 400)
 
   ;; hide modeline indicators
   (spacemacs|diminish anaconda-mode)
@@ -2217,8 +2237,7 @@ if __name__ == \"__main__\":
   (setq-local
     python-indent 4
     indent-tabs-mode nil
-    tab-width 4
-    whitespace-line-column 79)
+    tab-width 4)
 
   (setq flycheck-checker 'python-pylint
         flycheck-checker-error-threshold 300)
@@ -2366,8 +2385,7 @@ if __name__ == \"__main__\":
   (setq-local
     indent-tabs-mode nil
     markdown-toc-indentation-space 2
-    markdown-toc-header-toc-start "<!-- markdown-toc start -->"
-    whitespace-line-column 400))
+    markdown-toc-header-toc-start "<!-- markdown-toc start -->"))
 
 (defun jj/cmake-mode-hook ()
   (setq-local
@@ -2513,6 +2531,12 @@ if __name__ == \"__main__\":
 
   ;; tangle before exporting: https://orgmode.org/manual/Extracting-Source-Code.html
   (add-hook 'org-export-before-processing-hook #'org-babel-tangle)
+
+  ;; sync treemacs with projectile
+  ;; TODO: patch projectile to run this hook after
+  ;;       a file from a different project is opened?
+  (add-hook 'projectile-after-switch-project-hook
+            'treemacs-display-current-project-exclusively)
 
   ;; some modes don't inherit from prog-mode...
   (multi-hook-add
