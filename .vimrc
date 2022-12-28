@@ -233,9 +233,6 @@ cmap wt8 cal WhitespaceTab(8)
 " default indentation scheme
 call WhitespaceSpace(4)
 
-" linux code only aligns properly with 8-sized tabs
-autocmd BufRead /usr/src/linux* call WhitespaceTab(8)
-
 " language-specific stuff
 autocmd FileType python setlocal expandtab
 autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
