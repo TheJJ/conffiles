@@ -46,9 +46,7 @@ openbox)
     command="openbox-session"
     ;;
 i3|"")
-    #feh --bg-fill/scale /path/to/image &
-    xsetroot -solid black
-    xsetroot -bg black
+    unset I3SOCK
     command="i3"
     ;;
 *)
