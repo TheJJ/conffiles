@@ -975,6 +975,7 @@ multiline equations with \\\n get separate numbers."
         compilation-environment (quote ("TERM=xterm-256color"))
         recentf-max-saved-items 1000
         idle-highlight-idle-time 0.2
+        idle-highlight-visible-buffers t
         confirm-kill-emacs 'y-or-n-p     ; always ask when exiting
         password-cache-expiry nil        ; tramp password cache
         inhibit-compacting-font-caches t ; trade more memory with less lagging due to font compactions
