@@ -2516,6 +2516,11 @@ if __name__ == \"__main__\":
   ;; disable whitespace highlighting as long as artist mode is active.
   (setq show-trailing-whitespace (not artist-mode)))
 
+(defun jj/magit-log-mode-hook ()
+  ;; git log outputs some interesting whitespace errors
+  (whitespace-mode nil)
+  (setq show-trailing-whitespace nil))
+
 
 (defun jj/mode-hooks ()
   "hooks are registered here"
@@ -2548,6 +2553,7 @@ if __name__ == \"__main__\":
   (add-hook 'shell-mode-hook             'jj/shell-mode-hook)
   (add-hook 'eshell-mode-hook            'jj/eshell-mode-hook)
   (add-hook 'artist-mode-hook            'jj/artist-mode-hook)
+  (add-hook 'magit-log-mode-hook         'jj/magit-log-mode-hook)
   (add-hook 'compilation-filter-hook
             (lambda () (ansi-color-apply-on-region (point-min) (point-max))))
   ;; don't echo passwords when using interactive terminal programs
