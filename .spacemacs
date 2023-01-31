@@ -2528,10 +2528,13 @@ if __name__ == \"__main__\":
     sql-product 'postgres)
 
   ;; customize indentation - very simple basic-offset based indents
+  ;; see current line analysis with sqlind-show-syntax-of-line
   (setq
    sqlind-indentation-offsets-alist
    `((select-clause 0)
      (in-select-clause +)
+     (select-join-condition +)
+     (select-table-continuation +)
      (delete-clause 0)
      (in-delete-clause +)
      (update-clause 0)
@@ -2539,6 +2542,7 @@ if __name__ == \"__main__\":
      (insert-clause 0)
      (in-insert-clause +)
      (in-begin-block jj/sql-indent-begin-block)
+     (with-clause-cte-cont 0)
      ,@sqlind-default-indentation-offsets-alist))
 
   ;; TODO: detect psql prompt, or disable custom prompt
