@@ -148,7 +148,6 @@ compdef gdbs=gdb 2>/dev/null
 alias gdbc='gdb -q -ex "target remote localhost:8888"'
 alias gdbcx64='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remote localhost:8888"'
 alias bc='bc -q -l'
-(( $ON_LINUX )) && alias cp='cp --reflink=auto'
 alias grep='grep --color=auto'
 alias rg='rg -S'
 alias ip='ip --color'
