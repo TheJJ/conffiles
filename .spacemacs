@@ -801,6 +801,33 @@ because of 35af1299e73483eaf93d913a960e1d1738bc7de6"
       96)))
 
 
+(defun list-index (item list)
+  "Get zero-indexed offset of ITEM in LIST, or nil if absent."
+  (catch 'nth-elt
+    (cl-loop for idx from 0
+          for elem in list
+          do (when (equal item elem)
+               (throw 'nth-elt idx)))
+    nil))
+
+
+(defun double-list-index (item doublelist)
+  "Get zero-indexed offset of ITEM in the outer DOUBLELIST of lists, or nil if absent.
+Example (double-list-index 5 '(1 (2 3) (4 5) 6)) == 2
+"
+  (catch 'nth-elt
+    (cl-loop for idx from 0
+          for elem in doublelist
+          do
+          (cond ((listp elem)
+                 (let ((inneridx (list-index item elem)))
+                   (when inneridx
+                     (throw 'nth-elt idx))))
+                (t
+                 (when (equal item elem)
+                   (throw 'nth-elt idx)))))
+    nil))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; advices
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -864,6 +891,48 @@ multiline equations with \\\n get separate numbers."
   (apply orig-func args))
 
 (advice-add 'org-create-formula-image :around #'jj/org-renumber-environment)
+
+
+(defvar helm-fileext-priority
+  '("py" ("cpp" "c" "h" "hpp") ("org" "tex" "md") "pdf")
+  "Priority of file extensions to show for file selections.
+Groups have the same priority.")
+
+;;;; helm find file sorting by extension, and preferred ones..
+(defun jj/sort-dir-contents (dir-contents)
+  "sort the input list by file extension priority"
+  (let* ((priolist helm-fileext-priority)
+         (leastprio (length priolist))
+         (priolookup (lambda (ext) (or (double-list-index ext priolist) leastprio))))
+    (pcase helm-ff-initial-sort-method
+      ;; if the sort method is by extension
+      ('ext
+       (let-alist (seq-group-by #'file-directory-p dir-contents)
+         (nconc
+          .t                            ; folders
+          (sort
+           .nil                         ; files
+           (lambda (fa fb)                   ; file comparison
+             (let ((exta (or (file-name-extension fa) ""))
+                   (extb (or (file-name-extension fb) ""))
+                   (basea (or (file-name-sans-extension fa) ""))
+                   (baseb (or (file-name-sans-extension fb) "")))
+               (cond
+                 ;; extensions are equal, sort filename by name.
+                 ((string= exta extb)
+                  (string< fa fb))
+                 ;; look up extension priority and sort by it.
+                 (t (let ((exta-prio (funcall priolookup exta))
+                          (extb-prio (funcall priolookup extb)))
+                      (if (= exta-prio extb-prio)
+                          (string< basea baseb)
+                        (< exta-prio extb-prio)))))))))))
+      ;; all other helm sort methods
+      (_ dir-contents))))
+
+;; to test: (jj/sort-dir-contents '("A.aux" "A.tex" "A.cpp" "B.aux" "B.tex" "B.cpp"))
+
+(advice-add 'helm-list-directory :filter-return #'jj/sort-dir-contents)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -991,6 +1060,7 @@ multiline equations with \\\n get separate numbers."
         helm-adaptive-history-file (locate-user-emacs-file ".cache/helm-adaptive-history")
         helm-adaptive-history-length 200
         helm-ff-file-name-history-use-recentf nil  ; don't use recentf for helm find files
+        helm-ff-initial-sort-method 'ext           ; sort by extension, advised for priority and name sorting
 
         custom-unlispify-tag-names nil   ; view variable names in custom-mode
 
