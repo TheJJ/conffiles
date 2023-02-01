@@ -54,7 +54,7 @@ bindcode control+shift+232 exec xbacklight -dec 1
 bindcode control+shift+233 exec xbacklight -inc 1
 
 # lock & suspend
-bindsym $mod+shift+o exec ~/bin/screenlock && systemctl suspend
+bindsym $mod+shift+o exec ~/bin/screenlock --suspend
 # lock
 bindsym $mod+u exec ~/bin/screenlock
 bindsym $mod+shift+u exec xtrlock

@@ -1,25 +1,50 @@
-#!/bin/bash
+#!/usr/bin/env python3
 
-# lock the screen with i3lock
-# optionally display a lockscreen image if it exists
+"""
+lock the screen with i3lock
+optionally display a lockscreen image if it exists
+"""
 
-set -e
+import argparse
+import subprocess
+from pathlib import Path
 
-lockimage="$HOME/.config/lockscreen/1.png"
 
-# with xcompmgr, dunst actually overlays i3lock.
-# so we need to pause dunst.
-dunst_state=$(systemctl --user is-active dunst.service)
-function dunst_ctrl() {
-    return $(test "$dunst_state" == "active")
-}
+def main():
+    """
+    entry point
+    """
+    cli = argparse.ArgumentParser(description='lockscreen with i3')
+    cli.add_argument('--suspend', action="store_true")
+    args = cli.parse_args()
 
-dunst_ctrl && dunstctl set-paused true
+    lockimage = Path("~/.config/lockscreen/1.png").expanduser()
 
-if [[ -r "$lockimage" ]]; then
-    i3lock -n -c 000000 -i "$lockimage" -f
-else
-    i3lock -n -c 000000 -f
-fi
+    # with xcompmgr, dunst actually overlays i3lock.
+    # so we need to pause dunst.
+    dunst_state = subprocess.run(
+        ["systemctl", "--user", "is-active", "dunst.service"],
+        capture_output=True,
+    )
 
-dunst_ctrl && dunstctl set-paused false
+    dunst_active = dunst_state.returncode == 0 and dunst_state.stdout == b"active"
+
+    if dunst_active:
+        subprocess.check_call(["dunstctl", "set-paused", "true"])
+
+    lock_invocation = ["i3lock", "-n", "-c", "000000", "-f"]
+    if lockimage.is_file():
+        lock_invocation.extend(["-i", lockimage])
+
+    lockproc = subprocess.Popen(lock_invocation)
+
+    if args.suspend:
+        subprocess.check_call(["systemctl", "suspend"])
+
+    lockproc.wait()
+
+    if dunst_active:
+        subprocess.check_call(["dunstctl", "set-paused", "false"])
+
+if __name__ == "__main__":
+    main()
