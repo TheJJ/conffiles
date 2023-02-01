@@ -3,10 +3,23 @@
 # lock the screen with i3lock
 # optionally display a lockscreen image if it exists
 
+set -e
+
 lockimage="$HOME/.config/lockscreen/1.png"
 
+# with xcompmgr, dunst actually overlays i3lock.
+# so we need to pause dunst.
+dunst_state=$(systemctl --user is-active dunst.service)
+function dunst_ctrl() {
+    return $(test "$dunst_state" == "active")
+}
+
+dunst_ctrl && dunstctl set-paused true
+
 if [[ -r "$lockimage" ]]; then
-    i3lock -c 000000 -i "$lockimage" -f
+    i3lock -n -c 000000 -i "$lockimage" -f
 else
-    i3lock -c 000000 -f
+    i3lock -n -c 000000 -f
 fi
+
+dunst_ctrl && dunstctl set-paused false
