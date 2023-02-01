@@ -1,0 +1,5 @@
+[Unit]
+Description=perform updates in the org repo
+
+[Service]
+ExecStart=%h/bin/org-repo-update

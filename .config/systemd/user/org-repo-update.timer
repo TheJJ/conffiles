@@ -1,0 +1,11 @@
+[Unit]
+Description=trigger the org repo update
+ConditionPathExists=%h/org
+
+[Timer]
+OnCalendar=hourly
+AccuracySec=1m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
