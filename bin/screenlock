@@ -27,7 +27,7 @@ def main():
         capture_output=True,
     )
 
-    dunst_active = dunst_state.returncode == 0 and dunst_state.stdout == b"active"
+    dunst_active = dunst_state.returncode == 0 and dunst_state.stdout.strip() == b"active"
 
     if dunst_active:
         subprocess.check_call(["dunstctl", "set-paused", "true"])
