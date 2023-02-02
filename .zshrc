@@ -265,6 +265,7 @@ fi
 ## external tools
 # z -> jump to directory.
 # recommender system for directories through cd
+# stores stuff in ~/.local/share/zoxide/db.zo
 command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
 
 ## conffiles management - the whole $HOME is a git repo :)
@@ -637,12 +638,6 @@ function catchain() {
 	openssl crl2pkcs7 -nocrl -certfile $bundle | openssl pkcs7 -print_certs -noout $@
 }
 
-
-function pytest() {
-	env python3 - <<-'EOF'
-		print("rofl")
-	EOF
-}
 
 # show the zsh completion file origin
 function completionfile() {
