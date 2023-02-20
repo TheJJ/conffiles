@@ -828,6 +828,18 @@ Example (double-list-index 5 '(1 (2 3) (4 5) 6)) == 2
                    (throw 'nth-elt idx)))))
     nil))
 
+
+(defun whitespace-tail-disable ()
+  "disable whitespace-mode's long line highlighting"
+  ;; whitespace-highlight may not be initialized yet, thus handle both cases..
+  (let ((no-lines-tail (lambda ()
+                         (setq whitespace-style (delete 'lines-tail whitespace-style)))))
+    (if (boundp 'whitespace-style)
+      (funcall no-lines-tail)
+      (progn
+        (add-hook 'global-whitespace-mode-hook no-lines-tail)))))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; advices
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1142,9 +1154,9 @@ Groups have the same priority.")
                       :major-modes '(python-mode)
                       :remote? t
                       :server-id 'pylsp-remote))
+    ;; update treemacs folders from lsp
     (with-eval-after-load 'treemacs
-      (add-hook 'lsp-after-initialize-hook (lambda () (lsp-treemacs-sync-mode t))))
-    )
+      (add-hook 'lsp-workspace-folders-changed-functions #'lsp-treemacs--sync-folders)))
 
   ;; undo-tree with region-specific undos
   (with-eval-after-load 'undo-tree
@@ -1207,6 +1219,8 @@ Groups have the same priority.")
     (sync-variable 'ebib-preload-bib-files 'bibtex-completion-bibliography))
   (with-eval-after-load 'citar
     (sync-variable 'citar-bibliography 'bibtex-completion-bibliography))
+  (with-eval-after-load 'whitespace-mode
+    (sync-variable 'whitespace-line-column 'fill-column))
 
   ;; spell check. toggle with SPC-t-S, configure with SPC-S-...
   (with-eval-after-load 'ispell
@@ -2364,6 +2378,8 @@ if __name__ == \"__main__\":
     indent-tabs-mode nil
     tab-width 8)
 
+  (whitespace-tail-disable)
+
   ;; so plists and other things are properly indented
   (setq lisp-indent-function 'common-lisp-indent-function)
   (put 'cl-flet 'common-lisp-indent-function
@@ -2402,21 +2418,17 @@ if __name__ == \"__main__\":
   ;; (i.e. use values != n*tab-width)
   (setq-local
     tab-width 4
-    fill-column 76
+    fill-column 80
     LaTeX-indent-level 4
     LaTeX-item-indent 0
     indent-tabs-mode nil
 
-    company-minimum-prefix-length 2) ;; so completes start with 2 chars already
+    ;; disable indenting after paste
+    spacemacs-yank-indent-threshold 0
+    ;; so completes start with 2 chars already
+    company-minimum-prefix-length 2)
 
-  ;; don't highlight long lines
-  ;; whitespace-highlight may not be initialized yet, thus handle both cases..
-  (let ((no-lines-tail (lambda ()
-                          (setq whitespace-style (delete 'lines-tail whitespace-style)))))
-    (if (boundp 'whitespace-style)
-      (funcall no-lines-tail)
-      (progn
-        (add-hook 'global-whitespace-mode-hook no-lines-tail))))
+  (whitespace-tail-disable)
 
   ;; other settings are in jj/defaults
   (setq-default TeX-master nil) ; query for master file
@@ -2474,6 +2486,8 @@ if __name__ == \"__main__\":
 (defun jj/org-mode-hook ()
   (visual-line-mode t)
   (org-modern-mode t)
+  (whitespace-tail-disable)
+
   (setq-local
     indent-tabs-mode nil))
 
@@ -2482,7 +2496,9 @@ if __name__ == \"__main__\":
   (setq-local
     indent-tabs-mode nil
     markdown-toc-indentation-space 2
-    markdown-toc-header-toc-start "<!-- markdown-toc start -->"))
+    markdown-toc-header-toc-start "<!-- markdown-toc start -->")
+
+  (whitespace-tail-disable))
 
 (defun jj/cmake-mode-hook ()
   (setq-local
@@ -2576,7 +2592,7 @@ if __name__ == \"__main__\":
   (setq-local
    tab-width 4
    sh-basic-offset 4
-   indent-tabs-mode nil))
+   indent-tabs-mode -1))
 
 (defun jj/shell-mode-hook ()
   ;; correct zsh coloring in shell:
@@ -2592,7 +2608,7 @@ if __name__ == \"__main__\":
 
 (defun jj/magit-log-mode-hook ()
   ;; git log outputs some interesting whitespace errors
-  (whitespace-mode nil)
+  (whitespace-mode -1)
   (setq show-trailing-whitespace nil))
 
 
@@ -2638,12 +2654,6 @@ if __name__ == \"__main__\":
 
   ;; tangle before exporting: https://orgmode.org/manual/Extracting-Source-Code.html
   (add-hook 'org-export-before-processing-hook #'org-babel-tangle)
-
-  ;; sync treemacs with projectile
-  ;; TODO: patch projectile to run this hook after
-  ;;       a file from a different project is opened?
-  (add-hook 'projectile-after-switch-project-hook
-            'treemacs-display-current-project-exclusively)
 
   ;; some modes don't inherit from prog-mode...
   (multi-hook-add
@@ -2692,8 +2702,8 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; https://github.com/Somelauw/evil-org-mode/issues/93
   ;; https://github.com/syl20bnr/spacemacs/issues/15123
   (when (not (boundp 'evil-redirect-digit-argument))
-  (defmacro evil-redirect-digit-argument (map keys target)
-     `(define-key ,map ,keys ,target)))
+    (defmacro evil-redirect-digit-argument (map keys target)
+      `(define-key ,map ,keys ,target)))
 
   ;; load external packages
   (jj/loadpath-discover)
