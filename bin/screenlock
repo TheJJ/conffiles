@@ -7,7 +7,11 @@ optionally display a lockscreen image if it exists
 
 import argparse
 import subprocess
+import shlex
 from pathlib import Path
+
+def run(args):
+    subprocess.check_call(shlex.split(args))
 
 
 def main():
@@ -30,7 +34,7 @@ def main():
     dunst_active = dunst_state.returncode == 0 and dunst_state.stdout.strip() == b"active"
 
     if dunst_active:
-        subprocess.check_call(["dunstctl", "set-paused", "true"])
+        run("dunstctl set-paused true")
 
     lock_invocation = ["i3lock", "-n", "-c", "000000", "-f"]
     if lockimage.is_file():
@@ -39,12 +43,12 @@ def main():
     lockproc = subprocess.Popen(lock_invocation)
 
     if args.suspend:
-        subprocess.check_call(["systemctl", "suspend"])
+        run("systemctl suspend")
 
     lockproc.wait()
 
     if dunst_active:
-        subprocess.check_call(["dunstctl", "set-paused", "false"])
+        run("dunstctl set-paused false")
 
 if __name__ == "__main__":
     main()
