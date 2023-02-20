@@ -31,6 +31,8 @@ def main():
                      help="compile the .pyx as a .so module")
     cmd.add_argument('-o', '--output', help="output filename")
     cmd.add_argument('-c', '--cxxflags', default=os.environ.get("CXXFLAGS", ""))
+    cmd.add_argument('--cxx', default=os.environ.get("CXX", "c++"))
+    cmd.add_argument('-O', '--optimize', choices=["0", "1", "2", "3", "g"])
     cmd.add_argument("-v", "--verbose", action="count", default=0,
                      help="increase program verbosity")
     cmd.add_argument("-q", "--quiet", action="count", default=0,
@@ -79,14 +81,18 @@ def cyrun(args):
     with tempfile.TemporaryDirectory() as tmpdirname:
         tmpdir = pathlib.Path(tmpdirname)
         codepath = tmpdir / pyxpath.with_suffix('.cpp').name
-        cyinvoc = ["cython", "-3", "--cplus", "--line-directives", "-Wextra"]
+        if shutil.which("cython3"):
+            cython = "cython3"
+        else:
+            cython = "cython"
+        cyinvoc = [cython, "-3", "--cplus", "--line-directives", "-Wextra"]
         if not args.module:
             cyinvoc.append("--embed")
         if args.annotate:
             cyinvoc.append("--annotate")
 
         cyinvoc.extend(["-o", str(codepath), str(pyxpath)])
-        logging.info("$ %s", " ".join(cyinvoc))
+        logging.info("$ %s", shlex.join(cyinvoc))
         if subprocess.run(cyinvoc).returncode != 0:
             print("cython compilation failed")
             sys.exit(1)
@@ -99,18 +105,24 @@ def cyrun(args):
             shutil.copy(str(codepath), str(outpath.with_suffix('.cpp')))
 
         exepath = tmpdir / pyxpath.stem
-        gccinvoc = [os.environ.get("CXX", 'g++')]
+        gccinvoc = [args.cxx]
+        if shutil.which("python3-config"):
+            pycfg = "python3-config"
+        else:
+            pycfg = "python-config"
         gccinvoc.extend(shlex.split(subprocess.check_output(
-            ["python-config", "--libs", "--includes", "--cflags", "--ldflags"]
+            [pycfg, "--cflags", "--ldflags"]
             + (["--embed"] if not args.module else [])
         ).decode()))
+        if args.optimize:
+            gccinvoc.append(f"-O{args.optimize}")
         if args.cxxflags:
             gccinvoc.append(args.cxxflags)
         if args.module:
             gccinvoc.extend(["-fPIC", "-shared"])
         gccinvoc.extend(["-o", str(exepath), str(codepath)])
 
-        logging.info("$ %s", " ".join(gccinvoc))
+        logging.info("$ %s", shlex.join(gccinvoc))
 
         if subprocess.run(gccinvoc).returncode != 0:
             print("failed gcc compilation")
@@ -125,7 +137,7 @@ def cyrun(args):
 
         if not (args.norun or args.module):
             run_invoc = [str(exepath)] + args.pyargs
-            logging.info("$ %s", ' '.join(run_invoc))
+            logging.info("$ %s", shlex.join(run_invoc))
             sys.exit(subprocess.run(run_invoc).returncode)
 
 
