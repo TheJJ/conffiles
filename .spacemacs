@@ -37,9 +37,6 @@
 ;;   - bibtex-completion-library-path  (where are pdfs)
 ;;   => to edit notes of bibtex entries, use M-x helm-bibtex <search> C-z F8
 ;;
-;; ====
-;; configuration todos:
-;; * helm-M-x should display documentation of functions/variables, ivy does that
 
 
 (defun dotspacemacs/layers ()
@@ -94,6 +91,7 @@ This function should only modify configuration layer settings."
             c-c++-backend 'lsp-clangd)
      (cmake :variables
             cmake-enable-cmake-ide-support nil)
+     compleseus
      csv
      dap
      debug
@@ -108,8 +106,8 @@ This function should only modify configuration layer settings."
             gtags-enable-by-default nil)
      (haskell :variables
               haskell-completion-backend 'intero)
-     (helm :variables
-           helm-enable-auto-resize nil)
+     ;(helm :variables
+     ;      helm-enable-auto-resize nil)
      helpful
      html
      java
@@ -159,6 +157,7 @@ This function should only modify configuration layer settings."
      (syntax-checking :variables
                       syntax-checking-enable-by-default nil
                       syntax-checking-enable-tooltips t)
+     tabs
      theming
      (treemacs :variables
                treemacs-use-scope-type 'Perspectives
@@ -1820,7 +1819,7 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (global-set-key (kbd "<C-return>") #'newline)
   (global-set-key (kbd "C-c C-a") #'mark-whole-buffer)
 
-  ;; the best™ file chooser!!11
+  ;; if we have helm
   (with-eval-after-load 'helm-for-files
     (global-set-key (kbd "C-x C-S-f") #'helm-for-files)
     (spacemacs||set-helm-key "fF" helm-for-files))
@@ -1829,8 +1828,12 @@ from a change in by prefix-matching the current buffer's `default-directory`"
     ;; otherwise it would do helm-ff-run-toggle-auto-update wat
     (define-key helm-find-files-map (kbd "C-<backspace>") nil))
 
+  (with-eval-after-load 'helm
+    (global-set-key (kbd "C-x b") #'helm-mini)
+    (global-set-key (kbd "C-x j b") #'helm-bibtex)
+    (global-set-key (kbd "C-S-s") #'helm-occur))
+
   ;; open project/file/vc things
-  (global-set-key (kbd "C-x b") #'helm-mini)
   (global-set-key (kbd "C-x p C-p") #'jj/projectsearch)
   (global-set-key (kbd "C-x p /") #'jj/projectsearch)
 
@@ -1838,9 +1841,6 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   (global-set-key (kbd "C-x M-b") #'speedbar)
   (global-set-key (kbd "C-c g") #'magit-status)
   (global-set-key (kbd "C-x g") #'magit-status)
-
-  (global-set-key (kbd "C-x j b") #'helm-bibtex)
-  (global-set-key (kbd "C-S-s") #'helm-occur)
 
   (global-set-key (kbd "C-x B") #'bury-buffer)
   (global-set-key (kbd "C-x E") #'apply-macro-to-region-lines)
@@ -1916,11 +1916,6 @@ from a change in by prefix-matching the current buffer's `default-directory`"
   ;; implemented like zsh's history-beginning-search-backward
   ;; or readline's history-search-backward
   )
-
-
-(defun jj/cstyle-keybinds ()
-  (interactive)
-  (local-set-key (kbd "C-c C-c") #'helm-make-projectile))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2284,9 +2279,6 @@ if __name__ == \"__main__\":
   (add-to-list 'lsp-before-initialize-hook
                (lambda ()
                  (add-to-list 'lsp-clients-clangd-args "--header-insertion=never")))  ; don't auto-insert #includes
-
-  ;; keybindings for clike languages
-  (jj/cstyle-keybinds)
 
   ;; create codestyles
   (jj/create-codestyles)
