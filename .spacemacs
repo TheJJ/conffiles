@@ -904,46 +904,53 @@ multiline equations with \\\n get separate numbers."
 (advice-add 'org-create-formula-image :around #'jj/org-renumber-environment)
 
 
-(defvar helm-fileext-priority
+(defvar jj/fileext-priority
   '("py" ("cpp" "c" "h" "hpp") ("org" "tex" "md") "pdf")
   "Priority of file extensions to show for file selections.
 Groups have the same priority.")
 
-;;;; helm find file sorting by extension, and preferred ones..
-(defun jj/sort-dir-contents (dir-contents)
+(defun jj/sort-file-priority (dir-contents)
   "sort the input list by file extension priority"
-  (let* ((priolist helm-fileext-priority)
+  (let* ((priolist jj/fileext-priority)
          (leastprio (length priolist))
          (priolookup (lambda (ext) (or (double-list-index ext priolist) leastprio))))
+    ;; if the sort method is by extension
+    (let-alist (seq-group-by #'file-directory-p dir-contents)
+      (nconc
+       .t                            ; folders
+       (sort
+        .nil                         ; files
+        (lambda (fa fb)                   ; file comparison
+          (let ((exta (or (file-name-extension fa) ""))
+                (extb (or (file-name-extension fb) ""))
+                (basea (or (file-name-sans-extension fa) ""))
+                (baseb (or (file-name-sans-extension fb) "")))
+            (cond
+              ;; extensions are equal, sort filename by name.
+              ((string= exta extb)
+               (string< fa fb))
+              ;; look up extension priority and sort by it.
+              (t (let ((exta-prio (funcall priolookup exta))
+                       (extb-prio (funcall priolookup extb)))
+                   (if (= exta-prio extb-prio)
+                       (string< basea baseb)
+                     (< exta-prio extb-prio))))))))))))
+
+;; to test: (jj/sort-file-priority '("A.aux" "A.tex" "A.cpp" "B.aux" "B.tex" "B.cpp"))
+
+;;;; helm find file sorting by extension, and preferred ones..
+(defun jj/helm-sort-files (dir-contents)
+  "enhance the helm-list-directory function by allowing file extension priorities"
+
     (pcase helm-ff-initial-sort-method
       ;; if the sort method is by extension
-      ('ext
-       (let-alist (seq-group-by #'file-directory-p dir-contents)
-         (nconc
-          .t                            ; folders
-          (sort
-           .nil                         ; files
-           (lambda (fa fb)                   ; file comparison
-             (let ((exta (or (file-name-extension fa) ""))
-                   (extb (or (file-name-extension fb) ""))
-                   (basea (or (file-name-sans-extension fa) ""))
-                   (baseb (or (file-name-sans-extension fb) "")))
-               (cond
-                 ;; extensions are equal, sort filename by name.
-                 ((string= exta extb)
-                  (string< fa fb))
-                 ;; look up extension priority and sort by it.
-                 (t (let ((exta-prio (funcall priolookup exta))
-                          (extb-prio (funcall priolookup extb)))
-                      (if (= exta-prio extb-prio)
-                          (string< basea baseb)
-                        (< exta-prio extb-prio)))))))))))
+      ('ext (jj/sort-file-priority dir-contents))
+
       ;; all other helm sort methods
-      (_ dir-contents))))
+      (_ dir-contents)))
 
-;; to test: (jj/sort-dir-contents '("A.aux" "A.tex" "A.cpp" "B.aux" "B.tex" "B.cpp"))
-
-(advice-add 'helm-list-directory :filter-return #'jj/sort-dir-contents)
+(with-eval-after-load 'helm
+  (advice-add 'helm-list-directory :filter-return #'jj/helm-sort-files))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
