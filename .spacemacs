@@ -1283,6 +1283,7 @@ Groups have the same priority.")
   (global-auto-revert-mode t)
   (setq global-auto-revert-non-file-buffers t
         auto-revert-verbose nil)
+  (context-menu-mode t)
 
   ;; default mode for new buffers
   (setq-default major-mode 'text-mode)
