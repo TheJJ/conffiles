@@ -1062,7 +1062,6 @@ Groups have the same priority.")
         ranger-show-literal t            ; colored ranger previews
         python-shell-prompt-detect-failure-warning nil
         python-shell-interpreter "ipython3" ; tramp on remote-hosts needs ipython3 and python3-setuptools
-        ;python-shell-interpreter-interactive-arg ""
         compilation-environment (quote ("TERM=xterm-256color"))
         recentf-max-saved-items 1000
         idle-highlight-idle-time 0.2
@@ -2618,7 +2617,6 @@ if __name__ == \"__main__\":
   "hooks are registered here"
 
   ;; hooks to be inherited:
-  ;;(add-hook 'text-mode-hook       'something)
   (add-hook 'prog-mode-hook       'jj/coding-hook)
 
   ;; language-specific hooks:
