@@ -131,6 +131,8 @@ This function should only modify configuration layer settings."
           org-enable-appear-support t
           org-enable-roam-support t
           org-enable-github-support t
+          org-enable-modern-support t
+          org-projectile-file "TODO.org"
           ;; org-roam-directory is customized!
           org-roam-v2-ack t)
      pdf
@@ -353,7 +355,7 @@ It should only modify the values of Spacemacs settings."
    ;; If non-nil, show file icons for entries and headings on Spacemacs home buffer.
    ;; This has no effect in terminal or if "all-the-icons" package or the font
    ;; is not installed. (default nil)
-   dotspacemacs-startup-buffer-show-icons nil
+   dotspacemacs-startup-buffer-show-icons t
 
    ;; Default major mode for a new empty buffer. Possible values are mode
    ;; names such as `text-mode'; and `nil' to use Fundamental mode.
@@ -1091,27 +1093,6 @@ Groups have the same priority.")
         ebib-index-default-sort '("Year" . descend)
         ebib-file-associations '()         ; so find-file handles the opening
 
-        ;; org settings
-        org-hide-emphasis-markers t  ; hide syntax elements
-        org-startup-with-inline-images t
-        org-startup-with-latex-preview t
-        org-appear-autolinks nil      ; let links be invisible because they expand to long lines
-        org-appear-autoentities t
-        org-refile-use-outline-path 'file
-        org-outline-path-complete-in-steps nil
-        org-reverse-note-order t         ; new items at top
-        org-refile-targets '((org-agenda-files :maxlevel . 2))
-        org-enforce-todo-dependencies t
-        org-src-window-setup 'current-window ; edit in current window
-        org-src-preserve-indentation t
-        org-edit-src-content-indentation 0
-        org-latex-compiler "xelatex"
-        org-latex-pdf-process '("latexmk -f -%latex -interaction=nonstopmode -shell-escape -output-directory=%o %f")
-        org-latex-listings 'minted
-        org-confirm-babel-evaluate nil   ; sure, just execute org code snippets, what can go wrong
-        org-babel-default-header-args:cpp '((:flags . "-std=c++20 -Wall -Wextra"))
-        org-log-done nil
-
         ;; LaTeX settings
         TeX-engine 'default  ;; or xetex, but conflicts with inputenc package
         TeX-PDF-mode t
@@ -1140,13 +1121,41 @@ Groups have the same priority.")
         company-minimum-prefix-length 1  ;; lsp does the lookup :)
         company-idle-delay 0.1)
 
-  ;; TODO: scale according to display dpi and zoom!
-  ;;       i.e. Xft.dpi/96 * zoomfactor
-  (with-eval-after-load 'org
-    (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5)))
-
   ;; don't persist clipboard accross sessions
   (delete 'kill-ring savehist-additional-variables)
+
+  ;; org settings
+  (with-eval-after-load 'org
+    ;; tame org-open-file, which uses org-file-apps, and finally mailcap.el
+    ;; to determine how to open pdf files
+    ;; if we do not set this in mailcap-user-mime-data, it returns pdf-view-mode
+    ;; test with:
+    ;; (mailcap-mime-info (mailcap-extension-to-mime ".pdf"))
+    (setcdr (assoc "\\.pdf\\'" org-file-apps) 'default)
+
+    ;; TODO: scale according to display dpi and zoom!
+    ;;       i.e. Xft.dpi/96 * zoomfactor
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
+
+    (setq org-hide-emphasis-markers t  ; hide syntax elements
+          org-startup-with-inline-images t
+          org-startup-with-latex-preview t
+          org-appear-autolinks nil      ; let links be invisible because they expand to long lines
+          org-appear-autoentities t
+          org-refile-use-outline-path 'file
+          org-outline-path-complete-in-steps nil
+          org-reverse-note-order t         ; new items at top
+          org-refile-targets '((org-agenda-files :maxlevel . 2))
+          org-enforce-todo-dependencies t
+          org-src-window-setup 'current-window ; edit in current window
+          org-src-preserve-indentation t
+          org-edit-src-content-indentation 0
+          org-latex-compiler "xelatex"
+          org-latex-pdf-process '("latexmk -f -%latex -interaction=nonstopmode -shell-escape -output-directory=%o %f")
+          org-latex-listings 'minted
+          org-confirm-babel-evaluate nil   ; sure, just execute org code snippets, what can go wrong
+          org-babel-default-header-args:cpp '((:flags . "-std=c++20 -Wall -Wextra"))
+          org-log-done nil))
 
   ;; adjust lsp-mode internals
   (with-eval-after-load 'lsp-mode
@@ -1190,14 +1199,6 @@ Groups have the same priority.")
     ;; don't record posframe frames in desktop capture
     (push '(company-posframe-mode . nil)
           desktop-minor-mode-table))
-
-  ;; tame org-open-file, which uses org-file-apps, and finally mailcap.el
-  ;; to determine how to open pdf files
-  ;; if we do not set this in mailcap-user-mime-data, it returns pdf-view-mode
-  ;; test with:
-  ;; (mailcap-mime-info (mailcap-extension-to-mime ".pdf"))
-  (with-eval-after-load 'org
-    (setcdr (assoc "\\.pdf\\'" org-file-apps) 'default))
 
   (with-eval-after-load 'ox-latex
     (add-to-list 'org-latex-packages-alist '("newfloat" "minted")))
