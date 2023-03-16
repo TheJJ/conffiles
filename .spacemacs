@@ -136,6 +136,7 @@ This function should only modify configuration layer settings."
           ;; org-roam-directory is customized!
           org-roam-v2-ack t)
      pdf
+     php
      python
      (ranger :variables
              ranger-show-preview t)
@@ -217,6 +218,7 @@ This function should only modify configuration layer settings."
    '(
      auto-complete
      auto-highlight-symbol
+     company-php
      helm-company  ;; so C-/ is not mapped to it when completing...
      importmagic
      ox-pandoc
