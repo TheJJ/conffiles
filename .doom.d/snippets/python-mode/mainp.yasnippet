@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: mainargparse
+# key: mainp
+# group: argparser
+# --
+"""
+${1:cool script}
+"""
+
+import argparse
+
+
+def main():
+    """
+    ${2:entry point}
+    """
+    cli = argparse.ArgumentParser(description='$3')
+    cli.add_argument($4)
+    args = cli.parse_args()
+    $0
+
+if __name__ == "__main__":
+    main()
