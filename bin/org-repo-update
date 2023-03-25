@@ -1,8 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3 -u
 
 """
 automatic updates for the org repo
 mainly does git commits.
+
+only performs commits if a .gitcommit file is present
+only pushes when a .gitpush file is present
 """
 
 import os
