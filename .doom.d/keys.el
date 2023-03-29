@@ -9,7 +9,14 @@
   ;;(define-key evil-emacs-state-map (kbd "<escape>") 'evil-normal-state)
 
   ;; vim insert-mode emacs compatibility improvements
-  (define-key evil-insert-state-map (kbd "C-x C-s") 'save-buffer)
+  (define-key evil-insert-state-map (kbd "C-x C-s") #'save-buffer)
+  (define-key evil-insert-state-map (kbd "C-x C-f") #'find-file)
+  (define-key evil-insert-state-map (kbd "C-y") #'yank)
+  (define-key evil-insert-state-map (kbd "C-k") #'jj/delete-line)
+  (define-key evil-insert-state-map (kbd "C-S-k") #'jj/delete-line-backward)
+  (define-key evil-insert-state-map (kbd "M-w") #'kill-ring-save)
+  (define-key evil-insert-state-map (kbd "C-w") #'kill-region)
+  (define-key evil-insert-state-map (kbd "C-SPC") #'set-mark-command)
 
   ;; arrow key stuff
   (global-set-key (kbd "M-<left>")  #'windmove-left)
@@ -105,4 +112,9 @@
   (after! helm
     (global-set-key (kbd "C-x b") #'helm-mini)
     (global-set-key (kbd "C-x j b") #'helm-bibtex)
-    (global-set-key (kbd "C-S-s") #'helm-occur)))
+    (global-set-key (kbd "C-S-s") #'helm-occur))
+
+  (after! blacken
+    (map! :leader :desc "Blacken Buffer" "m b b" #'python-black-buffer)
+    (map! :leader :desc "Blacken Region" "m b r" #'python-black-region)
+    (map! :leader :desc "Blacken Statement" "m b s" #'python-black-statement)))

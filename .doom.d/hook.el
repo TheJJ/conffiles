@@ -104,7 +104,10 @@
 
   ;; don't show anaconda mode error popup gaaarrhhgh
   (remove-hook 'anaconda-mode-response-read-fail-hook
-                'anaconda-mode-show-unreadable-response)
+               'anaconda-mode-show-unreadable-response)
+
+  (use-package! blacken
+    :after python)
 
   ;; https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
   ;; disable docstring view
@@ -403,7 +406,10 @@
   (add-hook 'org-agenda-finalize-hook #'org-modern-agenda)
 
   ;; tangle before exporting: https://orgmode.org/manual/Extracting-Source-Code.html
-  (add-hook 'org-export-before-processing-hook #'org-babel-tangle)
+  (add-hook 'org-export-before-processing-functions #'org-babel-tangle)
+
+  ;; hook removals
+  (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 
   ;; some modes don't inherit from prog-mode...
   (multi-hook-add
