@@ -1,0 +1,83 @@
+# jj's i3 status config
+# for the x1 yoga laptop
+
+general {
+	colors = true
+	interval = 5
+}
+
+order += "ipv6"
+order += "disk /"
+#order += "run_watch DHCP"
+#order += "run_watch VPN"
+order += "wireless wlan0"
+order += "ethernet eth0"
+order += "volume master"
+order += "battery 0"
+order += "cpu_temperature 0"
+order += "memory"
+order += "load"
+order += "cpu_usage"
+order += "time"
+
+volume master {
+	format = "♪ %volume"
+	format_muted = "♪ -"
+	device = "default"
+	mixer = "Master"
+	mixer_idx = 0
+}
+
+wireless wlan0 {
+	format_up = "W: %essid %frequency%quality %bitrate %ip"
+	format_down = "W: pwnt"
+}
+
+ethernet eth0 {
+	format_up = "E: %ip (%speed)"
+	format_down = "E: pwnt"
+}
+
+battery 0 {
+	format = "%status %percentage %consumption %remaining"
+	#path = "/etc/sys/class/power_supply/BAT%d/uevent"
+	low_threshold = 5
+	threshold_type = percentage
+	color_bad = "FF0000"
+}
+
+run_watch DHCP {
+	pidfile = "/var/run/dhclient*.pid"
+}
+
+run_watch VPN {
+	pidfile = "/var/run/vpnc/pid"
+}
+
+time {
+	format = "%Y-%m-%d %H:%M:%S"
+}
+
+memory {
+	memory_used_method = "memavailable"
+	format = "%available"
+	threshold_degraded = "512M"
+	format_degraded = "!%available!"
+}
+
+load {
+	format = "%1min"
+}
+
+cpu_temperature 0 {
+	format = "%degrees °C"
+}
+
+cpu_usage {
+	format = "%usage"
+}
+
+disk "/" {
+	format = "%free (%percentage_used_of_avail use)"
+	#%percentage_used used, %percentage_free free, %percentage_avail avail)"
+}
