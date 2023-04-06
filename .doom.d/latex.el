@@ -18,7 +18,19 @@
         TeX-save-query nil
         TeX-parse-self t  ;; enable parse on load
         TeX-auto-save t   ;; enable parse on save
-        reftex-plug-into-AUCTeX t))
+        reftex-plug-into-AUCTeX t
+
+        ;; last is most preferred
+        +latex-viewers '(pdf-tools zathura okular evince))
+
+  (add-to-list 'org-latex-classes
+               '("acmart"
+                 "\\documentclass[]{acmart}"
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
 
 (after! ox-latex

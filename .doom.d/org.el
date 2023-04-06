@@ -38,7 +38,11 @@
         org-latex-src-block-backend 'minted
         org-confirm-babel-evaluate nil   ; sure, just execute org code snippets, what can go wrong
         org-babel-default-header-args:cpp '((:flags . "-std=c++20 -Wall -Wextra"))
-        org-log-done nil))
+        org-log-done nil
+        org-cycle-level-after-item/entry-creation nil)
+
+  ;; so pressing tab in insert mode doesn't indent the headline.
+  (remove-hook! 'org-tab-first-hook #'+org-indent-maybe-h))
 
 ;; org roam note system
 (after! org-roam
