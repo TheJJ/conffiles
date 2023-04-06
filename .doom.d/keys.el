@@ -17,6 +17,9 @@
   (define-key evil-insert-state-map (kbd "M-w") #'kill-ring-save)
   (define-key evil-insert-state-map (kbd "C-w") #'kill-region)
   (define-key evil-insert-state-map (kbd "C-SPC") #'set-mark-command)
+  (define-key evil-insert-state-map (kbd "C-r") #'isearch-repeat-backward)
+  (define-key evil-insert-state-map (kbd "M->") #'jj/shift-right)
+  (define-key evil-insert-state-map (kbd "M-<") #'jj/shift-left)
 
   ;; arrow key stuff
   (global-set-key (kbd "M-<left>")  #'windmove-left)
