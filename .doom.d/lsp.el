@@ -5,6 +5,7 @@
   (setq lsp-enable-indentation nil       ; don't ask the language server for indentations
         lsp-enable-imenu nil
         lsp-enable-xref t
+        lsp-headerline-breadcrumb-enable t
         lsp-headerline-breadcrumb-enable-diagnostics nil
         lsp-enable-on-type-formatting nil  ; using t funnily changes screen content whenever lsp thinks it can do "formatting"
         lsp-enable-file-watchers nil       ; lsp server can do inotify itself, but that may slow emacs down (https://github.com/MaskRay/ccls/issues/354)
