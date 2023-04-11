@@ -40,6 +40,11 @@
     recentf-max-saved-items 1000
     tab-always-indent t
     transient-mark-mode t
+    ;; when buffers have the same filenames, uniquify them
+    ;; by parts of the directory name instead of the annoying <2>,<3>,.. etc
+    uniquify-buffer-name-style 'post-forward
+    ;; don't rename special buffers
+    uniquify-ignore-buffers-re "^ ?\\*"
   ))
 
 (after! savehist

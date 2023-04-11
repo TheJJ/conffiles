@@ -99,6 +99,9 @@
     indent-tabs-mode nil
     tab-width 4)
 
+  ;; disable for now - better rely on linters and visual appearance...
+  (whitespace-tail-disable)
+
   (setq flycheck-checker 'python-pylint
         flycheck-checker-error-threshold 300)
 

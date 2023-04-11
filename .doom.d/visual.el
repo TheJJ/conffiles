@@ -17,6 +17,7 @@
                              'lazy-highlight))
 
 (after! whitespace-mode
+  ;; synchronize the fill-column setting to the whitespace long line highlight
   (sync-variable 'whitespace-line-column 'fill-column))
 
 (defun jj/scrolling ()

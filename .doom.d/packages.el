@@ -13,6 +13,8 @@
 (package! org-ref)
 (package! org-roam-bibtex)
 (package! org-super-agenda)
+(package! ripgrep)
+(package! sql-indent)
 (package! starlit-theme)
 
 

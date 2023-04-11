@@ -21,6 +21,9 @@
   (define-key evil-insert-state-map (kbd "M->") #'jj/shift-right)
   (define-key evil-insert-state-map (kbd "M-<") #'jj/shift-left)
 
+  ;; enable the alternative leader key also in normal and visual states
+  (setq doom-leader-alt-key-states '(normal visual motion emacs insert))
+
   ;; arrow key stuff
   (global-set-key (kbd "M-<left>")  #'windmove-left)
   (global-set-key (kbd "M-<right>") #'windmove-right)
@@ -80,7 +83,7 @@
   ;; disable annoying character swapping
   (global-unset-key (kbd "C-t"))
 
-  (after! org
+  (after! org-keys
     ;; org's default C-M-arrow bindings are kinda useless,
     ;; so we use them so M-arrow is free for window movements!
     (define-key org-mode-map (kbd "C-M-<right>") #'org-metaright)
@@ -94,15 +97,15 @@
     (define-key org-mode-map (kbd "M-<down>") nil))
 
   (after! markdown-mode
-        ;; markdown mode default C-M-arrow can also be overridden for window movements.
-        (define-key markdown-mode-map (kbd "C-M-<right>") #'markdown-demote)
-        (define-key markdown-mode-map (kbd "C-M-<left>") #'markdown-promote)
-        (define-key markdown-mode-map (kbd "C-M-<up>") #'markdown-move-up)
-        (define-key markdown-mode-map (kbd "C-M-<down>") #'markdown-move-down)
-        (define-key markdown-mode-map (kbd "M-<right>") nil)
-        (define-key markdown-mode-map (kbd "M-<left>") nil)
-        (define-key markdown-mode-map (kbd "M-<up>") nil)
-        (define-key markdown-mode-map (kbd "M-<down>") nil))
+    ;; markdown mode default C-M-arrow can also be overridden for window movements.
+    (define-key markdown-mode-map (kbd "C-M-<right>") #'markdown-demote)
+    (define-key markdown-mode-map (kbd "C-M-<left>") #'markdown-promote)
+    (define-key markdown-mode-map (kbd "C-M-<up>") #'markdown-move-up)
+    (define-key markdown-mode-map (kbd "C-M-<down>") #'markdown-move-down)
+    (define-key markdown-mode-map (kbd "M-<right>") nil)
+    (define-key markdown-mode-map (kbd "M-<left>") nil)
+    (define-key markdown-mode-map (kbd "M-<up>") nil)
+    (define-key markdown-mode-map (kbd "M-<down>") nil))
 
 
   (after! helm-for-files
