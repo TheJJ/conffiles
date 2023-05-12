@@ -412,7 +412,13 @@
   (add-hook 'org-export-before-processing-functions #'org-babel-tangle)
 
   ;; hook removals
+  ;; no smart parent creation
   (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
+  ;; no spellchecking by default
+  (remove-hook 'org-mode-hook #'flyspell-mode)
+  (remove-hook 'markdown-mode-hook #'flyspell-mode)
+  (remove-hook 'TeX-mode-hook #'flyspell-mode)
+  (remove-hook 'rst-mode-hook #'flyspell-mode)
 
   ;; some modes don't inherit from prog-mode...
   (multi-hook-add

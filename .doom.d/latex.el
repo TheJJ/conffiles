@@ -21,7 +21,10 @@
         reftex-plug-into-AUCTeX t
 
         ;; last is most preferred
-        +latex-viewers '(pdf-tools zathura okular evince))
+        +latex-viewers '(pdf-tools zathura okular evince)))
+
+(after! ox-latex
+  (add-to-list 'org-latex-packages-alist '("newfloat" "minted"))
 
   (add-to-list 'org-latex-classes
                '("acmart"
@@ -31,10 +34,6 @@
                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
                  ("\\paragraph{%s}" . "\\paragraph*{%s}")
                  ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
-
-
-(after! ox-latex
-  (add-to-list 'org-latex-packages-alist '("newfloat" "minted")))
 
 ;; synchronize bibliography customization settings to other packages
 (after! ebib

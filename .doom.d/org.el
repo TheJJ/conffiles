@@ -42,7 +42,9 @@
         org-cycle-level-after-item/entry-creation nil)
 
   ;; so pressing tab in insert mode doesn't indent the headline.
-  (remove-hook! 'org-tab-first-hook #'+org-indent-maybe-h))
+  (remove-hook! 'org-tab-first-hook #'+org-indent-maybe-h)
+  ;; pressing tab should cycle also child items, not just the current heading
+  (remove-hook! 'org-tab-first-hook #'+org-cycle-only-current-subtree-h))
 
 ;; org roam note system
 (after! org-roam

@@ -2,11 +2,8 @@
 
 (defun jj/keybindings ()
   ;; support for emacs bindings in insert mode
+  ;; this isn't very good, but missing keys are fixed below.
   (setq evil-disable-insert-state-bindings t)
-  ;; alternative: make insert mode the real emacs mode,
-  ;; but this doesn't support visual-mode insertions?
-  ;;(defalias 'evil-insert-state 'evil-emacs-state)
-  ;;(define-key evil-emacs-state-map (kbd "<escape>") 'evil-normal-state)
 
   ;; vim insert-mode emacs compatibility improvements
   (define-key evil-insert-state-map (kbd "C-x C-s") #'save-buffer)
@@ -30,10 +27,16 @@
   (global-set-key (kbd "M-<up>")    #'windmove-up)
   (global-set-key (kbd "M-<down>")  #'windmove-down)
 
+  ;; word jumping
   (global-set-key (kbd "C-<left>")  #'backward-word)
   (global-set-key (kbd "C-<right>") #'forward-word)
   (global-set-key (kbd "C-<up>")    #'backward-paragraph)
   (global-set-key (kbd "C-<down>")  #'forward-paragraph)
+  ;; no word jumping with shift - instead make shift-selection work in evil
+  (define-key evil-insert-state-map (kbd "S-<left>") nil)
+  (define-key evil-insert-state-map (kbd "S-<right>") nil)
+  (define-key evil-insert-state-map (kbd "S-<up>") nil)
+  (define-key evil-insert-state-map (kbd "S-<down>") nil)
 
   ;; line+region movement (like in org :)
   (global-set-key (kbd "M-S-<left>")  #'drag-stuff-left)
