@@ -21,6 +21,10 @@
   ;; enable the alternative leader key also in normal and visual states
   (setq doom-leader-alt-key-states '(normal visual motion emacs insert))
 
+  ;; mouse buttons
+  (global-set-key (kbd "<mouse-8>") #'previous-buffer)
+  (global-set-key (kbd "<mouse-9>") #'next-buffer)
+
   ;; arrow key stuff
   (global-set-key (kbd "M-<left>")  #'windmove-left)
   (global-set-key (kbd "M-<right>") #'windmove-right)
