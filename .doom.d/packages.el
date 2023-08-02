@@ -17,6 +17,9 @@
 (package! sql-indent)
 (package! starlit-theme)
 
+;; no snippets
+;; better would be to not complete snippets on TAB, but C-x C-s
+;(package! doom-snippets :ignore t :disable t)
 
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:

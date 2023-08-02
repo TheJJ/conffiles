@@ -45,6 +45,8 @@
     uniquify-buffer-name-style 'post-forward
     ;; don't rename special buffers
     uniquify-ignore-buffers-re "^ ?\\*"
+
+    +default-want-RET-continue-comments nil ;; no magic doom comment continuation
   ))
 
 (after! savehist

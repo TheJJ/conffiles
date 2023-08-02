@@ -34,9 +34,8 @@
                              'indent-for-tab-command
                              c-mode-base-map)
 
-  (add-to-list 'lsp-before-initialize-hook
-               (lambda ()
-                 (add-to-list 'lsp-clients-clangd-args "--header-insertion=never")))  ; don't auto-insert #includes
+  ;; include _ as part of a word
+  (modify-syntax-entry ?_ "w")
 
   ;; create codestyles
   (jj/create-c-codestyles)
@@ -97,13 +96,16 @@
   (setq-local
     python-indent 4
     indent-tabs-mode nil
-    tab-width 4)
+    tab-width 4
+    flycheck-checker 'python-pylint
+    flycheck-checker-error-threshold 300
+    )
+
+  ;; include _ as part of a word
+  (modify-syntax-entry ?_ "w")
 
   ;; disable for now - better rely on linters and visual appearance...
   (whitespace-tail-disable)
-
-  (setq flycheck-checker 'python-pylint
-        flycheck-checker-error-threshold 300)
 
   ;; don't show anaconda mode error popup gaaarrhhgh
   (remove-hook 'anaconda-mode-response-read-fail-hook
@@ -317,6 +319,8 @@
      (in-begin-block jj/sql-indent-begin-block)
      (with-clause-cte-cont 0)
      ,@sqlind-default-indentation-offsets-alist))
+
+  (whitespace-tail-disable)
 
   ;; TODO: detect psql prompt, or disable custom prompt
   ;;(sql-set-product-feature 'postgres)

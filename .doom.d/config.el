@@ -32,6 +32,7 @@
 (load! "mail.el")
 (load! "hook.el")
 (load! "settings.el")
+(load! "hack.el")
 
 ;; device-specific settings, before executions
 (load! "device-pre.el" nil t)

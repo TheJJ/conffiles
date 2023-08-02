@@ -18,10 +18,17 @@
         TeX-save-query nil
         TeX-parse-self t  ;; enable parse on load
         TeX-auto-save t   ;; enable parse on save
-        reftex-plug-into-AUCTeX t
+        reftex-plug-into-AUCTeX t))
 
-        ;; last is most preferred
-        +latex-viewers '(pdf-tools zathura okular evince)))
+;; doom uses this list to register the pdfviewers non-lazily.
+;; +latex-viewers is evaluated after! tex, too.
+;; TODO: validate if this is run in the correct order....
+(after! tex
+  ;; reset the contents, since +latex-viewers will do add-to-list, and evince already is in the list
+  ;; hence it won't be bumped to the front...
+  (setq TeX-view-program-selection '())
+  (setq +latex-viewers '(evince okular zathura pdf-tools)))
+
 
 (after! ox-latex
   (add-to-list 'org-latex-packages-alist '("newfloat" "minted"))

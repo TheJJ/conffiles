@@ -3,9 +3,6 @@
 ;; must be set before org loads
 (setq org-directory "~/org/")
 
-(use-package! org-modern
-  :after org)
-
 ;; org settings
 (after! org
 
@@ -37,14 +34,21 @@
         org-latex-pdf-process '("latexmk -f -%latex -interaction=nonstopmode -shell-escape -output-directory=%o %f")
         org-latex-src-block-backend 'minted
         org-confirm-babel-evaluate nil   ; sure, just execute org code snippets, what can go wrong
-        org-babel-default-header-args:cpp '((:flags . "-std=c++20 -Wall -Wextra"))
+        org-babel-default-header-args:cpp '((:flags . "-std=c++23 -Wall -Wextra"))
         org-log-done nil
+        org-todo-keywords '((sequence "TODO(t)" "PROJ(p)" "WAIT(w)" "HOLD(h)" "IDEA(i)" "|" "DONE(d)" "CNCL(c)") (sequence "|" "OKAY(o)" "YES(y)" "NO(n)"))
         org-cycle-level-after-item/entry-creation nil)
 
+  ;; no strapped-on vim bindings in org
+  (remove-hook! 'org-mode-hook #'evil-org-mode)
   ;; so pressing tab in insert mode doesn't indent the headline.
   (remove-hook! 'org-tab-first-hook #'+org-indent-maybe-h)
   ;; pressing tab should cycle also child items, not just the current heading
   (remove-hook! 'org-tab-first-hook #'+org-cycle-only-current-subtree-h))
+
+;; pretty formatting
+(use-package! org-modern
+  :after org)
 
 ;; org roam note system
 (after! org-roam

@@ -32,4 +32,9 @@
 
   ;; update treemacs folders from lsp
   (after! lsp-treemacs
-    (add-hook 'lsp-workspace-folders-changed-functions #'lsp-treemacs--sync-folders)))
+    (add-hook 'lsp-workspace-folders-changed-functions #'lsp-treemacs--sync-folders))
+
+  (add-to-list 'lsp-before-initialize-hook
+               (lambda ()
+                 (add-to-list 'lsp-clients-clangd-args "--header-insertion=never")))  ; don't auto-insert #includes
+  )
