@@ -3,7 +3,7 @@
 """
 jj's pythonrc
 
-Copyright (c) 2012-2022 Jonas Jelten <jj@sft.lol>
+Copyright (c) 2012-2023 Jonas Jelten <jj@sft.lol>
 Licensed GPLv3 or later.
 """
 
@@ -22,11 +22,13 @@ import pathlib
 import re
 import shlex
 import shutil
+import struct
 import subprocess
 import sys
 import time
 import traceback
 
+from binascii import hexlify, unhexlify
 from pathlib import Path
 from pprint import pprint, pformat
 from pydoc import doc, describe, locate
