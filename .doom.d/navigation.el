@@ -71,10 +71,8 @@ Groups have the same priority.")
   (local-set-key (kbd "M-g f") 'xref-find-references)
   (local-set-key (kbd "M-g G") 'xref-find-definitions-other-frame)
 
-  (with-library
-    lsp-mode
-    (with-library
-      treemacs
+  (with-package 'lsp-mode
+    (with-package 'treemacs
       (local-set-key (kbd "M-g e") 'lsp-treemacs-errors-list))
 
     ;; open inline popup with search results

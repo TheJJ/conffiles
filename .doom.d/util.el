@@ -164,12 +164,10 @@ from a change in by prefix-matching the current buffer's `default-directory`"
 
 
 ;; helper functions
-(defmacro with-library (symbol &rest body)
-  "when the library is available, do things with it."
-  `(condition-case nil
-       (progn (require ',symbol) ,@body)
-     (error (message (format "package unavailable: %s" ',symbol))
-            nil)))
+(defmacro with-package (package-name &rest body)
+  "if the given package is available, do something."
+  `(when (package-installed-p ',package-name)
+     ,@body))
 
 (defun sync-variable (destinationvar sourcevar)
   "synchronize the state of a given variable to another one.

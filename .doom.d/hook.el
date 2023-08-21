@@ -23,9 +23,8 @@
     (run-hooks 'prog-mode-hook))
 
   ;; magic region formatting
-  (with-library
-    clang-format
-    (global-set-key (kbd "C-M-<tab>") #'clang-format-region))
+  (with-package 'clang-format
+    (local-set-key (kbd "C-M-<tab>") #'clang-format-region))
 
   ;; restore so we indent line or region.
   ;; (does no completion since we set tab-always-indent)
