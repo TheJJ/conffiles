@@ -63,7 +63,7 @@ except ImportError:
 if USE_PYGMENTS:
     try:
         import pygments
-        from pygments.formatters import TerminalFormatter
+        import pygments.formatters
         import pygments.lexers
         HAS_PYGMENTS = True
     except ImportError:
@@ -94,12 +94,13 @@ def dis(obj):
 
 if USE_PYGMENTS and HAS_PYGMENTS:
     def highlight(source):
-        if not USE_PYGMENTS or not HAS_PYGMENTS:
-            return source
-
         lexer = pygments.lexers.get_lexer_by_name('python')
-        formatter = TerminalFormatter(bg='dark')
+        formatter = pygments.formatters.TerminalFormatter(bg='dark')
         return pygments.highlight(source, lexer, formatter)
+
+    def pprint(obj) -> None:
+        """Colored pretty printing."""
+        print(highlight(pformat(obj)), end="")
 else:
     def highlight(txt):
         return txt
