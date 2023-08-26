@@ -48,6 +48,18 @@
   (global-set-key (kbd "M-S-<up>")    #'drag-stuff-up)
   (global-set-key (kbd "M-S-<down>")  #'drag-stuff-down)
 
+  ;; only kill region when it is active
+  ;; (otherwise we would delete to the non-visible last mark...)
+  (global-set-key (kbd "C-w")
+                  (lambda (beg end &optional region)
+                    (interactive (let ((beg (mark))
+                                       (end (point)))
+                                   (unless (and beg end)
+                                     (user-error "no mark -> no region"))
+                                   (list beg end 'region)))
+                    (when (use-region-p)
+                      (kill-region beg end region))))
+
   ;; line nativation/deletion
   (global-set-key (kbd "C-k") #'jj/delete-line)
   (global-set-key (kbd "C-S-k") #'jj/delete-line-backward)
