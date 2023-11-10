@@ -42,6 +42,7 @@ except ImportError:
 
 PAGER_INVOCATION = os.environ.get("PAGER", "less -S -i -R -M --shift 5")
 HISTSIZE = 50000
+PDB = getattr(sys, "_load_pdb", None) is not None
 
 USE_PYGMENTS = True
 HAS_PYGMENTS = False
@@ -129,18 +130,25 @@ def pwd():
     return os.getcwd()
 
 
-def cat(name, binary=False, lines=False):
+def cat(*names, binary=False, lines=False):
     """Read the given file and return its contents."""
     mode = "rb" if binary else "r"
-    with open(name, mode) as fd:
-        if lines:
-            return fd.readlines()
-        return fd.read()
+    ret = list()
+    for name in names:
+        with open(name, mode) as fd:
+            if lines:
+                ret.extend(fd.readlines())
+            ret.append(fd.read())
+
+    if lines:
+        return ret
+    else:
+        return "".join(ret)
 
 
-def catln(name, binary=False):
-    """Read the lines of the given file and return them."""
-    return cat(name, binary, lines=True)
+def catln(names, binary=False):
+    """Read the lines of the given files and return them."""
+    return cat(names, binary, lines=True)
 
 
 def ls(*args, recurse=False, merge=False):
@@ -315,7 +323,7 @@ def _completion():
 
     # special-hack: when we're included from .pdbrc,
     # this is set.
-    if getattr(sys, "_load_pdb", None):
+    if PDB:
         hist_filename = ".python_pdbhistory"
     else:
         hist_filename = f".python{sys.version_info.major}_history"
@@ -340,13 +348,13 @@ def _completion():
         # create .python_history as second history file...
         readline.add_history("lol")
 
-    def save(h_size, prev_h_len, histfile):
-        new_h_len = readline.get_current_history_length()
-        readline.set_history_length(h_size)
-        readline.append_history_file(new_h_len - prev_h_len, histfile)
+    def save(prev_h_len, histfile):
+        new_hist_len = readline.get_current_history_length() - prev_h_len
+        readline.set_history_length(HISTSIZE)
+        readline.append_history_file(new_hist_len, histfile)
 
     if histfile_ok:
-        atexit.register(save, HISTSIZE, h_len, str(history_file))
+        atexit.register(save, h_len, str(history_file))
 
     return history_file
 
