@@ -510,10 +510,12 @@ end
 python
 
 # eigen
-import sys
-sys.path.insert(0, '/home/jj/devel/eigen/')
-from eigen_printers import register_eigen_printers
-register_eigen_printers(None)
+import sys, os
+eigenpath = os.path.expanduser('~/devel/eigen/')
+if os.path.isdir(eigenpath):
+    sys.path.append(eigenpath)
+    from eigen_printers import register_eigen_printers
+    register_eigen_printers(None)
 
 # kernel debugging
 gdb.execute('add-auto-load-safe-path /usr/src/linux/scripts/gdb/vmlinux-gdb.py')
