@@ -12,7 +12,6 @@ added to the respective load-paths."
       (let ((load-dir (car load-spec))
             (load-var (cdr load-spec)))
 
-        (message "trying %s" load-dir)
         (when (file-directory-p load-dir)
           (dolist (load-dir-file (directory-files load-dir))
             (let ((load-dir-path (expand-file-name (concat load-dir load-dir-file))))

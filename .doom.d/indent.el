@@ -83,6 +83,7 @@
 
     (when (not buffer-already-open)
       (save-buffer)
+      (message "saved %s!" (buffer-file-name))
       (kill-buffer openbuffer))))
 
 

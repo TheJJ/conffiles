@@ -66,18 +66,11 @@ Groups have the same priority.")
 
 (defun jj/codenav-keybinds ()
   (interactive)
-  (local-set-key [C-mouse-1] 'xref-find-definitions)
-  (local-set-key (kbd "M-g d") 'xref-find-definitions)
-  (local-set-key (kbd "M-g f") 'xref-find-references)
-  (local-set-key (kbd "M-g G") 'xref-find-definitions-other-frame)
-
-  (with-package 'lsp-mode
-    (with-package 'treemacs
-      (local-set-key (kbd "M-g e") 'lsp-treemacs-errors-list))
-
-    ;; open inline popup with search results
-    (local-set-key (kbd "M-g D") 'lsp-ui-peek-find-definitions)
-    (local-set-key (kbd "M-g F") 'lsp-ui-peek-find-references))
+  (local-set-key (kbd "C-<mouse-1>") #'xref-find-definitions-at-mouse)
+  (local-set-key (kbd "C-S-<mouse-1>") #'xref-find-references-at-mouse)
+  (local-set-key (kbd "M-g d") #'xref-find-definitions)
+  (local-set-key (kbd "M-g f") #'xref-find-references)
+  (local-set-key (kbd "M-g G") #'xref-find-definitions-other-frame)
 
   ;; defaults:
   ;; M-, pop-tagmark in slime-nav-mode-map ->xref-pop-marker-stack
@@ -93,5 +86,6 @@ Groups have the same priority.")
   (if (<= emacs-major-version 28)
       (error "emacs <= 28 not supported for xref jumping")
     (progn
-      (local-set-key (kbd "M-.") 'xref-go-forward)
-      (local-set-key (kbd "M-,") 'xref-go-back))))
+      ;; there's also evil-jump-backward/forward
+      (local-set-key (kbd "M-.") #'xref-go-forward)
+      (local-set-key (kbd "M-,") #'xref-go-back))))

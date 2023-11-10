@@ -22,8 +22,8 @@
   (setq doom-leader-alt-key-states '(normal visual motion emacs insert))
 
   ;; mouse buttons
-  (global-set-key (kbd "<mouse-8>") #'previous-buffer)
-  (global-set-key (kbd "<mouse-9>") #'next-buffer)
+  (global-set-key (kbd "<XF86Back>") #'previous-buffer)
+  (global-set-key (kbd "<XF86Forward>") #'next-buffer)
 
   ;; arrow key stuff
   (global-set-key (kbd "M-<left>")  #'windmove-left)
@@ -126,6 +126,16 @@
     (define-key markdown-mode-map (kbd "M-<up>") nil)
     (define-key markdown-mode-map (kbd "M-<down>") nil))
 
+  (after! lsp-mode
+    ;; open inline popup with search results
+    (define-key lsp-mode-map (kbd "M-g D") 'lsp-ui-peek-find-definitions)
+    (define-key lsp-mode-map (kbd "M-g F") 'lsp-ui-peek-find-references)
+
+    ;; instead we use xref-find-...-at-mouse
+    (define-key lsp-mode-map (kbd "C-<down-mouse-1>") nil)
+
+    (with-package 'treemacs
+      (define-key lsp-mode-map (kbd "M-g e") 'lsp-treemacs-errors-list)))
 
   (after! helm-for-files
     (global-set-key (kbd "C-x C-S-f") #'helm-for-files))
@@ -138,6 +148,23 @@
     (global-set-key (kbd "C-x b") #'helm-mini)
     (global-set-key (kbd "C-x j b") #'helm-bibtex)
     (global-set-key (kbd "C-S-s") #'helm-occur))
+
+  (after! evil-commands
+    (global-set-key (kbd "<XF86Back>") #'evil-jump-backward)
+    (global-set-key (kbd "<XF86Forward>") #'evil-jump-forward)
+    ;; mouse's side buttons
+    (global-set-key (kbd "<mouse-8>") #'evil-jump-backward)
+    (global-set-key (kbd "<mouse-9>") #'evil-jump-forward))
+
+  (after! vterm
+    ;; otherwise it would do helm-ff-run-toggle-auto-update wat
+    (define-key vterm-mode-map (kbd "C-c ESC ESC") #'vterm-send-escape)
+    (define-key vterm-mode-map (kbd "C-q") #'vterm-send-next-key)
+    (define-key vterm-mode-map (kbd "M-<left>")  #'windmove-left)
+    (define-key vterm-mode-map (kbd "M-<right>") #'windmove-right)
+    (define-key vterm-mode-map (kbd "M-<up>")    #'windmove-up)
+    (define-key vterm-mode-map (kbd "M-<down>")  #'windmove-down))
+  (after! evil (evil-set-initial-state 'vterm-mode 'emacs))
 
   (after! blacken
     (map! :leader :desc "Blacken Buffer" "m b b" #'python-black-buffer)

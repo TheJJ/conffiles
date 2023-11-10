@@ -3,10 +3,10 @@
 (defun jj/defaults ()
   (delete-selection-mode t)  ;; replace selection with typed text
   (context-menu-mode t)      ;; rightclick menu instead of useless region selection
-  (gud-tooltip-mode t)       ;; show tooltips in the debugger
 
-  ;; push the mouse out of the way when the cursor approaches.
-  (mouse-avoidance-mode 'cat-and-mouse)
+  ;; don't push the mouse away, instead just hide it when typing
+  (setq mouse-avoidance-mode nil
+        make-pointer-invisible t)
 
   (global-auto-revert-mode t)
   (setq global-auto-revert-non-file-buffers t
@@ -34,7 +34,6 @@
     native-comp-async-report-warnings-errors 'silent
     password-cache-expiry nil        ; tramp password cache
     python-fill-docstring-style 'symmetric
-    python-shell-interpreter "ipython3" ; tramp on remote-hosts needs ipython3 and python3-setuptools
     python-shell-prompt-detect-failure-warning nil
     ranger-show-literal t            ; colored ranger previews
     recentf-max-saved-items 1000
@@ -66,7 +65,12 @@
                  (test . window-system))))
 
 (after! helm
-  helm-adaptive-history-file (locate-user-emacs-file ".cache/helm-adaptive-history")
-  helm-adaptive-history-length 200
-  helm-ff-file-name-history-use-recentf nil  ; don't use recentf for helm find files
-  helm-ff-initial-sort-method 'ext)          ; sort by extension, advised for priority and name sorting
+  (setq
+   helm-adaptive-history-file (locate-user-emacs-file ".cache/helm-adaptive-history")
+   helm-adaptive-history-length 200
+   helm-ff-file-name-history-use-recentf nil  ; don't use recentf for helm find files
+   helm-ff-initial-sort-method 'ext))         ; sort by extension, advised for priority and name sorting
+
+
+(after! vterm
+  (setq vterm-min-window-width 20))

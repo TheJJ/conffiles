@@ -7,11 +7,15 @@
 
   (use-package! idle-highlight-mode)
 
+  ;; enable line-wrapping for all programming modes
+  (visual-line-mode)
+
   ;; highlight word under cursor
   (when (fboundp 'idle-highlight-mode)
     (idle-highlight-mode t))
 
-  (jj/codenav-keybinds))
+  (unless noninteractive
+    (jj/codenav-keybinds)))
 
 
 ;; c-like-language setup
@@ -129,10 +133,15 @@
 
 ;; elisp
 (defun jj/lisp-coding-hook ()
-  (jj/codenav-keybinds)
+  (unless noninteractive
+    (jj/codenav-keybinds))
+
   (setq-local
    indent-tabs-mode nil
    tab-width 8)
+
+  ;; include - as part of a word
+  (modify-syntax-entry ?- "w")
 
   (whitespace-tail-disable)
 
@@ -422,6 +431,10 @@
   (remove-hook 'markdown-mode-hook #'flyspell-mode)
   (remove-hook 'TeX-mode-hook #'flyspell-mode)
   (remove-hook 'rst-mode-hook #'flyspell-mode)
+
+  ;; batch mode. but the hook isn't in there yet? :(
+  (when noninteractive
+    (remove-hook 'kill-emacs-hook #'recentf-cleanup))
 
   ;; some modes don't inherit from prog-mode...
   (multi-hook-add

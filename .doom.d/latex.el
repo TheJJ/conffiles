@@ -23,11 +23,13 @@
 ;; doom uses this list to register the pdfviewers non-lazily.
 ;; +latex-viewers is evaluated after! tex, too.
 ;; TODO: validate if this is run in the correct order....
-(after! tex
-  ;; reset the contents, since +latex-viewers will do add-to-list, and evince already is in the list
-  ;; hence it won't be bumped to the front...
+;(after! tex ;; after is problematic since +viewers is run earlier?
   (setq TeX-view-program-selection '())
-  (setq +latex-viewers '(evince okular zathura pdf-tools)))
+  ; xx (add-to-list 'TeX-view-program-selection '(output-pdf "Evince"))
+  ;; TODO: reset the contents, since +latex-viewers will do add-to-list, and evince already is in the list
+  ;; hence it won't be bumped to the front...
+  (setq +latex-viewers '(evince okular zathura pdf-tools))
+;)
 
 
 (after! ox-latex

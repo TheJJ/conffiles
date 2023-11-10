@@ -37,10 +37,9 @@
         org-babel-default-header-args:cpp '((:flags . "-std=c++23 -Wall -Wextra"))
         org-log-done nil
         org-todo-keywords '((sequence "TODO(t)" "PROJ(p)" "WAIT(w)" "HOLD(h)" "IDEA(i)" "|" "DONE(d)" "CNCL(c)") (sequence "|" "OKAY(o)" "YES(y)" "NO(n)"))
+        org-return-follows-link t
         org-cycle-level-after-item/entry-creation nil)
 
-  ;; no strapped-on vim bindings in org
-  (remove-hook! 'org-mode-hook #'evil-org-mode)
   ;; so pressing tab in insert mode doesn't indent the headline.
   (remove-hook! 'org-tab-first-hook #'+org-indent-maybe-h)
   ;; pressing tab should cycle also child items, not just the current heading
