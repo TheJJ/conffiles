@@ -1,5 +1,5 @@
 # JJ's zshrc
-# Copyright (c) 2011 - 2022 Jonas Jelten
+# Copyright (c) 2011 - 2023 Jonas Jelten
 #
 # Released under GPLv3 or later.
 #
@@ -24,7 +24,7 @@
 
 # home bin dir path
 local homebin="$HOME/bin"
-if [[ -d $homebin ]]; then
+if [[ -d $homebin && ! "$PATH" =~ .*":$homebin:?".* ]]; then
 	export PATH="$PATH:$homebin"
 fi
 
@@ -43,11 +43,7 @@ export EDITOR=$VISUAL
 export LESS="-S -i -R -M --shift 5"
 export PAGER="less"
 
-# append cwd to java class path
-export CLASSPATH=.:$CLASSPATH
-
 # color gcc & cmake output
-export GCC_COLORS="yes"
 export CMAKE_COLOR_DIAGNOSTICS="ON"
 
 # silence funny gtk warnings
@@ -136,7 +132,8 @@ alias emacsopennew="emacsclient -n -c"  # new frame
 alias eon=emacsopennew
 alias emacsterm='emacsclient --tty'   # connect in current tty
 alias emacscc="emacs -batch -no-site-file -f batch-byte-compile"  # compile some elisp file(s)
-alias indentemacs="emacs -batch -l ~/.emacs.d/init.el --eval '(batch-indent)'" # indent given files
+alias ecc=emacscc
+alias indentemacs=$'emacs -q --no-site-file --batch -l .emacs.d/early-init.el --eval "(doom-require \'doom-start)" --eval "(batch-indent)"'
 
 alias open='xdg-open'
 alias objdump='objdump -M intel-mnemonic -C'
@@ -188,6 +185,7 @@ alias cal='cal -m -w'
 alias confgrep='grep -v -P "^\\s*($|#|;)"'   # good to strip conffile comments
 alias curlws='curl --no-buffer --header "Connection: Upgrade" --header "Upgrade: websocket" --header "Sec-WebSocket-Key: bG9sd2Vic29ja2V0Y29ubg==" --header "Sec-WebSocket-Version: 13"'
 alias mpvll='mpv --profile=low-latency --untimed'
+alias aga='ag --passthrough'  # show all content, but highlight
 
 # valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
@@ -1058,9 +1056,15 @@ precmd () {
 	psvar[4]="$vcs_info_msg_2_"
 }
 
+if [[ "$INSIDE_EMACS" == "vterm" ]]; then
+    NEWLINE=$'\n'
+else
+    NEWLINE=''
+    RPROMPT="%3v%4v%{$reset_color%}[%{$fg[yellow]%}%?%{$reset_color%}]%1v%{$fg[blue]%}:%{$fg[red]%}%l%{$reset_color%}"
+fi
+
 # best prompt ever!!11111
-PROMPT="%B%{$fg[green]%}%n%{$fg[cyan]%}@%{$fg[blue]%}%m%b %{$fg[red]%}%~ %{$fg[yellow]%}%1v%2v%{$reset_color%}%# "
-RPROMPT="%3v%4v%{$reset_color%}[%{$fg[yellow]%}%?%{$reset_color%}]%1v%{$fg[blue]%}:%{$fg[red]%}%l%{$reset_color%}"
+PROMPT="%B%{$fg[green]%}%n%{$fg[cyan]%}@%{$fg[blue]%}%m%b %{$fg[red]%}%~ %{$fg[yellow]%}%1v%2v%{$reset_color%}${NEWLINE}%# "
 
 #############################################
 # machine-specific config files
