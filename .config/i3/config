@@ -21,6 +21,8 @@ bindsym $mod+shift+Return exec --no-startup-id cool-retro-term
 bindsym $mod+d exec rofi -show run -show-icons
 # run .desktop files
 bindsym $mod+shift+d exec rofi -show drun -show-icons
+# ssh connection
+bindsym $mod+c exec rofi -show ssh -show-icons -terminal kitty
 
 bindsym control+grave exec dunstctl history-pop
 
