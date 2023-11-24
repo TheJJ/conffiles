@@ -10,7 +10,7 @@
 
 ;; be more patient about highlighting stuff
 (after! flycheck
-  (setq flycheck-idle-change-delay 2.0))
+  (setq flycheck-idle-change-delay 1.5))
 
 ;; we can try again once performance is better...
 (after! lsp-pylsp

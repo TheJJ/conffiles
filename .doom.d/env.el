@@ -20,7 +20,7 @@
    (0+ space)
    (optional "#" (0+ any))
    )
-  "Regexp to match env vars in file."
+  "Regexp to match env vars in a string."
   )
 
 (defun load-env-vars-re-seq (regexp)
@@ -40,8 +40,9 @@
 
 (defun load-env-vars-set-env (env-vars)
   "Set environment variables from key value lists from ENV-VARS."
-  (setq exec-path (cl-remove-duplicates (mapcar #'directory-file-name exec-path)
-                                        :test #'string-equal :from-end t))
+  (setq exec-path (cl-remove-duplicates
+                   (mapcar #'directory-file-name exec-path)
+                   :test #'string-equal :from-end t))
   (let ((convert-to-os-path (if (memq system-type '(windows-nt ms-dos))
                                 (apply-partially #'subst-char-in-string ?/ ?\\)
                               ;; Assume that we start with forward slashes.
@@ -58,52 +59,58 @@
           (setenv key value))))))
 
 
+(defvar jj/env-import-deny
+  '("^INSIDE_EMACS$" "^\\(OLD\\)?PWD$" "^SHLVL$" "^PS1$" "^R?PROMPT$" "^TERM\\(CAP\\)?$")
+  "Environment variables to omit from the shell environment import")
+
 (defun jj/import-shell-env ()
-  "Loads environment variables from you user's shell"
-  ;; execute the default shell twice and
-  ;; fetch the environment variables with `env'.
-  ;; in order to get the current env-vars (like the ssh-agent socket path)
-  ;; on each emacs launch, this variant exists.
-  ;; but why are we not happy with the env vars emacs got anyway from the kernel?
-  ;; because in .zshrc, .bashrc, ... users usually define more, and would expect emacs
-  ;; to know about them, even though they didn't launch emacs from their shell,
-  ;; but their desktop environment instead.
-  ;; we basically inject the shell-env into non-shell-launched emacs.
-  ;;
-  ;; important: the shell really has to export the env vars,
-  ;;            and not exit before env vars are set because the shell
-  ;;            is not interactive!
+  "Loads environment variables from you user's shell.
+
+This executes the default shell and fetches the environment variables with `env'
+in order to get the current env-vars (like the ssh-agent socket path)
+on each emacs launch.
+But why are we not happy with the env vars emacs got anyway from the kernel?
+Because in .zshrc, .bashrc, ... users usually define more, and would expect emacs
+to know about them, even though they didn't launch emacs from their shell,
+but their desktop environment instead.
+We basically inject the shell-env into non-shell-launched emacs.
+
+Important:
+The shell config has to export the env vars non-interactively - it must not exit
+in its config file before env vars are set because the shell is not interactive!
+
+In your zshrc this means:
+export STUFF=...
+# more env-vars
+# don't execute the rest of the file in non-interactive mode.
+[[ $- != *i* ]] && return
+# rest of your zshrc
+"
   (with-temp-buffer
-    (let ((shell-command-switches (cond
-                                   ((or (eq system-type 'darwin)
-                                        (eq system-type 'cygwin)
-                                        (eq system-type 'gnu/linux))
-                                    ;; execute env twice, once with a
-                                    ;; non-interactive login shell and
-                                    ;; once with an interactive shell
-                                    ;; in order to capture all the init
-                                    ;; files possible.
-                                    '("-lc" "-ic"))
-                                   ((eq system-type 'windows-nt) '("-c"))))
-          (executable (cond ((or (eq system-type 'darwin)
-                                 (eq system-type 'cygwin)
-                                 (eq system-type 'gnu/linux))
-                             "env")
-                            ((eq system-type 'windows-nt)
-                             "set")
-                            (t (warn "unsupported system type for fetching env: %s" system-type)
-                               nil))))
+    (let ((executable ;; what tool to run to extract the shell environment
+           (cond ((or (eq system-type 'darwin)
+                      (eq system-type 'cygwin)
+                      (eq system-type 'gnu/linux))
+                  "env")
+                 ((eq system-type 'windows-nt)
+                  "set")
+                 (t (warn "unsupported system type for fetching env: %s" system-type)
+                    nil))))
       (let ((process-environment initial-environment)
             (env-point (point)))
-        (dolist (shell-command-switch shell-command-switches)
-          (call-process-shell-command executable nil t))
+        (call-process-shell-command executable nil t)
         ;; sort envvars and remove duplicates
         (sort-regexp-fields nil "^.*$" ".*?=" env-point (point-max))
         (delete-duplicate-lines env-point (point-max) nil t)
         ;; remove ignored environment variables
-        (dolist (v spacemacs-ignored-environment-variables)
+        (dolist (v jj/env-import-deny)
           (flush-lines v env-point (point-max)))))
 
     ;; apply env vars into emacs
     (let ((env-vars (load-env-vars-extract-env-vars)))
       (load-env-vars-set-env env-vars))))
+
+;; in doom-start.el the cached doom-env-file is loaded if it's set.
+;(setq doom-env-file nil)
+;; instead, we import the environment by running the user's shell once.
+;(jj/import-shell-env)
