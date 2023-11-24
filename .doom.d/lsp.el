@@ -18,18 +18,6 @@
         lsp-warn-no-matched-clients nil    ; don't warn if there's no lsp client.
         dap-python-debugger 'debugpy)
 
-  ; remote lsp clients
-  ;(lsp-register-client
-  ; (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
-  ;                  :major-modes '(c++-mode)
-  ;                  :remote? t
-  ;                  :server-id 'clangd-remote))
-  ;(lsp-register-client
-  ; (make-lsp-client :new-connection (lsp-tramp-connection "pylsp")
-  ;                  :major-modes '(python-mode)
-  ;                  :remote? t
-  ;                  :server-id 'pylsp-remote))
-
   ;; update treemacs folders from lsp
   (after! lsp-treemacs
     (add-hook 'lsp-workspace-folders-changed-functions #'lsp-treemacs--sync-folders))

@@ -157,8 +157,8 @@
     (global-set-key (kbd "<mouse-9>") #'evil-jump-forward))
 
   (after! vterm
-    ;; otherwise it would do helm-ff-run-toggle-auto-update wat
     (define-key vterm-mode-map (kbd "C-c ESC ESC") #'vterm-send-escape)
+    (define-key vterm-mode-map (kbd "C-d") #'term-send-eof)
     (define-key vterm-mode-map (kbd "C-q") #'vterm-send-next-key)
     (define-key vterm-mode-map (kbd "M-<left>")  #'windmove-left)
     (define-key vterm-mode-map (kbd "M-<right>") #'windmove-right)
