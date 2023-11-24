@@ -20,9 +20,10 @@ def main():
     """
     cli = argparse.ArgumentParser(description='lockscreen with i3')
     cli.add_argument('--suspend', action="store_true")
+    cli.add_argument('--image', default='~/.config/lockscreen/1.png')
     args = cli.parse_args()
 
-    lockimage = Path("~/.config/lockscreen/1.png").expanduser()
+    lockimage = Path(args.image).expanduser()
 
     # with xcompmgr, dunst actually overlays i3lock.
     # so we need to pause dunst.
