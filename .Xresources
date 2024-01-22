@@ -16,7 +16,7 @@
 ! to my knowledge this is the easiest and best way to scale everything nicely.
 ! except Qt, which needs env QT_AUTO_SCREEN_SCALE_FACTOR=0 so it doesnt scale again.
 ! 144 is 1.5x96
-Xft.dpi: 125
+Xft.dpi: 192
 
 ! subpixel hinting
 ! only for non-fontconfig-aware applications, see .config/fontconfig and eselect fontconfig
