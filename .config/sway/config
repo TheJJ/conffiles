@@ -47,6 +47,8 @@ set $right semicolon
 # variable refresh rate for all monitors
 output * adaptive_sync on
 
+output * background #000000 solid_color
+
 ### Input configuration
 #
 # Example configuration:
