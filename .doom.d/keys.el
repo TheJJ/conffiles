@@ -115,6 +115,11 @@
     (define-key org-mode-map (kbd "M-<up>") nil)
     (define-key org-mode-map (kbd "M-<down>") nil))
 
+  (map! :after evil-org
+        ;; evil-org overrides the global delete-line binding
+        :map evil-org-mode-map
+        :n "C-k" #'jj/delete-line)
+
   (after! markdown-mode
     ;; markdown mode default C-M-arrow can also be overridden for window movements.
     (define-key markdown-mode-map (kbd "C-M-<right>") #'markdown-demote)
@@ -164,6 +169,7 @@
     (define-key vterm-mode-map (kbd "M-<right>") #'windmove-right)
     (define-key vterm-mode-map (kbd "M-<up>")    #'windmove-up)
     (define-key vterm-mode-map (kbd "M-<down>")  #'windmove-down))
+
   (after! evil (evil-set-initial-state 'vterm-mode 'emacs))
 
   (after! blacken
