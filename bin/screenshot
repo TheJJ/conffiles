@@ -3,7 +3,7 @@
 """
 take screenshots and copy them to the clipboard
 
-(c) 2022 Jonas Jelten <jj@sft.lol>
+(c) 2022-2024 Jonas Jelten <jj@sft.lol>
 
 GPLv3 or later.
 """
@@ -13,7 +13,6 @@ import datetime
 import os
 import pathlib
 import subprocess
-import time
 
 
 def main():
@@ -24,20 +23,39 @@ def main():
 
     cli.add_argument("-s", "--select", action='store_true',
                      help='use mouse selection')
-    cli.add_argument("-o", "--output", default="~/Pictures/screenshots/%stamp.png",
-                     help='output filename, %stamp is replaced with iso timestamp')
+    cli.add_argument("-o", "--output", default="~/Pictures/screenshots/<stamp>.png",
+                     help='output filename, <stamp> is replaced with iso timestamp')
 
     args = cli.parse_args()
 
-    outfile = args.output.replace('%stamp', datetime.datetime.now().isoformat())
+    outfile = args.output.replace('<stamp>', datetime.datetime.now().isoformat())
 
     outpath = pathlib.Path(os.path.expanduser(outfile))
-    take_screenshot(outpath, args.select)
 
+    if os.environ.get("XDG_SESSION_TYPE") == "wayland":
+        take_screenshot_wayland(outpath, args.select)
+    else:
+        take_screenshot_x(outpath, args.select)
 
-def take_screenshot(filepath, mouse_select=False):
+def take_screenshot_wayland(filepath, mouse_select=False):
     """
-    call scrot and shoot the screen.
+    take a screenshot with grim, with selection using slurp on wayland.
+    put it to the clipboard with wl-copy from gui-apps/wl-clipboard.
+    """
+    options = ['-l', '8'] # png compression
+
+    if mouse_select:
+        region_select = subprocess.check_output(['slurp', '-d']).decode()
+        options.extend(['-g', region_select.strip()])
+
+    subprocess.run(['grim'] + options + [filepath], check=True)
+    with open(filepath, "rb") as imagehdl:
+        subprocess.run(["wl-copy", "--type", "image/png"], stdin=imagehdl, check=True)
+
+
+def take_screenshot_x(filepath, mouse_select=False):
+    """
+    call maim and shoot the screen on X11.
     """
     options = []
     if mouse_select:
@@ -50,7 +68,7 @@ def take_screenshot(filepath, mouse_select=False):
     subprocess.run(['maim'] + options, check=True)
 
     # and copy to clipboard!
-    subprocess.run(['xclip', '-selection', 'clipboard', '-t', 'image/png', '-i', str(filepath)])
+    subprocess.run(['xclip', '-selection', 'clipboard', '-t', 'image/png', '-i', str(filepath)], check=True)
 
 
 if __name__ == "__main__":
