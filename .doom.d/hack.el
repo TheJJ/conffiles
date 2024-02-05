@@ -9,3 +9,16 @@
               :filter-args
               (lambda (args) (let ((filename (car args)))
                                (list (concat filename ".justadirtyhack"))))))
+
+;; disable some doom-snippets snippets
+;; https://github.com/doomemacs/snippets
+(after! yasnippet
+  (after! doom-snippets
+    (let ((disables-for-modes '((python-mode ("." "cl" "dec" "s" "size"))
+                                (c++-mode ("pack")))))
+      (dolist (disables-for-mode disables-for-modes)
+        (let ((table (yas--table-get-create (car disables-for-mode)))
+              (uuids (cdr disables-for-mode)))
+
+          (dolist (uuid uuids)
+            (yas--remove-template-by-uuid table uuid)))))))
