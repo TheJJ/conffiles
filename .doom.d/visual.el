@@ -7,6 +7,11 @@
 (after! centaur-tabs-mode
   (setq centaur-tabs-show-navigation-buttons t))
 
+(after! jit-lock-mode
+  (setq jit-lock-stealth-time 0.3   ;; fontify unfontified areas when idle for this time
+        jit-lock-stealth-nice 0.3   ;; time between fontifying chunks
+        jit-lock-chunk-size 4096))  ;; number of characters to fontify at once
+
 ;; when exiting isearch, register the search term as regexp-highlight
 (defadvice isearch-done (after ysph-hl-search activate compile)
            "highlight the search term after isearch has quit"
