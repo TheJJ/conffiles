@@ -8,6 +8,7 @@ optionally display a lockscreen image if it exists
 import argparse
 import subprocess
 import shlex
+import os
 from pathlib import Path
 
 def run(args):
@@ -37,7 +38,11 @@ def main():
     if dunst_active:
         run("dunstctl set-paused true")
 
-    lock_invocation = ["i3lock", "-n", "-c", "000000", "-f"]
+    if os.environ.get("XDG_SESSION_TYPE") == "wayland":
+        lock_invocation = ["swaylock", "-n", "-c", "000000", "-F", "-e"]
+    else:
+        lock_invocation = ["i3lock", "-n", "-c", "000000", "-f"]
+
     if lockimage.is_file():
         lock_invocation.extend(["-i", lockimage])
 

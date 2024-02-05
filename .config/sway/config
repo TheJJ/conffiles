@@ -1,11 +1,9 @@
-# Default config for sway
+# JJ's sway config
+# (c) 2024 Jonas Jelten <jj@sft.lol>
 #
-# Copy this to ~/.config/sway/config and edit it to your liking.
-#
-# Read `man 5 sway` for a complete reference.
+# `man 5 sway` for complete reference.
 
-### Variables
-#
+
 # Logo key. Use Mod1 for Alt.
 set $mod Mod4
 
@@ -13,6 +11,8 @@ set $left j
 set $down k
 set $up l
 set $right semicolon
+
+set $laptopscreen eDP-1
 
 
 # color title depending on wayland/x
@@ -47,7 +47,7 @@ set $right semicolon
 # variable refresh rate for all monitors
 output * adaptive_sync on
 
-output * background #000000 solid_color
+output * bg #000000 solid_color
 
 ### Input configuration
 #
@@ -73,30 +73,51 @@ input type:keyboard {
 
 input type:pointer {
     accel_profile flat
-    pointer_accel -0.3
+    pointer_accel 0.0
 }
 
 input type:touchpad {
-       dwt enabled
-       tap enabled
-       natural_scroll enabled
-       scroll_factor 1.3
+    dwt enabled
+    tap enabled
+    natural_scroll enabled
+    scroll_factor 1.3
 }
+
+input type:tablet_tool {
+    map_to_output $laptopscreen
+}
+
+input type:touch {
+    map_to_output $laptopscreen
+}
+
+#bindswitch --locked lid:off output $laptopscreen power off
+#bindswitch --locked lid:on output $laptopscreen power on
+bindswitch --locked lid:on exec "xbacklight -getf > ~/.cache/xbacklightstate && xbacklight -set 0"
+bindswitch --locked lid:off exec "xbacklight -set $(cat ~/.cache/xbacklightstate)"
 
 # broken because x stuff scales with xft.dpi again
 #output HDMI-A-1 scale 1.5
 
-### Key bindings
 #
-# Basics:
+# keybindings
 #
     bindsym $mod+Return exec kitty
+    bindsym $mod+shift+Return exec cool-retro-term
+
     bindsym $mod+Shift+q kill
 
     # launcher
+    #bindsym $mod+shift+d exec "rofi --show run --allow-icons"
+    #bindsym $mod+d exec "wofi --show run --allow-icons"
     bindsym $mod+d exec rofi -show run -show-icons
     bindsym $mod+shift+d exec rofi -show drun -show-icons
     bindsym $mod+c exec rofi -show ssh -show-icons -terminal kitty
+
+    # power & lock
+    bindsym $mod+u exec "~/bin/screenlock"
+    bindsym $mod+shift+o exec "~/bin/screenlock --suspend"
+    #bindsym $mod+p exec "todo power off screen"
 
     # audio
     bindsym XF86AudioPlay exec playerctl play
@@ -132,33 +153,27 @@ input type:touchpad {
 
     # Exit sway (logs you out of your Wayland session)
     bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
-#
-# Moving around:
-#
+
     # Move your focus around
     bindsym $mod+$left focus left
     bindsym $mod+$down focus down
     bindsym $mod+$up focus up
     bindsym $mod+$right focus right
-    # Or use $mod+[up|down|left|right]
     bindsym $mod+Left focus left
     bindsym $mod+Down focus down
     bindsym $mod+Up focus up
     bindsym $mod+Right focus right
 
-    # Move the focused window with the same, but add Shift
+    # Move the focused window
     bindsym $mod+Shift+$left move left
     bindsym $mod+Shift+$down move down
     bindsym $mod+Shift+$up move up
     bindsym $mod+Shift+$right move right
-    # Ditto, with arrow keys
     bindsym $mod+Shift+Left move left
     bindsym $mod+Shift+Down move down
     bindsym $mod+Shift+Up move up
     bindsym $mod+Shift+Right move right
-#
-# Workspaces:
-#
+
     # Switch to workspace
     bindsym $mod+1 workspace number 1
     bindsym $mod+2 workspace number 2
@@ -170,6 +185,20 @@ input type:touchpad {
     bindsym $mod+8 workspace number 8
     bindsym $mod+9 workspace number 9
     bindsym $mod+0 workspace number 10
+
+    bindsym $mod+F1 workspace F1
+    bindsym $mod+F2 workspace F2
+    bindsym $mod+F3 workspace F3
+    bindsym $mod+F4 workspace F4
+    bindsym $mod+F5 workspace F5
+    bindsym $mod+F6 workspace F6
+    bindsym $mod+F7 workspace F7
+    bindsym $mod+F8 workspace F8
+    bindsym $mod+F9 workspace F9
+    bindsym $mod+F10 workspace F10
+    bindsym $mod+F11 workspace F11
+    bindsym $mod+F12 workspace F12
+
     # Move focused container to workspace
     bindsym $mod+Shift+1 move container to workspace number 1
     bindsym $mod+Shift+2 move container to workspace number 2
@@ -181,8 +210,19 @@ input type:touchpad {
     bindsym $mod+Shift+8 move container to workspace number 8
     bindsym $mod+Shift+9 move container to workspace number 9
     bindsym $mod+Shift+0 move container to workspace number 10
-    # Note: workspaces can have any name you want, not just numbers.
-    # We just use 1-10 as the default.
+
+    bindsym $mod+Shift+F1 move workspace F1
+    bindsym $mod+Shift+F2 move workspace F2
+    bindsym $mod+Shift+F3 move workspace F3
+    bindsym $mod+Shift+F4 move workspace F4
+    bindsym $mod+Shift+F5 move workspace F5
+    bindsym $mod+Shift+F6 move workspace F6
+    bindsym $mod+Shift+F7 move workspace F7
+    bindsym $mod+Shift+F8 move workspace F8
+    bindsym $mod+Shift+F9 move workspace F9
+    bindsym $mod+Shift+F10 move workspace F10
+    bindsym $mod+Shift+F11 move workspace F11
+    bindsym $mod+Shift+F12 move workspace F12
 
     # whole workspace movement
     bindsym $mod+greater move workspace to output right
@@ -209,6 +249,7 @@ input type:touchpad {
 
     # Make the current focus fullscreen
     bindsym $mod+f fullscreen
+    bindsym $mod+shift+f fullscreen global
 
     # Toggle the current focus between tiling and floating mode
     bindsym $mod+Shift+space floating toggle
@@ -216,8 +257,9 @@ input type:touchpad {
     # Swap focus between the tiling area and the floating area
     bindsym $mod+space focus mode_toggle
 
-    # Move focus to the parent container
+    # Container tree traversal
     bindsym $mod+a focus parent
+    bindsym $mod+shift+a focus child
 #
 # Scratchpad:
 #
