@@ -61,3 +61,15 @@
 ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; device specific packages (e.g. for testing)
+;;
+;; example content to have a local non-byte-compiled repo instead of
+;; an upstream emacs package (for development):
+;;
+;; (package! some-package
+;;   :recipe (:local-repo "~/src/emacs/some-package" :build nil))
+;;
+(load! "device-packages.el" nil t)

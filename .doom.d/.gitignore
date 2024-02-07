@@ -1,5 +1,6 @@
 /device.el
 /device-pre.el
+/device-packages.el
 /custom.el
 /todo.org
 

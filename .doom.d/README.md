@@ -19,8 +19,8 @@ that way, these config files remain user-independent.
 
 ### org
 - `org-agenda-files`: directories and files to auto-load.
-  can be added with `org-agenda-file-to-front` C-c [
-  and removed with `org-remove-file` C-c ]
+  can be added with `org-agenda-file-to-front` `C-c [`
+  and removed with `org-remove-file` `C-c ]`
 
 ### org-roam
 - `org-roam-directory`: path where the org-roam notes are
@@ -51,6 +51,6 @@ example `.dir-locals.el` file for a linux repo:
 
 ```
 jj's Emacs configuration
-Copyright (c) 2011-2023 Jonas Jelten <jj@sft.lol>
+Copyright (c) 2011-2024 Jonas Jelten <jj@sft.lol>
 Licensed GPLv3 or later
 ```

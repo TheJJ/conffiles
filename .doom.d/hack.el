@@ -14,7 +14,7 @@
 ;; https://github.com/doomemacs/snippets
 (after! yasnippet
   (after! doom-snippets
-    (let ((disables-for-modes '((python-mode ("." "cl" "dec" "s" "size"))
+    (let ((disables-for-modes '((python-mode ("." "cl" "dec" "for" "s" "size"))
                                 (c++-mode ("pack")))))
       (dolist (disables-for-mode disables-for-modes)
         (let ((table (yas--table-get-create (car disables-for-mode)))
