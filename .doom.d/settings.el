@@ -3,6 +3,7 @@
 (defun jj/defaults ()
   (delete-selection-mode t)  ;; replace selection with typed text
   (context-menu-mode t)      ;; rightclick menu instead of useless region selection
+  (breadcrumb-mode t)        ;; display current navigation path in headerline
 
   ;; don't push the mouse away, instead just hide it when typing
   (setq mouse-avoidance-mode nil
@@ -78,3 +79,7 @@
 
 (after! vterm
   (setq vterm-min-window-width 20))
+
+(after! breadcrumb
+  (setq breadcrumb-project-max-length 0)  ; path to file
+  (setq breadcrumb-imenu-max-length 1.0)) ; path in file

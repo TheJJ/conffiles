@@ -26,3 +26,7 @@
                (lambda ()
                  (add-to-list 'lsp-clients-clangd-args "--header-insertion=never")))  ; don't auto-insert #includes
   )
+
+;; eglot lsp
+(after! eglot
+  (use-package! breadcrumb))

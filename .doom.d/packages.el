@@ -7,6 +7,7 @@
 
 
 (package! blacken)
+(package! breadcrumb)
 (package! company-statistics)
 (package! idle-highlight-mode)
 (package! org-modern)
