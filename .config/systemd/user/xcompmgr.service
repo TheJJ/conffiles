@@ -1,6 +1,7 @@
 [Unit]
 Description=xcompmgr
 BindsTo=graphical-session.target
+ConditionEnvironment=!WAYLAND_DISPLAY
 
 [Service]
 ExecStart=/usr/bin/xcompmgr

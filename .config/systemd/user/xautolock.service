@@ -1,6 +1,7 @@
 [Unit]
 Description=Automatic screen lock
 BindsTo=graphical-session.target
+ConditionEnvironment=!WAYLAND_DISPLAY
 
 [Service]
 ExecStart=/usr/bin/xautolock -time 10 -locker '/home/jelten/bin/screenlock'
