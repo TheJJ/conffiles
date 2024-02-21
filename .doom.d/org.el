@@ -36,7 +36,7 @@
         org-confirm-babel-evaluate nil   ; sure, just execute org code snippets, what can go wrong
         org-babel-default-header-args:cpp '((:flags . "-std=c++23 -Wall -Wextra"))
         org-log-done nil
-        org-todo-keywords '((sequence "TODO(t)" "PROJ(p)" "WAIT(w)" "HOLD(h)" "IDEA(i)" "|" "DONE(d)" "CNCL(c)") (sequence "|" "OKAY(o)" "YES(y)" "NO(n)"))
+        org-todo-keywords '((sequence "TODO(t)" "PROJ(p)" "WAIT(w)" "|" "DONE(d)" "CNCL(c)") (sequence "|" "YES(y)" "NO(n)"))
         org-return-follows-link t
         org-cycle-level-after-item/entry-creation nil)
 
