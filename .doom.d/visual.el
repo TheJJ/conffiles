@@ -25,6 +25,10 @@
   ;; synchronize the fill-column setting to the whitespace long line highlight
   (sync-variable 'whitespace-line-column 'fill-column))
 
+(after! doom-themes
+  ;; otherwise doom-themes would shadow org-modern
+  (setq doom-themes-org-fontify-horizontal-rules nil))
+
 (defun jj/scrolling ()
   ;; mouse-wheel scrolling
   (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)
