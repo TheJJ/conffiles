@@ -78,6 +78,7 @@
   (global-set-key (kbd "M-[ b") #'forward-paragraph)
 
   (map! :leader :desc "Search project" "p /" #'jj/projectsearch)
+  (global-set-key (kbd "C-S-s") #'+default/search-buffer) ; search like swiper
   (global-set-key (kbd "C-x C-b") #'bs-show) ; buffer selector
   (global-set-key (kbd "C-x M-b") #'speedbar)
   (global-set-key (kbd "C-c C-a") #'mark-whole-buffer)
