@@ -342,4 +342,8 @@ bar {
 exec [[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources
 exec [[ -f ~/.Xmodmap ]] && xmodmap ~/.Xmodmap
 
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
+exec dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
+exec systemctl --user start sway-session.service
+
 include /etc/sway/config.d/*
