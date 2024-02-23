@@ -119,6 +119,12 @@ bindswitch --locked lid:off exec "xbacklight -set $(cat ~/.cache/xbacklightstate
     bindsym $mod+shift+o exec "~/bin/screenlock --suspend"
     #bindsym $mod+p exec "todo power off screen"
 
+    # screenshot
+    bindcode control+Print exec "~/bin/screenshot"
+    bindcode control+shift+Print exec "~/bin/screenshot --select"
+    bindcode Print exec "~/bin/screenshot -o ~/Pictures/screenshots/<stamp>.png"
+    bindcode shift+Print exec "~/bin/screenshot --select -o ~/Pictures/screenshots/<stamp>.png"
+
     # audio
     bindsym XF86AudioPlay exec playerctl play
     bindsym XF86AudioPause exec playerctl pause
