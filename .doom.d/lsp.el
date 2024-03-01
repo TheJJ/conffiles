@@ -29,4 +29,8 @@
 
 ;; eglot lsp
 (after! eglot
-  (use-package! breadcrumb))
+  (use-package! breadcrumb)
+
+  (setq
+   ;; don't funnily reformat when typing
+   eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider)))
