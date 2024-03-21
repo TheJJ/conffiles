@@ -147,6 +147,9 @@ bindswitch --locked lid:off exec "xbacklight -set $(cat ~/.cache/xbacklightstate
     bindcode control+shift+232 exec xbacklight -dec 1
     bindcode control+shift+233 exec xbacklight -inc 1
 
+    # various
+    bindsym control+grave exec "dunstctl history-pop"
+
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
     # Despite the name, also works for non-floating windows.
