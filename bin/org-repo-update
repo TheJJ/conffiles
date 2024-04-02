@@ -17,7 +17,9 @@ os.chdir(os.path.expanduser("~/org/"))
 if os.path.exists(".gitcommit"):
     hostname = socket.gethostname()
     subprocess.check_call(["git", "add", "--all"])
-    subprocess.check_call(["git", "commit", "-m", f"commit on {hostname}"])
+    changes = subprocess.check_output(["git", "status", "--porcelain"])
+    if changes:
+        subprocess.check_call(["git", "commit", "-m", f"commit on {hostname}"])
 
 if os.path.exists(".gitpush"):
     subprocess.check_call(["git", "push"])
