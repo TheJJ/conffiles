@@ -74,8 +74,9 @@ export LC_PAPER="de_DE.UTF-8"
 
 ### no more setting env vars after this point:
 ### non-interactive mode does not process further.
-# we do this so for example `zsh -c env` prints the correct env,
+# we do this so for example `env -i -- zsh -c env` prints the correct env,
 # even it is not interactive. this is used by emacs for example.
+# (this works since .zshenv sources this file when not interactive)
 
 [[ $- != *i* ]] && return
 

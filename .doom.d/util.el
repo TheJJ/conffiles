@@ -231,8 +231,26 @@ Example (double-list-index 5 '(1 (2 3) (4 5) 6)) == 2
                    (throw 'nth-elt idx)))))
     nil))
 
-;; add a function to multiple hooks
 (defun multi-hook-add (function hooks)
+  "add a function to multiple hooks"
   (mapc (lambda (hook)
           (add-hook hook function))
         hooks))
+
+(defun jj/extract-kv-re-seq (regexp)
+  "return an alist of REGEXP matches in a buffer.
+group-1 becomes key,
+group-2 3 or 4 becomes value."
+
+  (save-excursion
+    (goto-char (point-min))
+
+    (save-match-data
+      (let (matches)
+        (while (re-search-forward regexp nil t)
+          (let ((key (match-string-no-properties 1))
+                (value (or (match-string-no-properties 2)
+                           (match-string-no-properties 3)
+                           (match-string-no-properties 4))))
+            (push `(,key . ,value) matches)))
+        matches))))

@@ -1,8 +1,15 @@
 ;;; env.el -*- lexical-binding: t; -*-
 
-;; TODO doom has this env-from-file loading mechanism somewhere
+;;; this is a bit similar to exec-path-from-shell
+;;; inject environment content from user's default shell into emacs.
+;;;
+;;; yes, this may increase Emacs' startup time if your shell config is crappy.
+;;; to fix this, do an early exit after setting variables with
+;;;   [[ $- != *i* ]] && return
+;;; this stops execution when running the shell non-interactively (which we do).
 
-(defvar load-env-vars-env-var-regexp
+
+(defvar jj/env-re
   (rx
    line-start
    (0+ space)
@@ -20,47 +27,38 @@
    (0+ space)
    (optional "#" (0+ any))
    )
-  "Regexp to match env vars in a string."
+  "Regexp to match env vars in a string returned in the output of `env`"
   )
 
-(defun load-env-vars-re-seq (regexp)
-  "Get a list of all REGEXP matches in a buffer."
-  (save-excursion
-    (goto-char (point-min))
-    (save-match-data
-      (let (matches)
-        (while (re-search-forward regexp nil t)
-          (push (list (match-string-no-properties 1) (or (match-string-no-properties 2) (match-string-no-properties 3) (match-string-no-properties 4))) matches))
-        matches))))
 
-(defun load-env-vars-extract-env-vars ()
-  "Extract environment variable name and value from STRING."
-  (load-env-vars-re-seq load-env-vars-env-var-regexp))
-
-
-(defun load-env-vars-set-env (env-vars)
+(defun jj/env--set (env-vars)
   "Set environment variables from key value lists from ENV-VARS."
-  (setq exec-path (cl-remove-duplicates
-                   (mapcar #'directory-file-name exec-path)
-                   :test #'string-equal :from-end t))
+
   (let ((convert-to-os-path (if (memq system-type '(windows-nt ms-dos))
                                 (apply-partially #'subst-char-in-string ?/ ?\\)
-                              ;; Assume that we start with forward slashes.
-                              #'identity)))
-    (dolist (element env-vars)
-      (let ((key (car element)) (value (cadr element)))
-        (if (string-equal "PATH" key)
-            (let ((paths (split-string value path-separator)))
-              (setq exec-path (cl-remove-duplicates
-                               (append (mapcar (lambda (path) (directory-file-name (subst-char-in-string ?\\ ?/ path))) paths) exec-path)
-                               :test #'string-equal :from-end t)
-                    )
-              (setenv "PATH" (mapconcat convert-to-os-path exec-path path-separator)))
-          (setenv key value))))))
+                              #'identity))
+        (convert-from-os-path (apply-partially #'subst-char-in-string ?\\ ?/)))
+
+    (cl-loop
+     for (key . value) in env-vars do
+
+     (if (string-equal "PATH" key)
+         (let ((paths (split-string value path-separator)))
+           ;; clean and construct emacs'
+           (setq exec-path
+                 (cl-remove-duplicates
+                  (mapcar #'directory-file-name
+                          (append (mapcar convert-from-os-path paths)
+                                  exec-path))
+                  :test #'string-equal :from-end t))
+
+           (setenv "PATH" (mapconcat convert-to-os-path exec-path path-separator)))
+
+       (setenv key value)))))
 
 
 (defvar jj/env-import-deny
-  '("^INSIDE_EMACS$" "^\\(OLD\\)?PWD$" "^SHLVL$" "^PS1$" "^R?PROMPT$" "^TERM\\(CAP\\)?$")
+  '("^_=" "^LS_COLORS=" "^INSIDE_EMACS=" "^\\(OLD\\)?PWD=" "^SHLVL=" "^PS1=" "^R?PROMPT=" "^TERM\\(CAP\\)?=")
   "Environment variables to omit from the shell environment import")
 
 (defun jj/import-shell-env ()
@@ -70,9 +68,9 @@ This executes the default shell and fetches the environment variables with `env'
 in order to get the current env-vars (like the ssh-agent socket path)
 on each emacs launch.
 But why are we not happy with the env vars emacs got anyway from the kernel?
-Because in .zshrc, .bashrc, ... users usually define more, and would expect emacs
-to know about them, even though they didn't launch emacs from their shell,
-but their desktop environment instead.
+Because in .zshrc, .bashrc, ... users usually define more,
+and would expect emacs to know about them, even though they didn't launch emacs
+from their shell, but their desktop environment instead.
 We basically inject the shell-env into non-shell-launched emacs.
 
 Important:
@@ -80,6 +78,7 @@ The shell config has to export the env vars non-interactively - it must not exit
 in its config file before env vars are set because the shell is not interactive!
 
 In your zshrc this means:
+
 export STUFF=...
 # more env-vars
 # don't execute the rest of the file in non-interactive mode.
@@ -97,20 +96,29 @@ export STUFF=...
                  (t (warn "unsupported system type for fetching env: %s" system-type)
                     nil))))
       (let ((process-environment initial-environment)
-            (env-point (point)))
+            (point-start (point)))
+        ;; uses the default shell (shell-file-name)
         (call-process-shell-command executable nil t)
+
         ;; sort envvars and remove duplicates
-        (sort-regexp-fields nil "^.*$" ".*?=" env-point (point-max))
-        (delete-duplicate-lines env-point (point-max) nil t)
+        (sort-regexp-fields nil "^.*$" ".*?=" point-start (point-max))
+        (delete-duplicate-lines point-start (point-max) nil t)
+
         ;; remove ignored environment variables
         (dolist (v jj/env-import-deny)
-          (flush-lines v env-point (point-max)))))
+          (flush-lines v point-start (point-max)))))
 
     ;; apply env vars into emacs
-    (let ((env-vars (load-env-vars-extract-env-vars)))
-      (load-env-vars-set-env env-vars))))
+    (let ((env-vars (jj/extract-kv-re-seq jj/env-re)))
+      (jj/env--set env-vars)))
+
+  ;; delete the `doom sync` generated env cache file to prevent loading it.
+  (when (and doom-env-file
+             (file-exists-p doom-env-file))
+    (delete-file doom-env-file)))
+
+;; instead, we import the environment by running the user's shell once.
+(jj/import-shell-env)
 
 ;; in doom-start.el the cached doom-env-file is loaded if it's set.
-;(setq doom-env-file nil)
-;; instead, we import the environment by running the user's shell once.
-;(jj/import-shell-env)
+(setq doom-env-file nil)

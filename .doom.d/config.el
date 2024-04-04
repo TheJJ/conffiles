@@ -19,9 +19,9 @@
 ;; - `map!' for binding new keys
 
 
+(load! "util.el")
 (load! "loadpath.el")
 (load! "env.el")
-(load! "util.el")
 (load! "batch.el")
 (load! "indent.el")
 (load! "codestyle.el")
