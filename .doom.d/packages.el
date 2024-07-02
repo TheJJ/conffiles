@@ -8,6 +8,7 @@
 
 (package! blacken)
 (package! breadcrumb)
+(package! casual-info)
 (package! company-statistics)
 (package! idle-highlight-mode)
 (package! org-modern)

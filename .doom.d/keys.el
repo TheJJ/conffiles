@@ -1,5 +1,9 @@
 ;;; keys.el -*- lexical-binding: t; -*-
 
+;; transient keys for info-mode
+(use-package! casual-info)
+
+
 (defun jj/keybindings ()
   ;; support for emacs bindings in insert mode
   ;; this isn't very good, but missing keys are fixed below.
@@ -172,6 +176,9 @@
     (define-key vterm-mode-map (kbd "M-<down>")  #'windmove-down))
 
   (after! evil (evil-set-initial-state 'vterm-mode 'emacs))
+
+  (after! casual-info
+    (map! :map Info-mode-map :desc "Info navigation" "C-o" #'casual-info-tmenu))
 
   (after! blacken
     (map! :leader :desc "Blacken Buffer" "m b b" #'python-black-buffer)
