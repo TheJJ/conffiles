@@ -4,6 +4,17 @@
 (use-package! casual-info)
 
 
+(defun jj/kill-region-only (beg end &optional region)
+  "only kill region if it is active"
+  (interactive (let ((beg (mark))
+                     (end (point)))
+                 (unless (and beg end)
+                   (user-error "no mark -> no region"))
+                 (list beg end 'region)))
+  (when (use-region-p)
+    (kill-region beg end region)))
+
+
 (defun jj/keybindings ()
   ;; support for emacs bindings in insert mode
   ;; this isn't very good, but missing keys are fixed below.
@@ -16,11 +27,13 @@
   (define-key evil-insert-state-map (kbd "C-k") #'jj/delete-line)
   (define-key evil-insert-state-map (kbd "C-S-k") #'jj/delete-line-backward)
   (define-key evil-insert-state-map (kbd "M-w") #'kill-ring-save)
-  (define-key evil-insert-state-map (kbd "C-w") #'kill-region)
   (define-key evil-insert-state-map (kbd "C-SPC") #'set-mark-command)
   (define-key evil-insert-state-map (kbd "C-r") #'isearch-repeat-backward)
   (define-key evil-insert-state-map (kbd "M->") #'jj/shift-right)
   (define-key evil-insert-state-map (kbd "M-<") #'jj/shift-left)
+  ;; only kill region when it is active
+  ;; (otherwise we would delete to the non-visible last mark...)
+  (map! :desc "kill region" :ig "C-w" #'jj/kill-region-only)
 
   ;; enable the alternative leader key also in normal and visual states
   (setq doom-leader-alt-key-states '(normal visual motion emacs insert))
@@ -51,18 +64,6 @@
   (global-set-key (kbd "M-S-<right>") #'drag-stuff-right)
   (global-set-key (kbd "M-S-<up>")    #'drag-stuff-up)
   (global-set-key (kbd "M-S-<down>")  #'drag-stuff-down)
-
-  ;; only kill region when it is active
-  ;; (otherwise we would delete to the non-visible last mark...)
-  (global-set-key (kbd "C-w")
-                  (lambda (beg end &optional region)
-                    (interactive (let ((beg (mark))
-                                       (end (point)))
-                                   (unless (and beg end)
-                                     (user-error "no mark -> no region"))
-                                   (list beg end 'region)))
-                    (when (use-region-p)
-                      (kill-region beg end region))))
 
   ;; line nativation/deletion
   (global-set-key (kbd "C-k") #'jj/delete-line)
