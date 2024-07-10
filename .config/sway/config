@@ -91,13 +91,14 @@ input type:touch {
     map_to_output $laptopscreen
 }
 
-#bindswitch --locked lid:off output $laptopscreen power off
-#bindswitch --locked lid:on output $laptopscreen power on
-bindswitch --locked lid:on exec "xbacklight -getf > ~/.cache/xbacklightstate && xbacklight -set 0"
-bindswitch --locked lid:off exec "xbacklight -set $(cat ~/.cache/xbacklightstate)"
+#bindswitch --locked lid:off output 'swaymsg output $laptopscreen power off'
+#bindswitch --locked lid:on exec 'swaymsg output $laptopscreen power on'
 
-# broken because x stuff scales with xft.dpi again
-#output HDMI-A-1 scale 1.5
+# lid closed
+bindswitch --locked lid:on exec 'xbacklight -ctrl intel_backlight -getf > ~/.cache/xbacklightstate && xbacklight -ctrl intel_backlight -set 0'
+# lid opened. important: when listing devices of xbacklight first, this apparently waits for the display control to be available again. without the backlight restore will fail with '2' because it is too early?
+bindswitch --locked lid:off exec 'xbacklight -list > /dev/null; xbacklight -ctrl intel_backlight -set "$(cat ~/.cache/xbacklightstate)"'
+
 
 #
 # keybindings
