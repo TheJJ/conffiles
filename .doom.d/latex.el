@@ -12,7 +12,7 @@
   (setq bibtex-completion-pdf-open-function 'helm-open-file-with-default-tool  ; open with system viewer
         bibtex-completion-pdf-field "file")) ; field in bibtex file for pdf name
 
-(after! LaTeX-mode
+(after! latex
   (setq TeX-engine 'default  ;; or xetex, but conflicts with inputenc package
         TeX-PDF-mode t
         TeX-save-query nil
