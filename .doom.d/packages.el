@@ -20,9 +20,9 @@
 (package! starlit-theme)
 
 ;; no snippets
-;; better would be to not complete snippets on TAB, but C-x C-s
-;; for now, most annoying snippets are disabled in hack.el
-;(package! doom-snippets :ignore t :disable t)
+;; better would be to not complete snippets on TAB, but C-x C-s or something.
+;; some annoying snippets are hard-disabled in hack.el
+(package! doom-snippets :ignore t :disable t)
 
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:
