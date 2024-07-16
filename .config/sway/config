@@ -97,7 +97,7 @@ input type:touch {
 # lid closed
 bindswitch --locked lid:on exec 'xbacklight -ctrl intel_backlight -getf > ~/.cache/xbacklightstate && xbacklight -ctrl intel_backlight -set 0'
 # lid opened. important: when listing devices of xbacklight first, this apparently waits for the display control to be available again. without the backlight restore will fail with '2' because it is too early?
-bindswitch --locked lid:off exec 'xbacklight -list > /dev/null; xbacklight -ctrl intel_backlight -set "$(cat ~/.cache/xbacklightstate)"'
+bindswitch --locked lid:off exec 'sleep 0.2; xbacklight -list > /dev/null; xbacklight -ctrl intel_backlight -set "$(cat ~/.cache/xbacklightstate)"'
 
 
 #
