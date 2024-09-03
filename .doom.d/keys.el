@@ -1,7 +1,12 @@
 ;;; keys.el -*- lexical-binding: t; -*-
 
 ;; transient keys for info-mode
-(use-package! casual-info)
+(use-package! casual-info
+  :defer t)
+
+;; line movement
+(use-package! drag-stuff
+  :defer t)
 
 
 (defun jj/kill-region-only (beg end &optional region)

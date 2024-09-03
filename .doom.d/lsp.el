@@ -33,4 +33,8 @@
 
   (setq
    ;; don't funnily reformat when typing
-   eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider)))
+   eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider))
+
+  (setq-default eglot-workspace-configuration
+                '((:pylsp . (:plugins (:black (:enabled t :line_length 120)
+                                       :mypy (:enabled t)))))))
