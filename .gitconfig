@@ -1,0 +1,49 @@
+[include]
+	path = ~/.gitconfig.local
+[color]
+	status = auto
+	branch = auto
+	interactive = auto
+	diff = auto
+[merge]
+	tool = nvimdiff
+[mergetool "jjnvimdiff"]
+	cmd = nvim -d $LOCAL $MERGED $REMOTE -c 'wincmd w' -c 'wincmd J'
+[diff]
+	tool = nvimdiff
+	colorMoved = default
+	wsErrorHighlight = all
+[push]
+	default = simple
+[help]
+	autocorrect = 1
+[rebase]
+	autosquash = true
+[alias]
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(reset) (%C(bold blue)%an%Creset <%C(yellow)%aE%C(reset)>)' --abbrev-commit --date=relative
+	slap = blame -w
+	c = commit
+	s = status
+	cm = commit -m
+	r = rebase
+	ri = rebase -i --autostash
+	a = add
+	ap = add -p
+	ca = commit --amend
+[fetch]
+	fsckobjects = true
+[transfer]
+	fsckobjects = true
+[receive]
+	fsckobjects = true
+[rerere]
+	enabled = true
+[pull]
+	ff = only
+[init]
+	defaultBranch = master
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
