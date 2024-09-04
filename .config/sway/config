@@ -123,8 +123,8 @@ bindswitch --locked lid:off exec 'sleep 0.2; xbacklight -list > /dev/null; xback
     # screenshot
     bindcode control+Print exec "~/bin/screenshot"
     bindcode control+shift+Print exec "~/bin/screenshot --select"
-    bindcode Print exec "~/bin/screenshot -o ~/Pictures/screenshots/<stamp>.png"
-    bindcode shift+Print exec "~/bin/screenshot --select -o ~/Pictures/screenshots/<stamp>.png"
+    bindcode Print exec "~/bin/screenshot -o '~/Pictures/screenshots/<stamp>.png'"
+    bindcode shift+Print exec "~/bin/screenshot --select -o '~/Pictures/screenshots/<stamp>.png'"
 
     # audio
     bindsym XF86AudioPlay exec playerctl play
