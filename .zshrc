@@ -121,6 +121,9 @@ alias ipy='ipython'
 alias pytrace='python3 -m trace -g -t'
 compdef py=python3 p3=python3 p=python3 p2=python2 py2=python2 pytrace=python3 ipy=ipython 2>/dev/null
 
+alias g='git'
+compdef g=git
+
 alias bpy='bpython'
 alias b='bpy'
 alias dmesg='dmesg -L'
