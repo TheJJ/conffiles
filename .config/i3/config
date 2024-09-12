@@ -28,8 +28,8 @@ bindsym control+grave exec dunstctl history-pop
 
 bindcode control+107 exec ~/bin/screenshot
 bindcode control+shift+107 exec ~/bin/screenshot --select
-bindcode 107 exec ~/bin/screenshot -o ~/Pictures/screenshots/<stamp>.png
-bindcode shift+107 exec ~/bin/screenshot --select -o ~/Pictures/screenshots/<stamp>.png
+bindcode 107 exec ~/bin/screenshot -o '~/Pictures/screenshots/<stamp>.png'
+bindcode shift+107 exec ~/bin/screenshot --select -o '~/Pictures/screenshots/<stamp>.png'
 
 #bindcode 162 exec sleep 0.3 && ~/bin/rscreen
 #bindcode 161 exec sleep 0.3 && ~/bin/rscreen portrait
