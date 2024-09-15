@@ -45,6 +45,7 @@
     uniquify-buffer-name-style 'post-forward
     ;; don't rename special buffers
     uniquify-ignore-buffers-re "^ ?\\*"
+    evil-want-fine-undo t
 
     +default-want-RET-continue-comments nil ;; no magic doom comment continuation
   ))
