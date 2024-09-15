@@ -73,11 +73,6 @@
    helm-ff-file-name-history-use-recentf nil  ; don't use recentf for helm find files
    helm-ff-initial-sort-method 'ext))         ; sort by extension, advised for priority and name sorting
 
-(after! vertico
-  (setq vertico-resize nil  ;; don't wildly resize the window
-        vertico-count 18    ;; number of candidates
-        vertico-cycle nil)) ;; no wrap in vertico candidates
-
 (after! vterm
   (setq vterm-min-window-width 20))
 

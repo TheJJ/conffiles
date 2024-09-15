@@ -17,3 +17,8 @@
   (setq lsp-pylsp-plugins-flake8-enabled nil
         lsp-pylsp-plugins-mccabe-enabled nil
         lsp-pylsp-plugins-pylint-enabled nil))
+
+(after! vertico
+  (setq vertico-resize nil  ;; don't wildly resize the window
+        vertico-count 18    ;; number of candidates
+        vertico-cycle nil)) ;; no wrap in vertico candidates
