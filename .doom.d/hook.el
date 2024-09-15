@@ -1,4 +1,5 @@
-;;; hook.el -*- lexical-binding: t; -*-
+;
+; hook.el -*- lexical-binding: t; -*-
 
 ;; config for all prog-modes
 (defun jj/coding-hook ()
@@ -422,6 +423,10 @@
 
   ;; tangle before exporting: https://orgmode.org/manual/Extracting-Source-Code.html
   (add-hook 'org-export-before-processing-functions #'org-babel-tangle)
+
+  ;; undo doom's disabling of delete-selection-mode
+  (remove-hook 'evil-insert-state-entry-hook #'delete-selection-mode)
+  (remove-hook 'evil-insert-state-exit-hook  #'+default-disable-delete-selection-mode-h)
 
   ;; hook removals
   ;; no smart parent creation
