@@ -45,6 +45,12 @@
   ;; pressing tab should cycle also child items, not just the current heading
   (remove-hook! 'org-tab-first-hook #'+org-cycle-only-current-subtree-h))
 
+;; org-roam settings
+(after! org-roam
+  ;; no completion of any words to roam documents
+  (setq org-roam-completion-everywhere nil)
+  (delq! #'org-roam-complete-everywhere org-roam-completion-functions))
+
 ;; pretty formatting
 (use-package! org-modern
   :after org)
