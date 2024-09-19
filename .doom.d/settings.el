@@ -77,5 +77,11 @@
   (setq vterm-min-window-width 20))
 
 (after! breadcrumb
-  (setq breadcrumb-project-max-length 0)  ; path to file
-  (setq breadcrumb-imenu-max-length 1.0)) ; path in file
+  ;; default is breadcrumb--header-line which combines project+imenu
+  ;; only show the in-file part from imenu.
+  ;; breadcrumb-local-mode hardcodes this to set header-line-format on activation,
+  ;; so we have to replace the hardcoded function...
+  (defadvice! jj/breadcrumb-default-format ()
+    :override #'breadcrumb--header-line
+    (breadcrumb-imenu-crumbs))
+  (setq breadcrumb-imenu-max-length 1.0))  ; path in file, 100% window width
