@@ -52,7 +52,7 @@
 
 (after! savehist
   ;; don't persist clipboard accross sessions
-  (delete 'kill-ring savehist-additional-variables))
+  (delq! 'kill-ring savehist-additional-variables))
 
 (after! mailcap
   (add-to-list 'mailcap-user-mime-data
