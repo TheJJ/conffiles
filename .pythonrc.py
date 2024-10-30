@@ -3,7 +3,7 @@
 """
 jj's pythonrc
 
-Copyright (c) 2012-2023 Jonas Jelten <jj@sft.lol>
+Copyright (c) 2012-2024 Jonas Jelten <jj@sft.lol>
 Licensed GPLv3 or later.
 """
 
@@ -70,6 +70,8 @@ if USE_PYGMENTS:
     except ImportError:
         pass
 
+
+### utility functions for a better cli experience™
 
 def pager(txt):
     # pydoc.getpager() may be better for some cases
@@ -276,6 +278,20 @@ def timer(duration, display=True, interval=1.0, notify=True):
     return (time.time() - start)
 
 
+def cororun(coro):
+    """
+    run the given coroutine and block until it's done.
+    when we're in a coro already, we can't run the event loop again
+    except when continuing execution normally...
+    """
+    try:
+        return asyncio.run(coro, debug=True)
+    except KeyboardInterrupt:
+        print("cancelled coro run")
+
+
+### internal initialization functions
+
 def _completion():
     """
     set up readline and history.
@@ -359,18 +375,6 @@ def _completion():
     return history_file
 
 
-def cororun(coro):
-    """
-    run the given coroutine and block until it's done
-    when we're in a coro already, we can't run the event loop again
-    except when continuing execution normally...
-    """
-    try:
-        return asyncio.run(coro, debug=True)
-    except KeyboardInterrupt:
-        print("cancelled coro run")
-
-
 def _fancy_displayhook(item):
     if item is None:
         return
@@ -414,9 +418,10 @@ if 'bpython' not in sys.modules:
 
     try:
         HISTFILE = _completion()
-        del _completion
     except Exception as exc:
         sys.stderr.write("failed history and completion init: %s\n" % exc)
         import traceback
         traceback.print_exc()
         HISTFILE = None
+    finally:
+        del _completion

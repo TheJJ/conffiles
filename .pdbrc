@@ -1,13 +1,13 @@
 # python pdb debugger config
 #
-# Copyright (c) 2022-2022 Jonas Jelten <jj@sft.lol>
+# Copyright (c) 2022-2024 Jonas Jelten <jj@sft.lol>
 # Licensed GPLv3 or later.
 #
 #
-# srsly why is this just single-line-based python
+# srsly why is this just one-line-statement python
 #
 # but fortunately we can just re-use .pythonrc.py
-# still, just importing it is pain (note the leading . in the filename)
+# we need to use importlib machinery to import the file due to its leading . filename.
 
 import os
 import sys
