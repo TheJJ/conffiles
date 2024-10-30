@@ -1,12 +1,13 @@
 ;;; completion.el -*- lexical-binding: t; -*-
 
-(use-package! company-statistics
-  :after company
-  :config
-  (progn
-    (setq company-statistics-file (concat doom-cache-dir
-                                          "company-statistics-cache.el"))
-    (add-hook 'company-mode-hook 'company-statistics-mode)))
+(when (modulep! :input company)
+  (use-package! company-statistics
+    :after company
+    :config
+    (progn
+      (setq company-statistics-file (concat doom-cache-dir
+                                            "company-statistics-cache.el"))
+      (add-hook 'company-mode-hook 'company-statistics-mode))))
 
 ;; be more patient about highlighting stuff
 (after! flycheck
