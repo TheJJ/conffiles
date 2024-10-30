@@ -395,13 +395,27 @@ def _fancy_displayhook(item):
 
     else:
         term_width, term_height = shutil.get_terminal_size(fallback=(80, 24))
+        # pprint.pformat does an internal repr(item), which "fixes" some unicode errors!
         display_text = pformat(item, width=term_width)
 
     output = highlight(display_text)
-    if output.endswith("\n"):
-        print(output, end="")
-    else:
-        print(output)
+
+    try:
+        sys.stdout.write(output)
+        if not output.endswith("\n"):
+            sys.stdout.write("\n")
+
+    except UnicodeEncodeError:
+        # to pass cpython's test.test_cmd_line.CmdLineTest.test_displayhook_unencodable
+        bytes = display_text.encode(sys.stdout.encoding, 'backslashreplace')
+        if hasattr(sys.stdout, 'buffer'):
+            sys.stdout.buffer.write(bytes)
+        else:
+            text = bytes.decode(sys.stdout.encoding, 'strict')
+            sys.stdout.write(text)
+
+        if not display_text.endswith("\n"):
+            sys.stdout.write("\n")
 
 
 # format numbers and nested structures fancily
