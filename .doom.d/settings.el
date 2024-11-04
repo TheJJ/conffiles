@@ -45,7 +45,8 @@
     uniquify-buffer-name-style 'post-forward
     ;; don't rename special buffers
     uniquify-ignore-buffers-re "^ ?\\*"
-    evil-want-fine-undo t
+    evil-want-fine-undo t            ; more undo steps, e.g. within one insert sequence
+    evil-search-wrap nil             ; like vim nowrapscan
 
     +default-want-RET-continue-comments nil ;; no magic doom comment continuation
   ))
