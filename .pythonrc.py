@@ -297,6 +297,8 @@ def _completion():
     set up readline and history.
     supports parallel sessions and appends only the new history part
     to the history file.
+
+    returns the history filename
     """
     import atexit
     import readline
@@ -364,13 +366,13 @@ def _completion():
         # create .python_history as second history file...
         readline.add_history("lol")
 
-    def save(prev_h_len, histfile):
+    def save(prev_h_len, histfile, histsize):
         new_hist_len = readline.get_current_history_length() - prev_h_len
-        readline.set_history_length(HISTSIZE)
+        readline.set_history_length(histsize)
         readline.append_history_file(new_hist_len, histfile)
 
     if histfile_ok:
-        atexit.register(save, h_len, str(history_file))
+        atexit.register(save, h_len, str(history_file), HISTSIZE)
 
     return history_file
 
