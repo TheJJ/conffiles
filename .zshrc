@@ -153,6 +153,7 @@ alias confgrep='grep -v -P "^\\s*($|#|;)"'   # good to strip conffile comments
 alias curlws='curl --no-buffer --header "Connection: Upgrade" --header "Upgrade: websocket" --header "Sec-WebSocket-Key: bG9sd2Vic29ja2V0Y29ubg==" --header "Sec-WebSocket-Version: 13"'
 alias dd="dd status=progress"
 alias dmesg='dmesg -L'
+alias doom='~/.emacs.d/bin/doom'
 alias file='file -L'
 alias g++as='g++as23'
 alias g++c='g++std23'
