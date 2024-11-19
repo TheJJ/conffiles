@@ -47,6 +47,8 @@
     uniquify-ignore-buffers-re "^ ?\\*"
     evil-want-fine-undo t            ; more undo steps, e.g. within one insert sequence
     evil-search-wrap nil             ; like vim nowrapscan
+    evil-want-C-u-scroll nil         ; don't shadow prefix argument
+    evil-want-C-u-delete nil         ; same
 
     +default-want-RET-continue-comments nil ;; no magic doom comment continuation
   ))
