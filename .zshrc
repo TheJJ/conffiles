@@ -107,9 +107,6 @@ Darwin)
 	;;
 esac
 
-alias woman="man"
-compdef woman=man 2> /dev/null
-
 alias python3="python3 -q"
 alias p3='python3'
 alias p2='python2'
@@ -121,14 +118,6 @@ alias ipy='ipython'
 alias pytrace='python3 -m trace -g -t'
 compdef py=python3 p3=python3 p=python3 p2=python2 py2=python2 pytrace=python3 ipy=ipython 2>/dev/null
 
-alias g='git'
-compdef g=git
-
-alias bpy='bpython'
-alias b='bpy'
-alias dmesg='dmesg -L'
-alias watch='watch -c'
-
 alias emacsnw='emacs -nw'
 alias emacsopen="emacsclient -n"      # reuse frame
 alias eo=emacsopen
@@ -139,112 +128,110 @@ alias emacscc="emacs -batch -no-site-file -f batch-byte-compile"  # compile some
 alias ecc=emacscc
 alias indentemacs=$'emacs -q --no-site-file --batch -l .emacs.d/early-init.el --eval "(doom-require \'doom-start)" --eval "(batch-indent)"'
 
-alias open='xdg-open'
-alias objdump='objdump -M intel-mnemonic -C'
-alias gdb='gdb -q'
-alias gdbs='gdbserver localhost:8888'
-alias gdbso='gdbserver --once localhost:8888'
-alias gdbsm='gdbserver --multi localhost:8888'
-compdef gdbs=gdb 2>/dev/null
-alias gdbc='gdb -q -ex "target remote localhost:8888"'
-alias gdbcx64='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remote localhost:8888"'
-alias bc='bc -q -l'
-alias grep='grep --color=auto'
-alias rg='rg -S'
-alias ip='ip --color'
-alias ipb='ip --color --brief'
-alias bridge='bridge --color'
-alias ag="ag -S"
-alias more='less'
-alias most='less'
-alias less="less $LESS"
-alias lesse="less $LESS +G"
-alias mkdir='mkdir -p -v'
-alias nano='nano -w -S -F -A'
-alias anon=' unset HISTFILE'
-alias ..='cd ..'
-alias ....='cd ../../'
+# also consider the gdbv function below which attaches gdb to the above commands
+# valgrind awesomeness
 alias ......='cd ../../../'
-alias ../../='cd ../../'
+alias ....='cd ../../'
 alias ../../../='cd ../../../'
-alias cd..='..'
-alias cmatrix="cmatrix -a -b"
-alias rd="cd $(pwd)"
-(( $ON_LINUX )) && alias chmod="chmod -c"
-alias dd="dd status=progress"
-alias file='file -L'
-alias xseltoclip="xclip -o | xclip -i -selection clipboard; xclip -o"
-alias xcliptosel="xclip -selection clipboard -o | xclip -i; xclip -selection clipboard -o"
-alias cls="echo -en \\\\033c"  # clear screen and scrollback
-alias scrolltop="echo -en '\x1b]720;99999\x07'"       # urxvt special command
-alias scrollbottom="echo -en '\x1b]721;99999\x07'"    # urxvt even more special command
-alias rcp="rsync -aHAXP --append-verify"  # yes, this shadows the real rcp
-compdef rcp=rsync 2> /dev/null
-alias rmirror="rsync --recursive --links --perms --times --timeout 180 --safe-links --delete-after --delay-updates --delete --force"
-compdef rmirror=rsync 2> /dev/null
-alias icat="kitty +kitten icat"
-alias kittyssh="kitty +kitten ssh"
-alias nemo='nemo --no-desktop'
+alias ../../='cd ../../'
+alias ..='cd ..'
+alias ag="ag -S"
+alias aga='ag --passthrough'  # show all content, but highlight
+alias anon=' unset HISTFILE'
+alias b='bpy'
+alias bc='bc -q -l'
+alias bpy='bpython'
+alias bridge='bridge --color'
 alias cal='cal -m -w'
+alias cd..='..'
+alias chgrp='chgrp --preserve-root'
+(( $ON_LINUX )) && alias chmod="chmod -c --preserve-root"
+alias chown='chown --preserve-root'
+alias cls="echo -en \\\\033c"  # clear screen and scrollback
+alias cmatrix="cmatrix -a -b"
 alias confgrep='grep -v -P "^\\s*($|#|;)"'   # good to strip conffile comments
 alias curlws='curl --no-buffer --header "Connection: Upgrade" --header "Upgrade: websocket" --header "Sec-WebSocket-Key: bG9sd2Vic29ja2V0Y29ubg==" --header "Sec-WebSocket-Version: 13"'
+alias dd="dd status=progress"
+alias dmesg='dmesg -L'
+alias file='file -L'
+alias g++as='g++as23'
+alias g++c='g++std23'
+alias g++std20='g++ -std=c++20 -Wall -Wextra -pedantic -pthread -fcoroutines'
+alias g++std23='g++ -std=c++23 -Wall -Wextra -pedantic -pthread -fcoroutines'
+alias g='git'
+compdef g=git 2> /dev/null
+alias gap='git add -p'
+alias gdb='gdb -q'
+alias gdbc='gdb -q -ex "target remote localhost:8888"'
+alias gdbcx64='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remote localhost:8888"'
+alias gdbs='gdbserver localhost:8888'
+alias gdbsm='gdbserver --multi localhost:8888'
+alias gdbso='gdbserver --once localhost:8888'
+alias grep='grep --color=auto'
+alias gschichten='fortune'
+alias icat="kitty +kitten icat"
+alias ip='ip --color'
+alias ipb='ip --color --brief'
+alias jsc="js -C ."  # json coloring
+alias kittyssh="kitty +kitten ssh"
+alias l='ls'
+alias lZ='ll -Z'                    # selinux
+alias la='ls -A'
+alias lal='ls -la'
+alias ldbind="LD_DEBUG=bindings ldd"  # show what symbols the linker binds
+alias less="less $LESS"
+alias lesse="less $LESS +G"
+(( $ON_LINUX )) && alias ls='ls --color=auto'
+(( $ON_MAC )) && alias ls='ls -G'
+alias ll='ls -lhtr'                 # magic
+alias lla='ls -la'
+alias lol="fortune | ponysay"
+alias lr='ls -R'                    # recursive ls
+alias lrandom="ls | sort -R | head -n 1"
+alias lt='ll -rt'                   # sort by date
+alias lx='ll -BX'                   # sort by extension
+alias lz='ll -rS'                   # sort by size
+alias mkdir='mkdir -p -v'
+alias more='less'
+alias most='less'
 alias mpvll='mpv --profile=low-latency --untimed'
-alias aga='ag --passthrough'  # show all content, but highlight
-
-# valgrind awesomeness
+alias nano='nano -w -S -F -A'
+alias nautilus="nautilus"
+alias nemo='nemo --no-desktop'
+alias objdump='objdump -M intel-mnemonic -C'
+alias open='xdg-open'
+alias pdb="python3 -m pdb"
+alias psc='ps xawf -eo pid,user,cgroup,args'
+alias rcp="rsync -aHAXP --append-verify"  # yes, this shadows the real rcp
+compdef rcp=rsync 2> /dev/null
+alias rg='rg -S'
+(( $ON_LINUX )) && alias rm='rm -I --one-file-system'
+alias rmirror="rsync --recursive --links --perms --times --timeout 180 --safe-links --delete-after --delay-updates --delete --force"
+compdef rmirror=rsync 2> /dev/null
+alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -delete"
+alias scrollbottom="echo -en '\x1b]721;99999\x07'"    # urxvt even more special command
+alias scrolltop="echo -en '\x1b]720;99999\x07'"       # urxvt special command
+alias sqlite="sqlite3"
+alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.argv[1]))"'
+alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
-alias vge="valgrind --leak-check=no --track-origins=yes" # only memory errors
 vgdb_pipe_prefix="/tmp/vgdb-pipe"
 vgdb_pipe_option="--vgdb-prefix=$vgdb_pipe_prefix"
 alias vga="vg $vgdb_pipe_option --show-leak-kinds=all"                     # analyze all
-alias vgr="vg $vgdb_pipe_option --vgdb-error=1 --vgdb=full"                # (run)  for gdb, halt on every error
 alias vgb="vg $vgdb_pipe_option --vgdb-error=0 --vgdb=full"                # (boot) for gdb, halt on startup and at every error
+alias vge="valgrind --leak-check=no --track-origins=yes" # only memory errors
 alias vgg="vg $vgdb_pipe_option --vgdb=full --vgdb-stop-at=startup"        # for gdb, halt only at startup
-# also consider the gdbv function below which attaches gdb to the above commands
-
-alias psc='ps xawf -eo pid,user,cgroup,args'
-alias gschichten='fortune'
-alias lol="fortune | ponysay"
-alias nautilus="nautilus"
-alias sqlite="sqlite3"
+alias vgr="vg $vgdb_pipe_option --vgdb-error=1 --vgdb=full"                # (run)  for gdb, halt on every error
+alias watch='watch -c'
+alias xcliptosel="xclip -selection clipboard -o | xclip -i; xclip -selection clipboard -o"
+alias xseltoclip="xclip -o | xclip -i -selection clipboard; xclip -o"
 alias zerocat="xargs -0 -L1 -a"  # cat a file like /proc/pid/environ or comm in lines
-alias ldbind="LD_DEBUG=bindings ldd"  # show what symbols the linker binds
-alias pdb="python3 -m pdb"
 
-alias l='ls'
-alias la='ls -A'
-alias lal='ls -la'
-alias lla='ls -la'
-alias lr='ls -R'                    # recursive ls
-alias lx='ll -BX'                   # sort by extension
-alias lz='ll -rS'                   # sort by size
-alias lt='ll -rt'                   # sort by date
-alias lZ='ll -Z'                    # selinux
-alias ll='ls -lhtr'                 # magic
-alias lrandom="ls | sort -R | head -n 1"
-
-alias gap='git add -p'
-
-(( $ON_LINUX )) && alias rm='rm -I --one-file-system'
-alias chown='chown --preserve-root'
-alias chmod='chmod --preserve-root'
-alias chgrp='chgrp --preserve-root'
-
-(( $ON_LINUX )) && alias ls='ls --color=auto'
-(( $ON_MAC )) && alias ls='ls -G'
-
-alias rmvim="find -type f \( -name \*~ -or -name \*.swp -or -name \*.swo \) -delete"
-alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
-alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.argv[1]))"'
-alias jsc="js -C ."  # json coloring
 hash colordiff 2>/dev/null && alias diff='colordiff' || alias diff='diff --color=auto'
-alias g++std20='g++ -std=c++20 -Wall -Wextra -pedantic -pthread -fcoroutines'
-alias g++std23='g++ -std=c++23 -Wall -Wextra -pedantic -pthread -fcoroutines'
-alias g++c='g++std20'
-function g++as20() {
-	g++ -std=c++20 -Wall -Wextra -pedantic -pthread -fcoroutines -S -masm=intel -o- $@ | c++filt
+
+function g++as23() {
+	g++ -std=c++23 -Wall -Wextra -pedantic -pthread -fcoroutines -S -masm=intel -o- $@ | c++filt
 }
-alias g++as='g++as20'
 
 # requires media-plugins/gst-plugins-ximagesrc:
 # https://gstreamer.freedesktop.org/documentation/ximagesrc/index.html
