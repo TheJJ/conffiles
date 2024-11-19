@@ -129,7 +129,6 @@ alias ecc=emacscc
 alias indentemacs=$'emacs -q --no-site-file --batch -l .emacs.d/early-init.el --eval "(doom-require \'doom-start)" --eval "(batch-indent)"'
 
 # also consider the gdbv function below which attaches gdb to the above commands
-# valgrind awesomeness
 alias ......='cd ../../../'
 alias ....='cd ../../'
 alias ../../../='cd ../../../'
@@ -143,6 +142,7 @@ alias bc='bc -q -l'
 alias bpy='bpython'
 alias bridge='bridge --color'
 alias cal='cal -m -w'
+alias catzero="xargs -0 -L1 -a"  # cat a file like /proc/pid/environ or comm in lines
 alias cd..='..'
 alias chgrp='chgrp --preserve-root'
 (( $ON_LINUX )) && alias chmod="chmod -c --preserve-root"
@@ -215,6 +215,11 @@ alias scrolltop="echo -en '\x1b]720;99999\x07'"       # urxvt special command
 alias sqlite="sqlite3"
 alias urldecode='python3 -c "import sys, urllib.parse as u; print(u.unquote(sys.argv[1]))"'
 alias urlencode='python3 -c "import sys, urllib.parse as u; print(u.quote_plus(sys.argv[1]))"'
+alias watch='watch -c'
+alias xcliptosel="xclip -selection clipboard -o | xclip -i; xclip -selection clipboard -o"
+alias xseltoclip="xclip -o | xclip -i -selection clipboard; xclip -o"
+
+# valgrind awesomeness
 alias vg="valgrind --leak-check=full --track-origins=yes --track-fds=yes"  # base
 vgdb_pipe_prefix="/tmp/vgdb-pipe"
 vgdb_pipe_option="--vgdb-prefix=$vgdb_pipe_prefix"
@@ -223,10 +228,6 @@ alias vgb="vg $vgdb_pipe_option --vgdb-error=0 --vgdb=full"                # (bo
 alias vge="valgrind --leak-check=no --track-origins=yes" # only memory errors
 alias vgg="vg $vgdb_pipe_option --vgdb=full --vgdb-stop-at=startup"        # for gdb, halt only at startup
 alias vgr="vg $vgdb_pipe_option --vgdb-error=1 --vgdb=full"                # (run)  for gdb, halt on every error
-alias watch='watch -c'
-alias xcliptosel="xclip -selection clipboard -o | xclip -i; xclip -selection clipboard -o"
-alias xseltoclip="xclip -o | xclip -i -selection clipboard; xclip -o"
-alias zerocat="xargs -0 -L1 -a"  # cat a file like /proc/pid/environ or comm in lines
 
 hash colordiff 2>/dev/null && alias diff='colordiff' || alias diff='diff --color=auto'
 
