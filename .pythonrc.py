@@ -11,6 +11,7 @@ Licensed GPLv3 or later.
 # these imports are available in interactive python shells
 import asyncio
 import base64
+import ctypes
 import datetime
 import importlib
 import inspect
@@ -407,6 +408,13 @@ def _completion():
         # create .python_history as second history file...
         readline_module.add_history("lol")
 
+    # we use the fancy C implementation of libreadline to truncate the history file.
+    if USE_PYREPL:
+        try:
+            rl = ctypes.cdll.LoadLibrary("libreadline.so")
+        except OSError:
+            print("failed to load readline library")
+            rl = None
 
     def save(prev_h_len, histfile, histsize):
 
@@ -432,6 +440,13 @@ def _completion():
                         entry = entry.replace("\n", "\r\n")  # multiline history support
                         f.write(entry)
                         f.write("\n")
+
+                # truncate the file (readline.append_history_file does this as well)
+                # and directly uses the libreadline C implementation...
+                if rl:
+                    ok = rl.history_truncate_file(histfile.encode(), histsize)
+                    if ok != 0:
+                        print("failed to truncate history file")
         else:
             new_hist_len = readline_module.get_current_history_length() - prev_h_len
             readline_module.append_history_file(new_hist_len, histfile)
