@@ -11,7 +11,7 @@
 
 import os
 import sys
-import importlib
+import importlib.util
 
 _pyrc = os.environ.get("PYTHONSTARTUP")
 if _pyrc and os.path.isfile(_pyrc): sys._load_pdb = True; _pyrcspec = importlib.util.spec_from_file_location("pythonrc", _pyrc); _pythonrc = importlib.util.module_from_spec(_pyrcspec); _pyrcspec.loader.exec_module(_pythonrc); locals().update(_pythonrc.__dict__); sys._load_pdb = False; del _pyrcspec
