@@ -22,6 +22,7 @@ import pathlib
 import re
 import shlex
 import shutil
+import site
 import struct
 import subprocess
 import sys
@@ -295,6 +296,10 @@ def cororun(coro):
 def _completion():
     """
     set up readline and history.
+
+    python3.13 has a very special readline replacement that is supposed to be better.
+    but this setup needs special adjustments.
+
     supports parallel sessions and appends only the new history part
     to the history file.
 
@@ -303,11 +308,28 @@ def _completion():
     import atexit
     import readline
 
+    # we do the cross-version implementation in this file.
     # the same setuip is also done in stdlib/site.py
-    # in `enablerlcompleter()`, but with less cool history file names
-    # and keybindings.
+    # in `enablerlcompleter/register_readline()`,
+    # but here we can
+    # - multi-process history support (the default overwrites history with the last-closed shell...)
+    # - more keybindings
+    # - compatibility of <=python3.12 and >=python3.13
+    sys.__interactivehook__ = lambda: None
 
-    libedit = "libedit" in readline.__doc__
+    try:
+        from _pyrepl.main import CAN_USE_PYREPL
+        from _pyrepl import readline as pyrepl_readline
+    except ImportError:
+        CAN_USE_PYREPL = False
+
+    USE_PYREPL = CAN_USE_PYREPL and not os.getenv("PYTHON_BASIC_REPL")
+
+    if sys.version_info >= (3, 13):
+        libedit = readline.backend == "editline"
+    else:
+        libedit = "libedit" in readline.__doc__
+
     if libedit:
         print("libedit detected - history may not work at all...")
 
@@ -336,25 +358,44 @@ def _completion():
             'tab: complete',
         )
 
+    # stdlib/site also still initializes regular readline...
     for rlcmd in readline_statements:
         readline.parse_and_bind(rlcmd)
+
+    try:
+        readline.read_init_file()
+    except OSError:
+        # init file not found
+        pass
 
     # special-hack: when we're included from .pdbrc,
     # this is set.
     if PDB:
-        hist_filename = ".python_pdbhistory"
+        history_file = Path("~/.python_pdbhistory").expanduser()
     else:
-        hist_filename = f".python{sys.version_info.major}_history"
+        old_hist_file = Path(f"~/.python{sys.version_info.major}_history").expanduser()
+        history_file = Path(site.gethistoryfile())
 
-    history_file = Path(os.path.expanduser('~')) / hist_filename
+        if old_hist_file.exists():
+            if not history_file.exists():
+                old_hist_file.rename(history_file)
+            else:
+                print("warning: both old and new history files exist, can't move old to new name.")
+                print(f"old: {old_hist_file}")
+                print(f"new: {history_file}")
 
     histfile_ok = True
     h_len = 0
 
+    if USE_PYREPL:
+        readline_module = pyrepl_readline
+    else:
+        readline_module = readline
+
     if history_file.exists():
         try:
-            readline.read_history_file(str(history_file))
-            h_len = readline.get_current_history_length()
+            readline_module.read_history_file(str(history_file))
+            h_len = readline_module.get_current_history_length()
         except OSError:
             print(f"failed to read existing history file {history_file!r}!")
             histfile_ok = False
@@ -364,17 +405,41 @@ def _completion():
     if h_len == 0:
         # if we have no history, force-add one entry so `site.py` doesn't
         # create .python_history as second history file...
-        readline.add_history("lol")
+        readline_module.add_history("lol")
+
 
     def save(prev_h_len, histfile, histsize):
-        new_hist_len = readline.get_current_history_length() - prev_h_len
-        readline.set_history_length(histsize)
-        readline.append_history_file(new_hist_len, histfile)
+
+        # trim the history size on save only
+        # so we can just append the new entries
+        readline_module.set_history_length(histsize)
+
+        if USE_PYREPL:
+            # TODO: implement history appending by using a virtual file
+            # this is an adaption of _pyrepl.readline.write_history_file,
+            # but with support for appending.
+
+            # hack to actually get history - sorry, there's no better way in 3.13.
+            history = readline_module._get_reader().history
+            # amount of new history elements
+            new_hist_len = len(history) - prev_h_len
+
+            if new_hist_len > 0:
+                # write the new history elements
+                new_history_entries = history[-new_hist_len:]
+                with open(histfile, "a", encoding="utf-8") as f:
+                    for entry in new_history_entries:
+                        entry = entry.replace("\n", "\r\n")  # multiline history support
+                        f.write(entry)
+                        f.write("\n")
+        else:
+            new_hist_len = readline_module.get_current_history_length() - prev_h_len
+            readline_module.append_history_file(new_hist_len, histfile)
 
     if histfile_ok:
         atexit.register(save, h_len, str(history_file), HISTSIZE)
 
-    return history_file
+    return history_file, readline_module
 
 
 def _fancy_displayhook(item):
@@ -433,11 +498,12 @@ if 'bpython' not in sys.modules:
     sys.ps2 = '\x01\x1b[36m\x02...\x01\x1b[m\x02 '
 
     try:
-        HISTFILE = _completion()
+        HISTFILE, HISTMODULE = _completion()
     except Exception as exc:
         sys.stderr.write("failed history and completion init: %s\n" % exc)
         import traceback
         traceback.print_exc()
         HISTFILE = None
+        HISTMODULE = None
     finally:
         del _completion
