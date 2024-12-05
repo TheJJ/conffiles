@@ -88,3 +88,13 @@
     :override #'breadcrumb--header-line
     (breadcrumb-imenu-crumbs))
   (setq breadcrumb-imenu-max-length 1.0))  ; path in file, 100% window width
+
+(after! tramp
+  ;; https://www.gnu.org/software/tramp/#Improving-performance-of-asynchronous-remote-processes-1
+
+  ;; for better performance
+  (setq tramp-verbose 0)
+  (setq tramp-histfile-override t)
+
+  ;; control ssh muxing in .ssh/config instead
+  (setq tramp-use-ssh-controlmaster-options nil))
