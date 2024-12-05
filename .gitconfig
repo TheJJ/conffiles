@@ -6,11 +6,9 @@
 	interactive = auto
 	diff = auto
 [merge]
-	tool = nvimdiff
-[mergetool "jjnvimdiff"]
-	cmd = nvim -d $LOCAL $MERGED $REMOTE -c 'wincmd w' -c 'wincmd J'
+	tool = vimdiff
 [diff]
-	tool = nvimdiff
+	tool = vimdiff
 	colorMoved = default
 	wsErrorHighlight = all
 [push]
