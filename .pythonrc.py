@@ -370,7 +370,10 @@ def _completion():
         history_file = Path("~/.python_pdbhistory").expanduser()
     else:
         old_hist_file = Path(f"~/.python{sys.version_info.major}_history").expanduser()
-        history_file = Path(site.gethistoryfile())
+        if sys.version_info >= (3, 13):
+            history_file = Path(site.gethistoryfile())
+        else:
+            history_file = Path("~/.python_history").expanduser()
 
         if old_hist_file.exists():
             if not history_file.exists():
