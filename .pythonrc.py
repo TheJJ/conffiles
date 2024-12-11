@@ -29,26 +29,16 @@ import subprocess
 import sys
 import time
 import traceback
-
 from binascii import hexlify, unhexlify
 from pathlib import Path
-from pprint import pprint, pformat
-from pydoc import doc, describe, locate
-from subprocess import call, run
+from pprint import pformat
+from pydoc import describe, doc, locate
+from subprocess import Popen, run
 
-try:
-    # alternative for dir() to view members
-    from see import see
-except ImportError:
-    pass
 
 PAGER_INVOCATION = os.environ.get("PAGER", "less -S -i -R -M --shift 5")
 HISTSIZE = 50000
 PDB = getattr(sys, "_load_pdb", None) is not None
-
-USE_PYGMENTS = True
-HAS_PYGMENTS = False
-
 
 # cython on the fly compilation
 try:
@@ -62,6 +52,9 @@ try:
 except ImportError:
     pass
 
+
+USE_PYGMENTS = True
+HAS_PYGMENTS = False
 
 if USE_PYGMENTS:
     try:
@@ -109,6 +102,8 @@ if USE_PYGMENTS and HAS_PYGMENTS:
 else:
     def highlight(txt):
         return txt
+
+    from pprint import pprint
 
 
 def src(obj):
@@ -319,8 +314,8 @@ def _completion():
     sys.__interactivehook__ = lambda: None
 
     try:
-        from _pyrepl.main import CAN_USE_PYREPL
         from _pyrepl import readline as pyrepl_readline
+        from _pyrepl.main import CAN_USE_PYREPL
     except ImportError:
         CAN_USE_PYREPL = False
 
@@ -332,7 +327,7 @@ def _completion():
         libedit = "libedit" in readline.__doc__
 
     if libedit:
-        print("libedit detected - history may not work at all...")
+        print(".pythonrc.py: libedit detected - history may not work at all...")
 
         readline_statements = (
             "bind '^[[A' ed-search-prev-history",
