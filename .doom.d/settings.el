@@ -34,8 +34,6 @@
     mouse-yank-at-point t            ; paste as cursor instead of mouse position
     native-comp-async-report-warnings-errors 'silent
     password-cache-expiry nil        ; tramp password cache
-    python-fill-docstring-style 'symmetric
-    python-shell-prompt-detect-failure-warning nil
     ranger-show-literal t            ; colored ranger previews
     recentf-max-saved-items 1000
     tab-always-indent t
@@ -98,3 +96,9 @@
 
   ;; control ssh muxing in .ssh/config instead
   (setq tramp-use-ssh-controlmaster-options nil))
+
+(after! python
+  (setq
+   python-fill-docstring-style 'symmetric
+   python-shell-prompt-detect-failure-warning nil
+   python-indent-def-block-scale 1))  ; multi-line function argument indent
