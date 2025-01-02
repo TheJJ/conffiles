@@ -1,0 +1,583 @@
+#!/usr/bin/env python3
+
+"""
+automatic environment variables.
+mini-version in Python of https://direnv.net
+
+(c) 2024 Jonas Jelten <jj@sft.lol>
+licensed under GPLv3
+
+it was written to have just for emacs integration (used with envrc.el),
+but it can be used for shell integration.
+
+
+++ installation ++
+emacs:
+use envrc-mode
+
+zsh, in .zshrc:
+eval "$(envrc hook zsh)"
+"""
+
+import argparse
+import sys
+import os
+
+store_path = os.environ.get("XDG_DATA_HOME", "~/.local/share") + "/envrc/db.sqlite"
+
+# we skip importing these environment variables
+ignored_env = {"_", "SHLVL", "PWD", "OLDPWD", "SHELL"}
+
+envrc_filename = ".envrc"
+
+
+def mkdirs(dir: str):
+    """
+    create this and all parent directories, skip missing ones.
+    """
+    missing = list()
+    while not os.path.isdir(dir):
+        missing.append(dir)
+        dir = os.path.normpath(dir + "/..")
+
+    for dir in reversed(missing):
+        os.mkdir(dir)
+
+
+class EnvACL:
+    def __init__(self, storage_path: str):
+        import sqlite3
+
+        storage_path = os.path.expanduser(storage_path)
+        mkdirs(os.path.normpath(storage_path + "/.."))
+        self._conn = sqlite3.connect(storage_path, autocommit=False)
+
+        self._migrate()
+
+    def _migrate(self):
+        c = self._conn.cursor()
+
+        c.executescript(
+            """
+            -- allowed_envrc: stores access privilege
+            create table if not exists allowed_envrc (
+                path text primary key,
+                access text not null,
+                hash text
+            );
+            """
+        )
+        self._conn.commit()
+
+    def is_allowed(self, path: str) -> bool:
+        path = os.path.abspath(path)
+        c = self._conn.execute(
+            "select access, hash from allowed_envrc where path=?", (path,)
+        )
+        row = c.fetchone()
+        if row is None:
+            sys.stderr.write(f"env file {path!r} has no acl set yet\n")
+            return False
+        access, hash = row
+        match access:
+            case "always":
+                return True
+            case "deny":
+                return False
+            case "hash":
+                good_hash = self._hash_file(path) == hash
+                if not good_hash:
+                    sys.stderr.write(
+                        f"env file {path!r} has changed content - you need to allow again\n"
+                    )
+                    return False
+                return True
+            case _:
+                raise NotImplementedError(f"unknown access mode {access}")
+
+    def is_known(self, path: str) -> bool:
+        path = os.path.abspath(path)
+        c = self._conn.execute("select true from allowed_envrc where path=?", (path,))
+        return c.fetchone() is not None
+
+    def allow(self, path: str, always: bool = False):
+        self._set_acl(path, mode="allow_always" if always else "allow")
+
+    def deny(self, path: str):
+        """
+        remove path from db
+        """
+        self._set_acl(path, mode="deny")
+
+    def remove(self, path: str, dry_run: bool):
+        """
+        remove path from db
+        """
+        if dry_run:
+            print(f"would remove {path!r} from acl")
+
+        else:
+            c = self._conn.execute("delete from allowed_envrc where path=?", (path,))
+            if c.rowcount == 0:
+                print(f"no entry for {path!r}")
+            else:
+                print("entry removed")
+            self._conn.commit()
+
+    def cleanup(self, dry_run: bool):
+        """
+        check if known .envrc files still exist, delete the others from DB.
+        """
+        to_delete = list()
+
+        c = self._conn.execute("select path from allowed_envrc")
+        while rows := c.fetchmany():
+            for row in rows:
+                filename = row[0]
+                if not os.path.isfile(filename):
+                    to_delete.append(filename)
+
+        if dry_run:
+            if to_delete:
+                print("records to delete for files no longer existing:")
+                for file in to_delete:
+                    print(file)
+            else:
+                print("no leftover acl entries")
+
+        else:
+            self._conn.executemany(
+                "delete from allowed_envrc where path=?", map(tuple, to_delete)
+            )
+            self._conn.commit()
+
+    def list(self) -> list[tuple[str, str]]:
+        ret = list()
+        c = self._conn.execute("select path, access from allowed_envrc")
+        while rows := c.fetchmany():
+            for row in rows:
+                path, access = row
+                ret.append((path, access))
+
+        return ret
+
+    def _set_acl(self, path: str, mode: str):
+        """
+        mode: allow, allow_always, deny
+        """
+        path = os.path.abspath(path)
+        match mode:
+            case "allow_always":
+                access = "always"
+                hash = None
+            case "allow":
+                access = "hash"
+                hash = self._hash_file(path)
+            case "deny":
+                access = "deny"
+                hash = None
+            case _:
+                raise NotImplementedError()
+
+        self._conn.execute(
+            "insert or replace into allowed_envrc(path, access, hash) values (?, ?, ?)",
+            (
+                path,
+                access,
+                hash,
+            ),
+        )
+        self._conn.commit()
+
+    @staticmethod
+    def _hash_file(path: str) -> str:
+        import hashlib
+
+        with open(path, "rb") as hdl:
+            digest = hashlib.file_digest(hdl, "sha256")
+
+        return digest.hexdigest()
+
+
+def find_envrcs(dir: str | None = None) -> list[str]:
+    """
+    starting from current diretory, find all .envrc files.
+
+    return [envrc_path, ...]
+    """
+    ret = list()
+
+    if dir:
+        target_dir = os.path.abspath(dir)
+    else:
+        target_dir = os.getcwd()
+
+    path = "/"
+
+    for part in target_dir.split("/"):
+        path = os.path.join(path, part)
+        envpath = os.path.join(path, envrc_filename)
+        if os.path.isfile(envpath):
+            ret.append(envpath)
+
+    return ret
+
+
+def env_diff_log(
+    old: dict[str, str], new: dict[str, str]
+) -> tuple[dict[str, str], dict[str, str]]:
+    """
+    old: previous state due to .envrc loading
+    new: new variables due to the current .envrc
+
+    return: ({name: new/changed value}, {name: previous value if changed})
+    """
+    new_keys = new.keys() - old.keys() - ignored_env
+    # new keys must be unset when we leave the scope
+    previous: dict[str, str] = {key: "" for key in new_keys}
+    updated: dict[str, str] = {key: new[key] for key in new_keys}
+
+    removed_keys = old.keys() - new.keys() - ignored_env
+    previous.update({key: old[key] for key in removed_keys})
+
+    maybe_changed_keys = (new.keys() & old.keys()) - ignored_env
+    for key in maybe_changed_keys:
+        new_val = new[key]
+        old_val = old[key]
+        if new_val != old_val:
+            updated[key] = new_val
+            previous[key] = old_val
+
+    return updated, previous
+
+
+def env_diff(
+    old: dict[str, str], new: dict[str, str]
+) -> tuple[dict[str, str], list[str]]:
+    """
+    old: previous state due to .envrc loading
+    new: new variables due to the current .envrc
+
+    return: {name: new/changed value}, list of var changes
+    """
+    report: list[str] = []
+    new_keys = new.keys() - old.keys() - ignored_env
+    updated: dict[str, str] = {key: new[key] for key in new_keys}
+    report.extend(f"+{key}" if new[key] else f"-{key}" for key in new_keys)
+
+    maybe_changed_keys = new.keys() & old.keys() - ignored_env
+    for key in maybe_changed_keys:
+        new_val = new[key]
+        old_val = old[key]
+        if new_val != old_val:
+            updated[key] = new_val
+            if new_val:
+                report.append(f"~{key}")
+            else:
+                report.append(f"-{key}")
+
+    return updated, report
+
+
+def env_revert(env: dict[str, str], log: dict[str, dict[str, str]]):
+    """
+    update the given env by applying the env update log in reverse order.
+    used to reset the environment to a previous state.
+    """
+    for prev_vars in reversed(log.values()):
+        env.update(prev_vars)
+
+
+def parse_envrc(
+    envrc_path: str, environment: dict[str, str] | None = None
+) -> dict[str, str]:
+    """
+    given a path to an envrc file, return its key-value contents.
+
+    we do this by evaluating the file in bash, and dumping the environment afterwards.
+    """
+    import shlex
+    import subprocess
+
+    env: dict[str, str] = dict()
+
+    strict_eval = True
+    if strict_eval:
+        strict_cmd = "set -euo pipefail && "
+    else:
+        strict_cmd = ""
+
+    stdlib_load = f'eval "$({__file__} stdlib)"'
+
+    # call bash to evaluate the env file
+    cmd = [
+        "bash",
+        "-c",
+        f"{strict_cmd}{stdlib_load} && __envdump__ {shlex.quote(envrc_path)}",
+    ]
+
+    env_raw = subprocess.check_output(
+        cmd,
+        cwd=os.path.normpath(envrc_path + "/.."),
+        text=True,
+        env=environment,
+    )
+    for line in env_raw.splitlines():
+        key, value = line.split("=", maxsplit=1)
+        if key in ignored_env:
+            continue
+        env[key] = value
+
+    return env
+
+
+def export(acl: EnvACL, path: str | None, format: str):
+    """
+    read and export the currently visible env variables.
+    """
+
+    import os
+    import json
+
+    # case:
+    # have two envs
+    # leave upper env
+    # env_log should contain lower env, but has nothing.
+
+    base_env = dict(os.environ)
+
+    # what did we set previously
+    # {envrc: {var: oldvalue, ...}}
+    env_log: dict[str, dict[str, str]] = json.loads(
+        base_env.get("DIRENV_envrc_log", "{}")
+    )
+
+    envrcs: list[str] = []
+    for envrc in find_envrcs(dir=path):
+        if acl.is_allowed(envrc):
+            envrcs.append(envrc)
+
+    # clean up the base environment from all our variables
+    env: dict[str, str] = base_env.copy()
+
+    env_revert(env, env_log)
+
+    # clear the log, so we only record active envrcs
+    env_log = dict()
+
+    for envrc in envrcs:
+        new_env = parse_envrc(envrc, environment=env)
+        changed_env, previous_env = env_diff_log(env, new_env)
+
+        if changed_env:
+            env.update(changed_env)
+            env_log[envrc] = previous_env
+
+    # only keep what's different from base_env, which we passed to each envrc evaluation
+    env, report = env_diff(base_env, env)
+
+    # we prefix with DIRENV_ so emacs envrc.el ignores our internal var.
+    # store all variables included in the current
+    if env:
+        sys.stderr.write(f"env: {' '.join(report)}\n")
+        # keys in env_log are the loaded files
+        env["DIRENV_envrc_log"] = json.dumps(env_log) if env_log else ""
+
+    match format:
+        case "json":
+            import json
+
+            json.dump(env, sys.stdout)
+
+        case "zsh":
+            for key, value in env.items():
+                if not value:
+                    print(f"unset $'{key}';")
+                else:
+                    print(f"export $'{key}'=$'{value}';")
+
+        case _:
+            raise NotImplementedError(f"format {format!r} not implemented")
+
+
+def hook(format: str):
+    """
+    shell hook for automatic variable import into interactive shells
+    """
+    match format:
+        case "zsh":
+            print(
+                f"""
+_envrc_hook() {{
+  eval "$("{__file__}" export zsh)";
+}}
+# only read new environment when changing a directory
+typeset -ag chpwd_functions;
+if [[ -z "${{chpwd_functions[(r)_envrc_hook]+1}}" ]]; then
+  chpwd_functions=( _envrc_hook ${{chpwd_functions[@]}} )
+fi
+"""
+            )
+        case _:
+            raise NotImplementedError(f"format {format!r} not implemented")
+
+
+def find_paths_envfiles(paths: list[str], check_exists: bool = True) -> list[str]:
+    """
+    given a list of paths, return a list of .envrc filenames in them.
+    checks if these files exist.
+    """
+    file_paths = list()
+    for path in paths:
+        path = os.path.abspath(path)
+
+        if not path.endswith(envrc_filename):
+            path += f"/{envrc_filename}"
+
+        if not check_exists or os.path.isfile(path):
+            file_paths.append(path)
+        else:
+            raise FileNotFoundError(f"env file {path!r} does not exist")
+
+    return file_paths
+
+
+def allow(acl: EnvACL, paths: list[str], always: bool = False):
+    if not paths:
+        paths = ["."]
+
+    to_allow = find_paths_envfiles(paths)
+
+    print("allowing:")
+    for path in to_allow:
+        print(f"allowing {path!r}...")
+        acl.allow(path, always=always)
+    print("ok")
+
+
+def deny(acl: EnvACL, paths: list[str]):
+    if not paths:
+        paths = ["."]
+
+    to_deny = find_paths_envfiles(paths)
+
+    print("denying:")
+    for path in to_deny:
+        print(f"denying {path!r}...")
+        acl.deny(path)
+    print("ok")
+
+
+def remove(acl: EnvACL, paths: list[str], dry_run: bool = False):
+    if not paths:
+        paths = ["."]
+
+    to_remove = find_paths_envfiles(paths, check_exists=False)
+
+    print("removing from acl list:")
+    for path in to_remove:
+        print(f"removing {path!r}...")
+        acl.remove(path, dry_run=dry_run)
+    print("ok")
+
+
+def stdlib():
+    print(
+        """
+# this is injected before sourcing your .envrc
+
+__envdump__() {
+    # use stdout only for dumping
+    exec 3>&1
+    exec 1>&2
+
+    __dump_env_atexit() {
+        local ret=$?
+        trap - EXIT
+        printenv >&3
+        exit "$ret"
+    }
+    trap __dump_env_atexit EXIT
+
+    # source the file
+    . "$@"
+
+    # atexit dumps the new environment
+}
+"""
+    )
+
+
+def main():
+    cli = argparse.ArgumentParser(
+        description="per-directory environment variable activation"
+    )
+    sp = cli.add_subparsers(dest="mode", required=True)
+    export_cli = sp.add_parser("export")
+    export_cli.add_argument("format", choices=["json", "zsh"])
+    export_cli.add_argument("--path")
+
+    hook_cli = sp.add_parser("hook")
+    hook_cli.add_argument("format", choices=["zsh"])
+
+    _stdlib_cli = sp.add_parser("stdlib")
+
+    allow_cli = sp.add_parser("allow")
+    allow_cli.add_argument("--always", action="store_true")
+    allow_cli.add_argument("path", nargs="*")
+
+    deny_cli = sp.add_parser("deny")
+    deny_cli.add_argument("path", nargs="*")
+
+    _reload_cli = sp.add_parser("reload")
+
+    remove_cli = sp.add_parser("remove")
+    remove_cli.add_argument("--dry-run", action="store_true")
+    remove_cli.add_argument("path", nargs="*")
+
+    _list_cli = sp.add_parser("list")
+
+    prune_cli = sp.add_parser("prune")
+    prune_cli.add_argument("--dry-run", action="store_true")
+
+    args = cli.parse_args()
+
+    if args.mode == "stdlib":
+        stdlib()
+        exit(0)
+
+    acl = EnvACL(store_path)
+
+    match args.mode:
+        case "export":
+            export(acl, path=args.path, format=args.format)
+
+        case "hook":
+            hook(format=args.format)
+
+        case "allow":
+            allow(acl, paths=args.path, always=args.always)
+
+        case "deny":
+            deny(acl, paths=args.path)
+
+        case "reload":
+            print("reload ok (not implemented, since nothing is cached yet).")
+
+        case "remove":
+            remove(acl, paths=args.path, dry_run=args.dry_run)
+
+        case "prune":
+            acl.cleanup(dry_run=args.dry_run)
+
+        case "list":
+            from pprint import pprint
+
+            pprint(acl.list())
+
+        case _:
+            raise NotImplementedError()
+
+
+if __name__ == "__main__":
+    main()
