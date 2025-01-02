@@ -235,29 +235,26 @@ function g++as23() {
 	g++ -std=c++23 -Wall -Wextra -pedantic -pthread -fcoroutines -S -masm=intel -o- $@ | c++filt
 }
 
-# requires media-plugins/gst-plugins-ximagesrc:
-# https://gstreamer.freedesktop.org/documentation/ximagesrc/index.html
-function screenrecord() {
-	# TODO: record xid=0, i.e. the root window
-	echo "please click on the window to record..."
-	gst-launch-1.0 ximagesrc xid=$(xwininfo | grep -oP "Window id: \K0x([0-9a-f]+)") ! videoconvert ! av1enc ! webmmux ! filesink location=$1.webm
-}
-
 
 # vim
 hash nvim 2>/dev/null && alias vim='nvim'
 hash nvim 2>/dev/null && alias vimdiff='nvim -d'
 
-# wrap vim to support file:linenumner
-if [[ -x $homebin/viml ]]; then
-	alias vim=viml
+if hash python3 2>/dev/null; then
+	# wrap vim to support file:linenumner
+	if [[ -x $homebin/viml ]]; then
+		alias vim=viml
+	fi
+
+	# automatic environment import
+	hash envrc 2>/dev/null && eval "$(envrc hook zsh)"
 fi
 
 ## external tools
 # z -> jump to directory.
 # recommender system for directories through cd
 # stores stuff in ~/.local/share/zoxide/db.zo
-command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
+hash zoxide 2>/dev/null && eval "$(zoxide init zsh)"
 
 ## conffiles management - the whole $HOME is a git repo :)
 # usual setup:
