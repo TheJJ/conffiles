@@ -311,15 +311,26 @@ def _completion():
     # - multi-process history support (the default overwrites history with the last-closed shell...)
     # - more keybindings
     # - compatibility of <=python3.12 and >=python3.13
-    sys.__interactivehook__ = lambda: None
 
-    try:
-        from _pyrepl import readline as pyrepl_readline
-        from _pyrepl.main import CAN_USE_PYREPL
-    except ImportError:
-        CAN_USE_PYREPL = False
+    in_emacs = os.environ.get("INSIDE_EMACS") is not None
 
-    USE_PYREPL = CAN_USE_PYREPL and not os.getenv("PYTHON_BASIC_REPL")
+    if in_emacs:
+        print("no completion and history setup")
+        return None, None
+
+    try_pyrepl = True
+    # emacs has great readline integration
+    if in_emacs or os.environ.get("PYTHON_BASIC_REPL") is not None:
+        try_pyrepl = False
+
+    use_pyrepl = False
+    if try_pyrepl:
+        try:
+            from _pyrepl import readline as pyrepl_readline
+            from _pyrepl.main import CAN_USE_PYREPL
+            use_pyrepl = CAN_USE_PYREPL
+        except ImportError:
+            pass
 
     if sys.version_info >= (3, 13):
         libedit = readline.backend == "editline"
@@ -352,6 +363,10 @@ def _completion():
             r'"\e[3^": kill-word',
             r'"\C-h": backward-kill-word',
             'tab: complete',
+            # one tab for completions only
+            "set show-all-if-ambiguous on",
+            # prevent prefix replacement with ellipsis.
+            "set completion-prefix-display-length 0",
         )
 
     # stdlib/site also still initializes regular readline...
@@ -386,7 +401,7 @@ def _completion():
     histfile_ok = True
     h_len = 0
 
-    if USE_PYREPL:
+    if use_pyrepl:
         readline_module = pyrepl_readline
     else:
         readline_module = readline
@@ -407,7 +422,7 @@ def _completion():
         readline_module.add_history("lol")
 
     # we use the fancy C implementation of libreadline to truncate the history file.
-    if USE_PYREPL:
+    if use_pyrepl:
         try:
             rl = ctypes.cdll.LoadLibrary("libreadline.so")
         except OSError:
@@ -420,7 +435,7 @@ def _completion():
         # so we can just append the new entries
         readline_module.set_history_length(histsize)
 
-        if USE_PYREPL:
+        if use_pyrepl:
             # TODO: implement history appending by using a virtual file
             # this is an adaption of _pyrepl.readline.write_history_file,
             # but with support for appending.
@@ -453,6 +468,24 @@ def _completion():
         atexit.register(save, h_len, str(history_file), HISTSIZE)
 
     return history_file, readline_module
+
+
+
+def _completion_init():
+    try:
+        HISTFILE, HISTMODULE = _completion()
+    except Exception as exc:
+        sys.stderr.write("failed history and completion init: %s\n" % exc)
+        import traceback
+        traceback.print_exc()
+        HISTFILE = None
+        HISTMODULE = None
+
+    globals()["HISTFILE"] = HISTFILE
+    globals()["HISTMODULE"] = HISTMODULE
+
+# register completion init for interactive shells
+sys.__interactivehook__ = _completion_init
 
 
 def _fancy_displayhook(item):
@@ -509,14 +542,3 @@ if 'bpython' not in sys.modules:
 
     sys.ps1 = '\x01\x1b[36m\x02>>>\x01\x1b[m\x02 '
     sys.ps2 = '\x01\x1b[36m\x02...\x01\x1b[m\x02 '
-
-    try:
-        HISTFILE, HISTMODULE = _completion()
-    except Exception as exc:
-        sys.stderr.write("failed history and completion init: %s\n" % exc)
-        import traceback
-        traceback.print_exc()
-        HISTFILE = None
-        HISTMODULE = None
-    finally:
-        del _completion
