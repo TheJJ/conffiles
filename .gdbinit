@@ -30,9 +30,9 @@ set breakpoint pending on
 set $arch64bit = 1
 
 
-#set prompt = gdb>> 
-#set extended-prompt \e[1;32m= gdb>>\e[0m 
-set prompt \001\033[1;32m\002= gdb>>\001\033[0m\002 
+set prompt = gdb>> 
+set extended-prompt \e[1;32m= gdb>>\e[0m 
+#set prompt \001\033[1;32m\002= gdb>>\001\033[0m\002 
 
 
 # don't confirm the exit
@@ -508,6 +508,10 @@ end
 # TODO: remove hardcoding...
 
 python
+
+import shutil
+if shutil.which("debuginfod"):
+    gdb.execute("set debuginfod enabled on")
 
 # eigen
 import sys, os
