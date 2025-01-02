@@ -95,43 +95,6 @@
    tab-width 4
    c-basic-offset 4))
 
-;; py
-(defun jj/python-coding-hook ()
-  (setq-local
-    python-indent 4
-    indent-tabs-mode nil
-    tab-width 4
-    flycheck-checker 'python-pylint
-    flycheck-checker-error-threshold 300
-    )
-
-  ;; include _ as part of a word
-  (modify-syntax-entry ?_ "w")
-
-  ;; disable for now - better rely on linters and visual appearance...
-  (whitespace-tail-disable)
-
-  ;; don't show anaconda mode error popup gaaarrhhgh
-  (remove-hook 'anaconda-mode-response-read-fail-hook
-               'anaconda-mode-show-unreadable-response)
-
-  (use-package! blacken
-    :after python)
-
-  ;; https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
-  ;; disable docstring view
-  (setq-local
-    lsp-signature-doc-lines 0
-    lsp-eldoc-enable-hover nil
-    lsp-signature-auto-activate nil
-    lsp-signature-render-documentation nil)
-
-  ;; smart tabs
-  (smart-tabs-mode)
-  (smart-tabs-advice py-indent-line py-indent-offset)
-  (smart-tabs-advice py-newline-and-indent py-indent-offset)
-  (smart-tabs-advice py-indent-region py-indent-offset))
-
 ;; elisp
 (defun jj/lisp-coding-hook ()
   (unless noninteractive
@@ -429,7 +392,7 @@
   (remove-hook 'evil-insert-state-exit-hook  #'+default-disable-delete-selection-mode-h)
 
   ;; hook removals
-  ;; no smart parent creation
+  ;; no smart parens creation
   (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
   ;; no spellchecking by default
   (remove-hook 'org-mode-hook #'flyspell-mode)

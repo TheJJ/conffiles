@@ -28,6 +28,7 @@
 (load! "completion.el")
 (load! "org.el")
 (load! "latex.el")
+(load! "python.el")
 (load! "lsp.el")
 (load! "mail.el")
 (load! "hook.el")

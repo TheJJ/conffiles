@@ -97,8 +97,6 @@
   ;; control ssh muxing in .ssh/config instead
   (setq tramp-use-ssh-controlmaster-options nil))
 
-(after! python
-  (setq
-   python-fill-docstring-style 'symmetric
-   python-shell-prompt-detect-failure-warning nil
-   python-indent-def-block-scale 1))  ; multi-line function argument indent
+(after! envrc
+  ;; custom, lightweight pure-python implementation alternative to `direnv'
+  (setq envrc-direnv-executable "envrc"))
