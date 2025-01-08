@@ -146,8 +146,10 @@ class EnvACL:
                 print("no leftover acl entries")
 
         else:
+            paths = (tuple([path]) for path in to_delete)
             self._conn.executemany(
-                "delete from allowed_envrc where path=?", map(tuple, to_delete)
+                "delete from allowed_envrc where path=?",
+                paths,
             )
             self._conn.commit()
 
