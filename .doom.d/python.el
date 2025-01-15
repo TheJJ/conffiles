@@ -5,7 +5,16 @@
   (setq
    python-fill-docstring-style 'symmetric
    python-shell-prompt-detect-failure-warning nil
-   python-indent-def-block-scale 1))  ; multi-line function argument indent
+   python-indent-def-block-scale 1)  ; multi-line function argument indent
+
+  (when (locate-library "anaconda-mode")
+    ;; when running on tramp, disable anaconda-mode.
+    ;; when eldoc-mode uses anaconda for some info, a new ssh connection
+    ;; seems to be opened every time, which causes buffer lag...
+    (defadvice! +python-disable-anaconda-tramp-a (fn &rest args)
+      :around #'+python-init-anaconda-mode-maybe-h
+      (unless (file-remote-p default-directory)
+        (apply fn args)))))
 
 (use-package! blacken
   :after python)
