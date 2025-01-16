@@ -90,8 +90,7 @@
 (after! tramp
   ;; https://www.gnu.org/software/tramp/#Improving-performance-of-asynchronous-remote-processes-1
 
-  ;; for better performance
-  (setq tramp-verbose 0)
+  (setq tramp-verbose 3)
   (setq tramp-histfile-override t)
 
   ;; control ssh muxing in .ssh/config instead
