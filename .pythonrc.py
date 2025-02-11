@@ -3,7 +3,7 @@
 """
 jj's pythonrc
 
-Copyright (c) 2012-2024 Jonas Jelten <jj@sft.lol>
+Copyright (c) 2012-2025 Jonas Jelten <jj@sft.lol>
 Licensed GPLv3 or later.
 """
 
@@ -29,6 +29,7 @@ import subprocess
 import sys
 import time
 import traceback
+import types
 from binascii import hexlify, unhexlify
 from pathlib import Path
 from pprint import pformat
@@ -289,7 +290,7 @@ def cororun(coro):
 
 ### internal initialization functions
 
-def _completion():
+def _completion() -> tuple[Path | None, types.ModuleType | None]:
     """
     set up readline and history.
 
@@ -299,7 +300,7 @@ def _completion():
     supports parallel sessions and appends only the new history part
     to the history file.
 
-    returns the history filename
+    returns the history filename, history_module
     """
     import atexit
     import readline
@@ -332,15 +333,34 @@ def _completion():
         except ImportError:
             pass
 
-    if sys.version_info >= (3, 13):
-        libedit = readline.backend == "editline"
+    readline_module: types.ModuleType
+    if use_pyrepl:
+        readline_module = pyrepl_readline
     else:
-        libedit = "libedit" in readline.__doc__
+        readline_module = readline
 
-    if libedit:
+        if sys.version_info >= (3, 13):
+            libedit = readline.backend == "editline"
+        else:
+            libedit = "libedit" in readline.__doc__
+
+    if use_pyrepl:
+        pyrepl_keymap: tuple[tuple[str, str], ...] = (
+            #from _pyrepl.commands import up, down
+            # keymap customizations:
+            # TODO: history search can't handle multiline edits,
+            # so we leave them bound to <page-up> and <page-down> for now.
+            # TODO: implement new commands based on up/down that
+            # do line movements first, else history search?
+
+            #(r"\<up>", "history-search-backward"),
+            #(r"\<down>", "history-search-forward"),
+        )
+
+    elif libedit:
         print(".pythonrc.py: libedit detected - history may not work at all...")
 
-        readline_statements = (
+        readline_statements: tuple[str, ...] = (
             "bind '^[[A' ed-search-prev-history",
             "bind '^[[B' ed-search-next-history",
             "bind '^[[5C' vi-next-word",
@@ -369,15 +389,33 @@ def _completion():
             "set completion-prefix-display-length 0",
         )
 
-    # stdlib/site also still initializes regular readline...
-    for rlcmd in readline_statements:
-        readline.parse_and_bind(rlcmd)
+    if use_pyrepl:
+        # we inject a new keymap collection function
+        reader_cls = readline_module.ReadlineAlikeReader
+        collect_fun = getattr(reader_cls, "collect_keymap", None)
 
-    try:
-        readline.read_init_file()
-    except OSError:
-        # init file not found
-        pass
+        if collect_fun:
+            def collect_keymap(self) -> tuple[tuple[str, str], ...]:
+                return collect_fun(self) + pyrepl_keymap
+        else:
+            # we could call the superclass? super(reader_cls, None)
+            raise Exception("function missing")
+
+        reader_cls.collect_keymap = collect_keymap
+
+        # reset the wrapper's reader object
+        # so we get our injecte initialization
+        readline_module._wrapper.reader = None
+
+    else:
+        for rlcmd in readline_statements:
+            readline.parse_and_bind(rlcmd)
+
+        try:
+            readline.read_init_file()
+        except OSError:
+            # init file not found
+            pass
 
     # special-hack: when we're included from .pdbrc,
     # this is set.
@@ -400,11 +438,6 @@ def _completion():
 
     histfile_ok = True
     h_len = 0
-
-    if use_pyrepl:
-        readline_module = pyrepl_readline
-    else:
-        readline_module = readline
 
     if history_file.exists():
         try:
