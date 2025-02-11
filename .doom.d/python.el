@@ -4,7 +4,6 @@
 (after! python
   (setq
    python-fill-docstring-style 'symmetric
-   python-shell-prompt-detect-failure-warning nil
    python-indent-def-block-scale 1)  ; multi-line function argument indent
 
   (when (locate-library "anaconda-mode")
@@ -21,12 +20,9 @@
 
 (defun jj/python-coding-hook ()
   (setq-local
-    python-indent 4
+    python-indent-offset 4
     indent-tabs-mode nil
-    tab-width 4
-    flycheck-checker 'python-pylint
-    flycheck-checker-error-threshold 300
-    )
+    tab-width 4)
 
   ;; include _ as part of a word
   (modify-syntax-entry ?_ "w")
