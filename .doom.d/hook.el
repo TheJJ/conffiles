@@ -107,8 +107,6 @@
   ;; include - as part of a word
   (modify-syntax-entry ?- "w")
 
-  (whitespace-tail-disable)
-
   ;; so plists and other things are properly indented
   ;; apparently doom has fixes for this already in place :)
   ;;(setq lisp-indent-function 'common-lisp-indent-function)
@@ -156,8 +154,6 @@
     spacemacs-yank-indent-threshold 0
     ;; so completes start with 2 chars already
     company-minimum-prefix-length 2)
-
-  (whitespace-tail-disable)
 
   ;; other settings are in jj/defaults
   (setq-default TeX-master nil) ; query for master file
@@ -218,7 +214,6 @@
 (defun jj/org-mode-hook ()
   (visual-line-mode t)
   (org-modern-mode t)
-  (whitespace-tail-disable)
 
   (setq-local
     indent-tabs-mode nil))
@@ -228,9 +223,7 @@
   (setq-local
     indent-tabs-mode nil
     markdown-toc-indentation-space 2
-    markdown-toc-header-toc-start "<!-- markdown-toc start -->")
-
-  (whitespace-tail-disable))
+    markdown-toc-header-toc-start "<!-- markdown-toc start -->"))
 
 (defun jj/cmake-mode-hook ()
   (setq-local
@@ -291,8 +284,6 @@
      (in-begin-block jj/sql-indent-begin-block)
      (with-clause-cte-cont 0)
      ,@sqlind-default-indentation-offsets-alist))
-
-  (whitespace-tail-disable)
 
   ;; TODO: detect psql prompt, or disable custom prompt
   ;;(sql-set-product-feature 'postgres)

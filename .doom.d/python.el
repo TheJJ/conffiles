@@ -31,9 +31,6 @@
   ;; include _ as part of a word
   (modify-syntax-entry ?_ "w")
 
-  ;; disable for now - better rely on linters and visual appearance...
-  (whitespace-tail-disable)
-
   ;; don't show anaconda mode error popup gaaarrhhgh
   (remove-hook 'anaconda-mode-response-read-fail-hook
                'anaconda-mode-show-unreadable-response)

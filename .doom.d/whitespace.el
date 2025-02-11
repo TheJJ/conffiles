@@ -19,13 +19,3 @@
         show-trailing-whitespace t)
 
   (global-whitespace-mode t))
-
-(defun whitespace-tail-disable ()
-  "disable whitespace-mode's long line highlighting"
-  ;; whitespace-highlight may not be initialized yet, thus handle both cases..
-  (let ((no-lines-tail (lambda ()
-                         (setq whitespace-style (delete 'lines-tail whitespace-style)))))
-    (if (boundp 'whitespace-style)
-      (funcall no-lines-tail)
-      (progn
-        (add-hook 'global-whitespace-mode-hook no-lines-tail)))))
