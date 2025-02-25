@@ -11,6 +11,9 @@
 	tool = vimdiff
 	colorMoved = default
 	wsErrorHighlight = all
+	mnemonicPrefix = true
+	renames = true
+	algorithm = histogram
 [push]
 	default = simple
 [help]
@@ -46,3 +49,11 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+[tag]
+	sort = version:refname
+[commit]
+	verbose = true
+[column]
+	ui = auto
+[branch]
+	sort = -committerdate
