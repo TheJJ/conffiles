@@ -245,4 +245,6 @@ autocmd FileType rust cal WhitespaceSpace(4)
 autocmd FileType sql cal WhitespaceSpace(4)
 autocmd FileType cpp cal WhitespaceTab(4)
 autocmd FileType c cal WhitespaceTab(4)
-autocmd FileType yaml call WhitespaceSpace(2)
+autocmd FileType yaml
+    \ call WhitespaceSpace(2) |
+    \ setlocal indentkeys-=0#
