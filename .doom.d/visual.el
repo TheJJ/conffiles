@@ -25,10 +25,6 @@
   ;; synchronize the fill-column setting to the whitespace long line highlight
   (sync-variable 'whitespace-line-column 'fill-column))
 
-(after! doom-themes
-  ;; otherwise doom-themes would shadow org-modern
-  (setq doom-themes-org-fontify-horizontal-rules nil))
-
 (defun jj/scrolling ()
   ;; mouse-wheel scrolling
   (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)
@@ -40,7 +36,6 @@
         scroll-margin 4                             ; start scrolling n lines before window borders
         scroll-conservatively 25                    ; scroll up to n lines to bring pointer back on screen
         scroll-step 0                               ; try scrolling n lines when pointer moves out
-        scrollbar-mode 'right
         auto-window-vscroll nil)
 
   ;; smooth scrolling :)
