@@ -241,7 +241,7 @@ client.background       #000000
 
 # us international
 #caps:none altwin:meta_alt lv3:rals_switch
-exec --no-startup-id setxkbmap us altgr-intl -option ctrl:nocaps
+exec --no-startup-id setxkbmap us altgr-intl
 exec --no-startup-id xset -b
 exec --no-startup-id xset r rate 170 60
 exec --no-startup-id xsetroot -solid black
