@@ -1,5 +1,5 @@
 # JJ's sway config
-# (c) 2024 Jonas Jelten <jj@sft.lol>
+# (c) 2024-2025 Jonas Jelten <jj@sft.lol>
 #
 # `man 5 sway` for complete reference.
 
@@ -7,10 +7,10 @@
 # Logo key. Use Mod1 for Alt.
 set $mod Mod4
 
-set $left j
-set $down k
-set $up l
-set $right semicolon
+set $left h
+set $down j
+set $up k
+set $right l
 
 set $laptopscreen eDP-1
 
@@ -246,10 +246,8 @@ bindswitch --locked lid:off exec 'sleep 0.2; xbacklight -list > /dev/null; xback
 #
 # Layout stuff:
 #
-    # You can "split" the current object of your focus with
-    # $mod+b or $mod+v, for horizontal and vertical splits
-    # respectively.
-    bindsym $mod+h splith
+    # Splitting
+    bindsym $mod+n splith
     bindsym $mod+v splitv
 
     # Switch the current container between different layout styles
