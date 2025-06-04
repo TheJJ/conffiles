@@ -1,12 +1,17 @@
 # i3 config file (v4)
 #
 # JJ's i3 config
-# Copyright (c) 2011-2022 Jonas Jelten <jj@sft.lol>
+# Copyright (c) 2011-2025 Jonas Jelten <jj@sft.lol>
 #
 # hint: set unknown scancodes with `setkeycodes`
 #
 # Mod1: meta Mod4: super
 set $mod Mod4
+
+set $left h
+set $down j
+set $up k
+set $right l
 
 # font for window titles. ISO 10646 = Unicode
 font pango:DejaVu Sans Mono 10
@@ -78,20 +83,20 @@ bindsym $mod+x [urgent=latest] focus
 # invert colors
 bindsym $mod+Shift+i exec xcalib -invert -alter
 
-bindsym $mod+j focus left
-bindsym $mod+k focus down
-bindsym $mod+l focus up
-bindsym $mod+semicolon focus right
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
 
 bindsym $mod+Left focus left
 bindsym $mod+Down focus down
 bindsym $mod+Up focus up
 bindsym $mod+Right focus right
 
-bindsym $mod+Shift+J move left
-bindsym $mod+Shift+K move down
-bindsym $mod+Shift+L move up
-bindsym $mod+Shift+colon move right
+bindsym $mod+Shift+$left move left
+bindsym $mod+Shift+$down move down
+bindsym $mod+Shift+$up move up
+bindsym $mod+Shift+$right move right
 
 bindsym $mod+Shift+Left move left
 bindsym $mod+Shift+Down move down
@@ -103,8 +108,7 @@ bindsym $mod+Shift+less move workspace to output left
 bindsym $mod+Shift+M move workspace to output up
 bindsym $mod+Shift+slash move workspace to output down
 
-bindsym $mod+h split h
-
+bindsym $mod+n split h
 bindsym $mod+v split v
 
 bindsym $mod+f fullscreen
@@ -173,17 +177,17 @@ bindsym $mod+Shift+R restart
 bindsym $mod+Shift+E exit
 
 mode "resize" {
-	bindsym j resize shrink left 10 px or 10 ppt
-	bindsym Shift+J resize grow   left 10 px or 10 ppt
+	bindsym $left resize shrink left 10 px or 10 ppt
+	bindsym Shift+$left resize grow   left 10 px or 10 ppt
 
-	bindsym k resize shrink down 10 px or 10 ppt
-	bindsym Shift+K resize grow   down 10 px or 10 ppt
+	bindsym $down resize shrink down 10 px or 10 ppt
+	bindsym Shift+$down resize grow   down 10 px or 10 ppt
 
-	bindsym l resize shrink up 10 px or 10 ppt
-	bindsym Shift+L resize grow   up 10 px or 10 ppt
+	bindsym $up resize shrink up 10 px or 10 ppt
+	bindsym Shift+$up resize grow   up 10 px or 10 ppt
 
-	bindsym semicolon resize shrink right 10 px or 10 ppt
-	bindsym Shift+colon resize grow   right 10 px or 10 ppt
+	bindsym $right resize shrink right 10 px or 10 ppt
+	bindsym Shift+$right resize grow   right 10 px or 10 ppt
 
 	bindsym Left resize shrink left 10 px or 10 ppt
 	bindsym Shift+Left resize grow   left 10 px or 10 ppt
@@ -201,7 +205,7 @@ mode "resize" {
 	bindsym Escape mode "default"
 }
 
-bindsym $mod+i mode "resize"
+bindsym $mod+r mode "resize"
 
 
 #0. bar, multiple bars possible
