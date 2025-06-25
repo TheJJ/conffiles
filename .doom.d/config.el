@@ -26,6 +26,7 @@
 (load! "indent.el")
 (load! "codestyle.el")
 (load! "completion.el")
+(load! "distro.el")
 (load! "org.el")
 (load! "latex.el")
 (load! "python.el")

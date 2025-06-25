@@ -17,6 +17,7 @@
 (package! ripgrep)
 (package! sql-indent)
 (package! starlit-theme)
+(package! dpkg-dev-el)
 
 ;; no snippets
 ;; better would be to not complete snippets on TAB, but C-x C-s or something.
