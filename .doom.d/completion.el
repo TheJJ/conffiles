@@ -9,9 +9,10 @@
                                             "company-statistics-cache.el"))
       (add-hook 'company-mode-hook 'company-statistics-mode))))
 
-;; be more patient about highlighting stuff
 (after! flycheck
-  (setq flycheck-idle-change-delay 1.5))
+  ;; be more patient about highlighting stuff
+  (setq flycheck-idle-change-delay 1.2
+        flycheck-checker-error-threshold 5000))
 
 ;; we can try again once performance is better...
 (after! lsp-pylsp
