@@ -35,8 +35,6 @@
   ;; disable docstring view
   (setq-local
     lsp-signature-doc-lines 0
-    lsp-eldoc-enable-hover nil
-    lsp-signature-auto-activate nil
     lsp-signature-render-documentation nil)
 
   ;; smart tabs
