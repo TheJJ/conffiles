@@ -170,6 +170,7 @@ alias gdbsm='gdbserver --multi localhost:8888'
 alias gdbso='gdbserver --once localhost:8888'
 alias grep='grep --color=auto'
 alias gschichten='fortune'
+alias gu='git ubuntu'
 alias icat="kitty +kitten icat"
 alias ip='ip --color'
 alias ipb='ip --color --brief'

@@ -32,6 +32,7 @@
 	a = add
 	ap = add -p
 	ca = commit --amend
+	u = ubuntu
 [fetch]
 	fsckobjects = true
 [transfer]
