@@ -62,6 +62,8 @@ Groups have the same priority.")
         (string-prefix-p ".cache" file)))
   (push #'jj/treemacs-ignore-file-predicate treemacs-ignored-file-predicates))
 
+(after! neotree
+  (setq neo-theme 'nerd-icons))
 
 
 (defun jj/codenav-keybinds ()
