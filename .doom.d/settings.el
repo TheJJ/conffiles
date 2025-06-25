@@ -20,21 +20,17 @@
     auto-compression-mode t          ; deal with compressed files
     backward-delete-char-untabify-method nil
     custom-unlispify-tag-names nil   ; view variable names in custom-mode
-    desktop-restore-eager 3          ; other buffers are restored lazily
     display-line-numbers-type t      ; line number format
     history-delete-duplicates t      ; helm history duplicate removal
     indicate-empty-lines t
     isearch-allow-scroll t           ; continue the search even though we're scrolling
     isearch-wrap-function '(lambda nil)   ; no overwrapping in search
-    lazy-highlight t                 ; highlight occurrences
     lazy-highlight-cleanup nil       ; keep search term highlighted
     lazy-highlight-max-at-a-time nil ; all occurences in file
     load-prefer-newer t              ; don't load older .elc files than .el
-    mime-edit-split-message nil      ; don't split large messages
     mouse-yank-at-point t            ; paste as cursor instead of mouse position
     native-comp-async-report-warnings-errors 'silent
     password-cache-expiry nil        ; tramp password cache
-    ranger-show-literal t            ; colored ranger previews
     recentf-max-saved-items 1000
     tab-always-indent t
     transient-mark-mode t
