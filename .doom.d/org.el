@@ -55,7 +55,10 @@ returning t: ask user for confirmation"
   ;; no completion of any words to roam documents
   (setq org-roam-completion-everywhere nil)
   (delq! #'org-roam-complete-everywhere org-roam-completion-functions)
-  (setq org-roam-directory (expand-file-name "~/org/zettel")))
+  (setq org-roam-directory (expand-file-name "~/org/zettel"))
+
+  (after! projectile
+      (add-to-list 'projectile-globally-ignored-directories org-roam-directory)))
 
 ;; pretty formatting
 (use-package! org-modern
