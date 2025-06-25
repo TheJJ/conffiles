@@ -267,6 +267,13 @@
     sqlind-basic-offset 4
     sql-product 'postgres)
 
+  ;; TODO: detect psql prompt, or disable custom prompt
+  ;;(sql-set-product-feature 'postgres)
+
+  (smart-tabs-mode)
+  (smart-tabs-advice sqlind-indent-line sqlind-basic-offset))
+
+(defun jj/sqlind-mode-hook ()
   ;; customize indentation - very simple basic-offset based indents
   ;; see current line analysis with sqlind-show-syntax-of-line
   (setq
@@ -284,12 +291,7 @@
      (in-begin-block jj/sql-indent-begin-block)
      (with-clause-cte-cont 0)
      ,@sqlind-default-indentation-offsets-alist))
-
-  ;; TODO: detect psql prompt, or disable custom prompt
-  ;;(sql-set-product-feature 'postgres)
-
-  (smart-tabs-mode)
-  (smart-tabs-advice sqlind-indent-line sqlind-basic-offset))
+  )
 
 
 (defun jj/sql-interactive-mode-hook ()
@@ -361,6 +363,7 @@
   (add-hook 'cmake-mode-hook             'jj/cmake-mode-hook)
   (add-hook 'compilation-mode-hook       'jj/compilation-mode-hook)
   (add-hook 'sql-mode-hook               'jj/sql-mode-hook)
+  (add-hook 'sqlind-minor-mode-hook      'jj/sqlind-mode-hook)
   (add-hook 'server-visit-hook           'jj/emacs-server-visit-hook)
   (add-hook 'sh-mode-hook                'jj/sh-mode-hook)
   (add-hook 'shell-mode-hook             'jj/shell-mode-hook)
