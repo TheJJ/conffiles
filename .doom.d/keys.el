@@ -46,13 +46,17 @@
   (global-set-key (kbd "<XF86Back>") #'previous-buffer)
   (global-set-key (kbd "<XF86Forward>") #'next-buffer)
 
-  ;; arrow key stuff
-  (global-set-key (kbd "M-<left>")  #'windmove-left)
-  (global-set-key (kbd "M-<right>") #'windmove-right)
-  (global-set-key (kbd "M-<up>")    #'windmove-up)
-  (global-set-key (kbd "M-<down>")  #'windmove-down)
+  ;; i3-like window navigation (both arrow keys and vim)
+  (map! :g "M-<left>" #'windmove-left
+        :n "M-h" #'windmove-left
+        :g "M-<right>" #'windmove-right
+        :n "M-l" #'windmove-right
+        :g "M-<up>" #'windmove-up
+        :n "M-k" #'windmove-up
+        :g "M-<down>" #'windmove-down
+        :n "M-j" #'windmove-down)
 
-  ;; word jumping
+  ;; emacs-style word jumping
   (global-set-key (kbd "C-<left>")  #'backward-word)
   (global-set-key (kbd "C-<right>") #'forward-word)
   (global-set-key (kbd "C-<up>")    #'backward-paragraph)
