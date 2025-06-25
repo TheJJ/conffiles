@@ -55,6 +55,12 @@ Groups have the same priority.")
   (setq treemacs-project-follow-cleanup t
         treemacs-follow-after-init t
         treemacs-width 30)
+
+  ;; single-click expansion
+  (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action)
+
+  (treemacs-project-follow-mode 1)
+
   (defun jj/treemacs-ignore-file-predicate (file _)
     (or (string= file ".gitignore")
         (string-suffix-p ".pyc" file)
