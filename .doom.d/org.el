@@ -13,6 +13,12 @@
   ;; (mailcap-mime-info (mailcap-extension-to-mime ".pdf"))
   (setcdr (assoc "\\.pdf\\'" org-file-apps) 'default)
 
+  (defun jj/org-confirm-babel-execute (lang body)
+    "called when a babel block is about to run.
+returning nil: execute without prompting
+returning t: ask user for confirmation"
+    t)
+
   ;; TODO: scale according to display dpi and zoom!
   ;;       i.e. Xft.dpi/96 * zoomfactor
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
@@ -20,11 +26,10 @@
   (setq org-hide-emphasis-markers t  ; hide syntax elements
         org-startup-with-inline-images t
         org-startup-with-latex-preview t
-        org-appear-autolinks nil      ; let links be invisible because they expand to long lines
-        org-appear-autoentities t
         org-refile-use-outline-path 'file
         org-outline-path-complete-in-steps nil
         org-reverse-note-order t         ; new items at top
+        org-archive-reversed-order t     ; new archive items at top
         org-refile-targets '((org-agenda-files :maxlevel . 2))
         org-enforce-todo-dependencies t
         org-src-window-setup 'current-window ; edit in current window
@@ -33,11 +38,11 @@
         org-latex-compiler "xelatex"
         org-latex-pdf-process '("latexmk -f -%latex -interaction=nonstopmode -shell-escape -output-directory=%o %f")
         org-latex-src-block-backend 'minted
-        org-confirm-babel-evaluate nil   ; sure, just execute org code snippets, what can go wrong
-        org-babel-default-header-args:cpp '((:flags . "-std=c++23 -Wall -Wextra"))
+        org-confirm-babel-evaluate #'jj/org-confirm-babel-execute
         org-log-done nil
-        org-todo-keywords '((sequence "TODO(t)" "PROJ(p)" "WAIT(w)" "|" "DONE(d)" "CNCL(c)") (sequence "|" "YES(y)" "NO(n)"))
+        org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "WAIT(w)" "|" "DONE(d)" "CNCL(c)") (sequence "|" "YES(y)" "NO(n)"))
         org-return-follows-link t
+        org-clock-idle-time 15
         org-cycle-level-after-item/entry-creation nil)
 
   ;; so pressing tab in insert mode doesn't indent the headline.
