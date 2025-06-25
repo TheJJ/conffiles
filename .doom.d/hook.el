@@ -319,7 +319,10 @@
   (setq-local
    tab-width 4
    sh-basic-offset 4
-   indent-tabs-mode -1))
+   indent-tabs-mode -1)
+
+  ;; use _ as part of a word (variable name)
+  (modify-syntax-entry ?_ "w"))
 
 (defun jj/shell-mode-hook ()
   ;; correct zsh coloring in shell:
