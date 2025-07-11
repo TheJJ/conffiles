@@ -1,5 +1,5 @@
 # JJ's zshrc
-# Copyright (c) 2011 - 2023 Jonas Jelten
+# Copyright (c) 2011 - 2025 Jonas Jelten
 #
 # Released under GPLv3 or later.
 #
@@ -299,13 +299,7 @@ function git-g() {
 	aboutcommit="$reldate $commitmessage"
 	aboutauthor="$author"
 	suffix=" $commitpointer"
-
-	# if no args, dump all refs
-	if [[ $# -eq 0 ]]; then
-		treeish="--all"
-	else
-		treeish=""
-	fi
+	treeish=""
 
 	while [[ $# -gt 0 ]]; do
 		case $1 in
