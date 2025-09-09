@@ -4,7 +4,7 @@
 automatic environment variables.
 mini-version in Python of https://direnv.net
 
-(c) 2024 Jonas Jelten <jj@sft.lol>
+(c) 2024-2025 Jonas Jelten <jj@sft.lol>
 licensed under GPLv3
 
 it was written to have just for emacs integration (used with envrc.el),
@@ -418,6 +418,8 @@ typeset -ag chpwd_functions;
 if [[ -z "${{chpwd_functions[(r)_envrc_hook]+1}}" ]]; then
   chpwd_functions=( _envrc_hook ${{chpwd_functions[@]}} )
 fi
+# run when shell starts
+_envrc_hook
 """
             )
         case _:
