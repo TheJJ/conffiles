@@ -239,6 +239,10 @@
       (ansi-color-apply-on-region compilation-filter-start (point-max))))
   (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
 
+(defun jj/rustic-mode-hook ()
+  ;; include _ as part of a word
+  (modify-syntax-entry ?_ "w"))
+
 (defun jj/sql-indent-begin-block (context offset)
   "depending on the block kind, either do an indent, or not.
   no indent for defun, all other block kinds are indented."
@@ -365,6 +369,7 @@
   (add-hook 'markdown-mode-hook          'jj/markdown-mode-hook)
   (add-hook 'cmake-mode-hook             'jj/cmake-mode-hook)
   (add-hook 'compilation-mode-hook       'jj/compilation-mode-hook)
+  (add-hook 'rustic-mode-hook            'jj/rustic-mode-hook)
   (add-hook 'sql-mode-hook               'jj/sql-mode-hook)
   (add-hook 'sqlind-minor-mode-hook      'jj/sqlind-mode-hook)
   (add-hook 'server-visit-hook           'jj/emacs-server-visit-hook)
