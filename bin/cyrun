@@ -98,7 +98,7 @@ def cyrun(args):
         options.annotate = args.annotate
 
         logging.info("cythonizing %s...", pyxpath)
-        result = compile_single(str(pyxpath), options)
+        result = compile_single(str(pyxpath), options, full_module_name="__main__")
 
         if result.num_errors > 0:
             sys.exit(1)
