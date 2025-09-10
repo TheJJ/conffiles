@@ -365,14 +365,6 @@ alias git-die="git diff --word-diff-regex=. "
 # random functions
 #####################################
 
-# unix shadow password checking
-# - generate a new hash with random seed for given password
-# mksalt determines the algorithm: crypt.mksalt(crypt.METHOD_$x)
-# {'SHA512': '6', 'SHA256': '5', 'BLOWFISH': '2b', 'MD5': '1'}
-alias gencrypthash="python3 -c 'import crypt, getpass; print(crypt.crypt(getpass.getpass(\"passwd> \"), crypt.mksalt()))'"
-# - check hash (either via argv0 or input) against given password
-alias checkcrypthash="python3 -c 'import crypt, hmac, getpass, sys; hash=(sys.argv[1] if len(sys.argv) > 1 else input(\"hash> \")); k=(\"kay\" if hmac.compare_digest(crypt.crypt(getpass.getpass(\"passwd> \"), hash), hash) else \"no\"); print(k); exit(0 if k == \"kay\" else 1)'"
-
 # communication with emacs vterm
 function vterm_printf() {
     if [ -n "$TMUX" ] && ([ "${TERM%%-*}" = "tmux" ] || [ "${TERM%%-*}" = "screen" ] ); then
