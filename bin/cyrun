@@ -15,7 +15,7 @@ import tempfile
 import subprocess
 from distutils.sysconfig import get_config_var
 
-from Cython.Compiler.Main import compile_single
+from Cython.Compiler.Main import compile_single, default_options
 from Cython.Compiler import Options
 
 
@@ -90,7 +90,7 @@ def cyrun(args):
         # global options
         Options.embed = None if args.module else "main"
         # direct options
-        options = Options.CompilationOptions()
+        options = Options.CompilationOptions(default_options)
         options.cplus = not args.use_c
         options.language_level = "3"
         options.output_file = str(codepath)
@@ -98,7 +98,8 @@ def cyrun(args):
         options.annotate = args.annotate
 
         logging.info("cythonizing %s...", pyxpath)
-        result = compile_single(str(pyxpath), options, full_module_name="__main__")
+        # cythonize -> cythonize_one -> compile_single
+        result = compile_single(str(pyxpath), options, full_module_name=None)
 
         if result.num_errors > 0:
             sys.exit(1)
