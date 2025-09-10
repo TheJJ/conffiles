@@ -2,7 +2,7 @@
 " JJ's vimrc
 "
 " released under the GPLv3 or later
-" (c) 2008 - 2022 Jonas Jelten
+" (c) 2008 - 2025 Jonas Jelten
 
 
 syntax on
@@ -129,6 +129,10 @@ autocmd BufWritePost * if &diff == 1 | diffupdate | endif
 if &diff
 	colorscheme murphy
 endif
+
+" highlight current line
+set cursorline
+hi CursorLine term=NONE cterm=NONE gui=NONE ctermbg=Black guibg=NONE
 
 " refresh vimrc (this file) after saving
 autocmd BufWritePost ~/.vimrc source %
