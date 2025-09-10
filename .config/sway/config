@@ -121,10 +121,10 @@ bindswitch --locked lid:off exec 'sleep 0.2; xbacklight -list > /dev/null; xback
     #bindsym $mod+p exec "todo power off screen"
 
     # screenshot
-    bindcode control+Print exec "~/bin/screenshot"
-    bindcode control+shift+Print exec "~/bin/screenshot --select"
-    bindcode Print exec "~/bin/screenshot -o '~/Pictures/screenshots/<stamp>.png'"
-    bindcode shift+Print exec "~/bin/screenshot --select -o '~/Pictures/screenshots/<stamp>.png'"
+    bindcode control+107 exec "~/bin/screenshot"
+    bindcode control+shift+107 exec "~/bin/screenshot --select"
+    bindcode 107 exec "~/bin/screenshot -o '~/Pictures/screenshots/<stamp>.png'"
+    bindcode shift+107 exec "~/bin/screenshot --select -o '~/Pictures/screenshots/<stamp>.png'"
 
     # audio
     bindsym XF86AudioPlay exec playerctl play
