@@ -1,8 +1,7 @@
 # JJ's gdb config
-# Copyright (c) 2012-2018 Jonas Jelten <jj@sft.mx>
+# Copyright (c) 2012-2025 Jonas Jelten <jj@sft.mx>
 # Licensed GNU GPLv3 or later
 
-#set architecture i386:x86-64:intel
 set auto-load python-scripts on
 set disassemble-next-line auto
 set disassembly-flavor intel
@@ -25,6 +24,9 @@ set python print-stack full
 set trace-commands off
 set breakpoint pending on
 #set detach-on-fork off
+#set follow-fork-mode child
+#set scheduler-locking step
+#set schedule-multiple on
 
 #(sizeof(void *) == 8)
 set $arch64bit = 1
