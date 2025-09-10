@@ -33,11 +33,11 @@
         mouse-wheel-follow-mouse t)                 ; scroll- window under mouse
 
   (setq scroll-preserve-screen-position t           ; keep relative column position when scrolling
-        scroll-margin 4                             ; start scrolling n lines before window borders
+        scroll-margin 0                             ; start scrolling n lines before window borders
         scroll-conservatively 25                    ; scroll up to n lines to bring pointer back on screen
         scroll-step 0                               ; try scrolling n lines when pointer moves out
-        auto-window-vscroll nil)
+        auto-window-vscroll nil))
 
   ;; smooth scrolling :)
-  (when (>= emacs-major-version 29)
-    (pixel-scroll-precision-mode t)))
+  ;(when (>= emacs-major-version 29)
+  ;  (pixel-scroll-precision-mode t)))
