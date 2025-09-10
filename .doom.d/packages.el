@@ -24,10 +24,6 @@
 ;; some annoying snippets are hard-disabled in hack.el
 (package! doom-snippets :ignore t :disable t)
 
-;; to fix https://github.com/joaotavora/eglot/discussions/1127#discussioncomment-8017640
-;; until a newer emacs >= 29.4 is released (or rather a newer jsonrpc is included)
-(package! jsonrpc :pin "74268ee45494f40b3534164001b994e315490c27")
-
 ;; drag-stuff is useful even though we use evil
 ;; it was disabled in doom with 816db4a62addf7ac5e658123ba081069d224d310
 (package! drag-stuff :pin "6d06d846cd37c052d79acd0f372c13006aa7e7c8")
