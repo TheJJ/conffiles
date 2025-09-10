@@ -168,6 +168,8 @@ alias gdbcx64='gdb -q -ex "set architecture i386:x86-64:intel" -ex "target remot
 alias gdbs='gdbserver localhost:8888'
 alias gdbsm='gdbserver --multi localhost:8888'
 alias gdbso='gdbserver --once localhost:8888'
+alias gdiff='git diff --no-index'
+alias gdiffw='git diff --no-index --word-diff -U0'
 alias grep='grep --color=auto'
 alias gschichten='fortune'
 alias gu='git ubuntu'
