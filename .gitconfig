@@ -58,3 +58,6 @@
 	ui = auto
 [branch]
 	sort = -committerdate
+[tig]
+	ignore-case = smart-case
+	mailmap = true
