@@ -51,6 +51,9 @@
   ;; don't persist clipboard accross sessions
   (delq! 'kill-ring savehist-additional-variables))
 
+(after! magit
+  (append-to-list 'magit-git-global-arguments '("-c" "commit.verbose=false")))
+
 (after! mailcap
   (add-to-list 'mailcap-user-mime-data
                '("pdf"
