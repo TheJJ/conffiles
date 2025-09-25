@@ -188,7 +188,7 @@ alias lesse="less $LESS +G"
 (( $ON_LINUX )) && alias ls='ls --color=auto'
 (( $ON_MAC )) && alias ls='ls -G'
 alias ll='ls -lhtr'                 # magic
-alias lla='ls -la'
+alias lla='ll -a'
 alias lol="fortune | ponysay"
 alias lr='ls -R'                    # recursive ls
 alias lrandom="ls | sort -R | head -n 1"
@@ -817,9 +817,8 @@ HISTORY_IGNORE="(ls|pwd|exit|cd ..)"
 setopt append_history share_history extended_history histverify histignorespace histignoredups
 histsearch() { fc -lim "*$@*" 0 }
 
-# directory history and stack
+# directory history and stack, view with `dirs -v`
 DIRSTACKSIZE=16
-alias dh=' dirs -v'
 setopt autopushd pushdminus pushdsilent pushdtohome pushdignoredups
 
 # allow # in interactive shell
