@@ -7,7 +7,6 @@ set disassemble-next-line auto
 set disassembly-flavor intel
 set history expansion on
 set history filename ~/.gdb_history
-set history save
 set history save on
 set history size 10000
 set pagination on
