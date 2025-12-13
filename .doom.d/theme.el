@@ -27,9 +27,8 @@
     ;; only the emacs background is transparent then
     (add-to-list 'default-frame-alist '(alpha-background . nil)))
 
-
   (setq doom-font (font-spec
-                  :family "DejaVu Sans Mono"
-                  :size 10.0
-                  :weight 'normal
-                  :width 'normal)))
+                   :family "DejaVu Sans Mono"
+                   :size 10.0
+                   :weight 'normal
+                   :width 'normal)))
