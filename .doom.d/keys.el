@@ -19,6 +19,11 @@
   (when (use-region-p)
     (kill-region beg end region)))
 
+(defun jj/unfill-paragraph ()
+  (interactive)
+  (let ((fill-column (point-max)))
+    (fill-paragraph nil)))
+
 
 (defun jj/keybindings ()
   ;; support for emacs bindings in insert mode
@@ -101,6 +106,8 @@
 
   ;; align the current region to = or whatever
   (global-set-key (kbd "M-A") #'align-current)
+  ;; undo fill-paragraph
+  (global-set-key (kbd "M-Q") #'jj/unfill-paragraph)
 
   (global-set-key (kbd "M-p") (lambda ()
                                 (interactive)
