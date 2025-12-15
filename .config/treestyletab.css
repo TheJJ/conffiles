@@ -2,32 +2,43 @@
 tree style tab style configuration
 https://addons.mozilla.org/en-US/firefox/addon/tree-style-tab/
 
-Copyright (c) 2017-2022 Jonas Jelten <jj@sft.lol>
+Copyright (c) 2017-2025 Jonas Jelten <jj@sft.lol>
 
 more snippets here:
 https://github.com/piroor/treestyletab/wiki/Code-snippets-for-custom-style-rules
 */
 
-.tab.active .label {
-  /*color: #fff;*/
+/*
+more snippets here:
+https://github.com/piroor/treestyletab/wiki/Code-snippets-for-custom-style-rules
+*/
+
+tab-item.active .background {
+  background-color: steelblue;
 }
 
-.tab.unread .label {
+tab-item.active .label-content {
+  font-weight: normal;
+}
+
+tab-item.unread .label {
   color: #acf !important;
 }
 
-.tab.discarded {
+tab-item.discarded {
   opacity: 0.7;
 }
 
-/*.tab.discarded .label {
+tab-item.discarded .label {
   color: #eee;
-}*/
-
-/* Add private browsing indicator per tab */
-.tab.private-browsing .label:before {
-  content: "🕶";
 }
+
+/* indicator per tab (likely native feature now)
+tab-item.private-browsing .label:before {
+  content: "🕶 ";
+  vertical-align: bottom;
+}
+*/
 
 /* Counter Magic */
 #tabbar {
@@ -84,5 +95,3 @@ https://github.com/piroor/treestyletab/wiki/Code-snippets-for-custom-style-rules
 .closebox:hover {
   background: #fa7676;
 }
-
-#tabbar { scrollbar-width: auto; }
