@@ -6,7 +6,6 @@
 ;; use 'M-x doom/reload'.
 
 
-(package! blacken)
 (package! breadcrumb)
 (package! casual)
 (package! idle-highlight-mode)

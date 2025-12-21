@@ -36,6 +36,16 @@
    eglot-code-action-indications '(margin mode-line)  ;; doom-modeline doesn't display it yet.
    )
 
+  (add-to-list
+   'eglot-server-programs
+   `((python-mode python-ts-mode)
+     . ,(eglot-alternatives
+         '(("rass" "python")  ;; https://github.com/joaotavora/rassumfrassum
+           ("ty" "server")
+           ("ruff" "server")
+           "pylsp"
+           "pyls"))))
+
   (setq-default eglot-workspace-configuration
-                '((:pylsp . (:plugins (:black (:enabled t :line_length 120)
+                '((:pylsp . (:plugins (:ruff (:enabled t :line_length 120)
                                        :mypy (:enabled t)))))))

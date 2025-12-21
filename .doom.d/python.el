@@ -6,6 +6,8 @@
    python-fill-docstring-style 'symmetric
    python-indent-def-block-scale 1)  ; multi-line function argument indent
 
+  (set-formatter! 'ruff :modes '(python-mode python-ts-mode))
+
   (when (locate-library "anaconda-mode")
     ;; when running on tramp, disable anaconda-mode.
     ;; when eldoc-mode uses anaconda for some info, a new ssh connection
@@ -14,9 +16,6 @@
       :around #'+python-init-anaconda-mode-maybe-h
       (unless (file-remote-p default-directory)
         (apply fn args)))))
-
-(use-package! blacken
-  :after python)
 
 (defun jj/python-coding-hook ()
   (setq-local
