@@ -6,16 +6,8 @@
    python-fill-docstring-style 'symmetric
    python-indent-def-block-scale 1)  ; multi-line function argument indent
 
-  (set-formatter! 'ruff :modes '(python-mode python-ts-mode))
+  (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
 
-  (when (locate-library "anaconda-mode")
-    ;; when running on tramp, disable anaconda-mode.
-    ;; when eldoc-mode uses anaconda for some info, a new ssh connection
-    ;; seems to be opened every time, which causes buffer lag...
-    (defadvice! +python-disable-anaconda-tramp-a (fn &rest args)
-      :around #'+python-init-anaconda-mode-maybe-h
-      (unless (file-remote-p default-directory)
-        (apply fn args)))))
 
 (defun jj/python-coding-hook ()
   (setq-local
@@ -25,10 +17,6 @@
 
   ;; include _ as part of a word
   (modify-syntax-entry ?_ "w")
-
-  ;; don't show anaconda mode error popup gaaarrhhgh
-  (remove-hook 'anaconda-mode-response-read-fail-hook
-               'anaconda-mode-show-unreadable-response)
 
   ;; https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
   ;; disable docstring view
