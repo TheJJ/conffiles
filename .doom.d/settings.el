@@ -44,6 +44,8 @@
     evil-want-C-u-scroll nil         ; don't shadow prefix argument
     evil-want-C-u-delete nil         ; same
 
+    doom-modeline-buffer-file-name-style 'auto  ;; truncate directories
+    doom-modeline-project-detection 'project
     +default-want-RET-continue-comments nil ;; no magic doom comment continuation
   ))
 

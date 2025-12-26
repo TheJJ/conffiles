@@ -33,7 +33,8 @@
   (setq
    ;; don't funnily reformat when typing
    eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider)
-   eglot-code-action-indications '(margin mode-line)  ;; doom-modeline doesn't display it yet.
+   eglot-code-action-indications '(mode-line)  ;; doom-modeline doesn't display it yet. and margin is 0 currently.
+   eglot-semantic-token-modifiers nil  ;; these are face highlight overlays, which overwrite the eglot-semantic-tokentypes (but a good theme could display them somehow)
    )
 
   (add-to-list
