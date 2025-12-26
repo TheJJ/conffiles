@@ -54,6 +54,7 @@
   (delq! 'kill-ring savehist-additional-variables))
 
 (after! magit
+  (setq git-commit-summary-max-length 90)
   (append-to-list 'magit-git-global-arguments '("-c" "commit.verbose=false")))
 
 (after! mailcap
