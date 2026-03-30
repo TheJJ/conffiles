@@ -253,12 +253,6 @@ if hash python3 2>/dev/null; then
 	hash envrc 2>/dev/null && eval "$(envrc hook zsh)"
 fi
 
-## external tools
-# z -> jump to directory.
-# recommender system for directories through cd
-# stores stuff in ~/.local/share/zoxide/db.zo
-hash zoxide 2>/dev/null && eval "$(zoxide init zsh)"
-
 ## conffiles management - the whole $HOME is a git repo :)
 # usual setup:
 # - clone conffiles git repo
@@ -930,6 +924,19 @@ bindkey "^[d"           kill-word
 bindkey "^[[3^"         kill-word
 bindkey "^[[3;5~"       kill-word
 
+## external tools
+# z -> jump to directory.
+# recommender system for directories through cd
+# stores stuff in ~/.local/share/zoxide/db.zo
+hash zoxide 2>/dev/null && eval "$(zoxide init zsh)"
+
+if hash fzf 2>/dev/null; then
+	if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
+		source /usr/share/fzf/key-bindings.zsh
+		bindkey '^R' fzf-history-widget
+	fi
+fi
+
 
 ###############################
 # dircolors for ls
@@ -1036,6 +1043,10 @@ precmd () {
 
 if [[ "$INSIDE_EMACS" == "vterm" ]]; then
     NEWLINE=$'\n'
+elif [[ "$TERM_PROGRAM" == "vscode" ]]; then
+    hash code 2>/dev/null && {
+        source "$(code --locate-shell-integration-path zsh)"
+    }
 else
     NEWLINE=''
     RPROMPT="%3v%4v%{$reset_color%}[%{$fg[yellow]%}%?%{$reset_color%}]%1v%{$fg[blue]%}:%{$fg[red]%}%l%{$reset_color%}"
