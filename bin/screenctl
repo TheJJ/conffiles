@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+
+"""
+screenlock and power control
+use i3lock/swaylock/swayidle
+optionally display a lockscreen image if it exists
+"""
+
+import argparse
+import subprocess
+import shlex
+import os
+import time
+from pathlib import Path
+
+def run(args):
+    subprocess.check_call(shlex.split(args))
+
+
+def main():
+    """
+    entry point
+    """
+    cli = argparse.ArgumentParser(description='lockscreen with i3')
+    sp = cli.add_subparsers(dest="mode", required=True)
+    lockp = sp.add_parser("lock")
+    lockp.add_argument('--suspend', action="store_true")
+    lockp.add_argument('--image', default='~/.config/lockscreen/1.png')
+
+    powerp = sp.add_parser("power")
+    powerp.add_argument("power_mode", choices=["off-wakeup", "autoidle"])
+    args = cli.parse_args()
+
+    match args.mode:
+        case "lock":
+            lockimage = Path(args.image).expanduser()
+
+            # with xcompmgr, dunst actually overlays i3lock.
+            # so we need to pause dunst.
+            dunst_state = subprocess.run(
+                ["systemctl", "--user", "is-active", "dunst.service"],
+                capture_output=True,
+            )
+
+            dunst_active = dunst_state.returncode == 0 and dunst_state.stdout.strip() == b"active"
+
+            if dunst_active:
+                run("dunstctl set-paused true")
+
+            if os.environ.get("XDG_SESSION_TYPE") == "wayland":
+                lock_invocation = ["swaylock", "-n", "-c", "000000", "-F", "-e"]
+            else:
+                lock_invocation = ["i3lock", "-n", "-c", "000000", "-f"]
+
+            if lockimage.is_file():
+                lock_invocation.extend(["-i", lockimage])
+
+            lockproc = subprocess.Popen(lock_invocation)
+
+            if args.suspend:
+                run("systemctl suspend")
+
+            lockproc.wait()
+
+            if dunst_active:
+                run("dunstctl set-paused false")
+
+        case "power":
+            match args.power_mode:
+                case "off-wakeup":
+                    display = "*"
+                    cmd = f"""swayidle -w timeout 0.5 'swaymsg "output {display} power off"' resume 'swaymsg "output {display} power on"; kill $PPID'"""
+                    subprocess.run(shlex.split(cmd))
+
+                case "autoidle":
+                    os.execlp("swayidle", shlex.split("""swayidle -w timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'"""))
+
+        case _:
+            raise Exception(f"unknown mode {args.mode}")
+
+if __name__ == "__main__":
+    main()

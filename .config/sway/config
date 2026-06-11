@@ -1,5 +1,5 @@
 # JJ's sway config
-# (c) 2024-2025 Jonas Jelten <jj@sft.lol>
+# (c) 2024-2026 Jonas Jelten <jj@sft.lol>
 #
 # `man 5 sway` for complete reference.
 
@@ -49,6 +49,8 @@ output * adaptive_sync on
 
 output * bg #000000 solid_color
 
+include local.conf
+
 ### Input configuration
 #
 # Example configuration:
@@ -96,9 +98,8 @@ input type:touch {
 
 # lid closed
 bindswitch --locked lid:on exec 'xbacklight -ctrl intel_backlight -getf > ~/.cache/xbacklightstate && xbacklight -ctrl intel_backlight -set 0'
-# lid opened. important: when listing devices of xbacklight first, this apparently waits for the display control to be available again. without the backlight restore will fail with '2' because it is too early?
-bindswitch --locked lid:off exec 'sleep 0.2; xbacklight -list > /dev/null; xbacklight -ctrl intel_backlight -set "$(cat ~/.cache/xbacklightstate)"'
-
+# lid opened. important: when listing devices of xbacklight first, this apparently waits for the display control to be available again. without the backlight restore will fail with '2' because it is too early? also, bash can't handle floats...
+bindswitch --locked lid:off exec 'sleep 0.2; xbacklight -list > /dev/null; val="$(cat ~/.cache/xbacklightstate)"; newvalue=$(awk -v v="$val" "BEGIN { if (length(v) == 0 || v < 10.0) print 10.0; else print v }"); xbacklight -ctrl intel_backlight -set "$newvalue"'
 
 #
 # keybindings
@@ -116,9 +117,10 @@ bindswitch --locked lid:off exec 'sleep 0.2; xbacklight -list > /dev/null; xback
     bindsym $mod+c exec rofi -show ssh -show-icons -terminal kitty
 
     # power & lock
-    bindsym $mod+u exec "~/bin/screenlock"
-    bindsym $mod+shift+o exec "~/bin/screenlock --suspend"
-    #bindsym $mod+p exec "todo power off screen"
+    bindsym $mod+u exec "~/bin/screenctl lock"
+    bindsym $mod+shift+o exec "~/bin/screenctl lock --suspend"
+    bindsym $mod+o exec "~/bin/screenctl power off-wakeup"
+    #exec_always "~/bin/screenctl power autoidle"
 
     # screenshot
     bindcode control+107 exec "~/bin/screenshot"
@@ -280,6 +282,9 @@ bindswitch --locked lid:off exec 'sleep 0.2; xbacklight -list > /dev/null; xback
     # Show the next scratchpad window or hide the focused scratchpad window.
     # If there are multiple scratchpad windows, this command cycles through them.
     bindsym $mod+minus scratchpad show
+
+# show which are xwayland
+for_window [shell="xwayland"] title_format "⛌ %title"
 
 #
 # Floating windows:
