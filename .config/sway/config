@@ -49,6 +49,8 @@ output * adaptive_sync on
 
 output * bg #000000 solid_color
 
+seat * xcursor_theme Adwaita 20
+
 include local.conf
 
 ### Input configuration
