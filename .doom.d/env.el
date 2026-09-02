@@ -112,10 +112,14 @@ export STUFF=...
     (let ((env-vars (jj/extract-kv-re-seq jj/env-re)))
       (jj/env--set env-vars)))
 
-  ;; delete the `doom sync` generated env cache file to prevent loading it.
-  (when (and doom-env-file
-             (file-exists-p doom-env-file))
-    (delete-file doom-env-file)))
+  ;; delete the `doom sync --env` generated env cache file to prevent loading it.
+  (let ((env-file
+         (cond ((and (bound-and-true-p doom-env-file)
+                     (file-exists-p doom-env-file))
+                doom-env-file)
+               ;; is hardcoded in doom/lisp/cli/sync.el & doom/lisp/lib/config.el
+               (t (doom-profile-dir t (or (bound-and-true-p doom-profile-init-dir-name) "init.d") "05-doom-env.load.el")))))
+         (delete-file env-file)))
 
 ;; instead, we import the environment by running the user's shell once.
 (jj/import-shell-env)
