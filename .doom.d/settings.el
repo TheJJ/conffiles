@@ -43,10 +43,11 @@
     evil-search-wrap nil             ; like vim nowrapscan
     evil-want-C-u-scroll nil         ; don't shadow prefix argument
     evil-want-C-u-delete nil         ; same
-
     doom-modeline-buffer-file-name-style 'auto  ;; truncate directories
     doom-modeline-project-detection 'project
     +default-want-RET-continue-comments nil ;; no magic doom comment continuation
+    projectile-enable-caching nil
+    projectile-indexing-method 'alien
   ))
 
 (after! savehist
@@ -101,3 +102,8 @@
 (after! envrc
   ;; custom, lightweight pure-python implementation alternative to `direnv'
   (setq envrc-direnv-executable "envrc"))
+
+(after! projectile
+  ;; ignore the annoying stdout popup projectile shows when opening files.
+  ;; originates from `projectile-files-via-ext-command'
+  (set-popup-rule! "^\\*projectile-files-errors\\*$" :ignore t))
