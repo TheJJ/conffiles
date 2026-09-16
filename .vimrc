@@ -124,15 +124,16 @@ cmap diffw exec 'w !git diff -R --no-index -- - ' . shellescape(expand('%'))
 " diff refresh on write
 autocmd BufWritePost * if &diff == 1 | diffupdate | endif
 
+" highlight current line
+set cursorline
+hi CursorLine term=NONE cterm=NONE gui=NONE ctermbg=Black guibg=NONE
+
 " different colorscheme for diff
 " themes that are not totally crappy: slate, murphy, industry
 if &diff
 	colorscheme murphy
+	hi CursorLine term=NONE cterm=NONE gui=NONE ctermbg=DarkGray guibg=NONE
 endif
-
-" highlight current line
-set cursorline
-hi CursorLine term=NONE cterm=NONE gui=NONE ctermbg=Black guibg=NONE
 
 " refresh vimrc (this file) after saving
 autocmd BufWritePost ~/.vimrc source %
