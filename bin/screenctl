@@ -17,6 +17,11 @@ def run(args):
     subprocess.check_call(shlex.split(args))
 
 
+def screen_off_cmd():
+    display = "*"
+    return f"""swayidle -w timeout 0.5 'swaymsg "output {display} power off"' resume 'swaymsg "output {display} power on"; kill $PPID'"""
+
+
 def main():
     """
     entry point
@@ -26,6 +31,7 @@ def main():
     lockp = sp.add_parser("lock")
     lockp.add_argument('--suspend', action="store_true")
     lockp.add_argument('--image', default='~/.config/lockscreen/1.png')
+    lockp.add_argument('--screenoff', action="store_true")
 
     powerp = sp.add_parser("power")
     powerp.add_argument("power_mode", choices=["off-wakeup", "autoidle"])
@@ -57,10 +63,17 @@ def main():
 
             lockproc = subprocess.Popen(lock_invocation)
 
+            if args.screenoff:
+                screenoffproc = subprocess.Popen(shlex.split(screen_off_cmd()))
+            else:
+                screenoffproc = None
+
             if args.suspend:
                 run("systemctl suspend")
 
             lockproc.wait()
+            if screenoffproc:
+                screenoffproc.wait()
 
             if dunst_active:
                 run("dunstctl set-paused false")
@@ -68,9 +81,7 @@ def main():
         case "power":
             match args.power_mode:
                 case "off-wakeup":
-                    display = "*"
-                    cmd = f"""swayidle -w timeout 0.5 'swaymsg "output {display} power off"' resume 'swaymsg "output {display} power on"; kill $PPID'"""
-                    subprocess.run(shlex.split(cmd))
+                    run(screen_off_cmd())
 
                 case "autoidle":
                     os.execlp("swayidle", shlex.split("""swayidle -w timeout 300 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'"""))
