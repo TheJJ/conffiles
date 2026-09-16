@@ -919,7 +919,8 @@ bindkey "^[[3^"         kill-word
 bindkey "^[[3;5~"       kill-word
 
 ## external tools
-# z -> jump to directory.
+# z -> jump to popular directory.
+# zi -> select popular directory.
 # recommender system for directories through cd
 # stores stuff in ~/.local/share/zoxide/db.zo
 hash zoxide 2>/dev/null && eval "$(zoxide init zsh)"
@@ -928,6 +929,30 @@ if hash fzf 2>/dev/null; then
 	if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
 		source /usr/share/fzf/key-bindings.zsh
 		bindkey '^R' fzf-history-widget
+	fi
+
+	if hash zoxide 2>/dev/null; then
+		zi() {
+			local dir
+			dir=$(zoxide query -l | fzf) && cd "$dir"
+		}
+		zil() {
+			local dir
+			dir=$(zoxide query -l | fzf --preview 'ls --color=always -lht {}') && cd "$dir"
+		}
+		zit() {
+			local dir
+			dir=$(zoxide query -l | fzf --preview 'tree -C -L2 {}') && cd "$dir"
+		}
+
+		jump-dir-fuzzy-widget() {
+			zi
+			zle reset-prompt
+		}
+
+		zle -N jump-dir-fuzzy-widget
+		# bind Meta-C
+		bindkey '\ec' jump-dir-fuzzy-widget
 	fi
 fi
 
