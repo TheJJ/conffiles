@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+
+import sys
+import subprocess
+from collections import Counter
+from concurrent.futures import ProcessPoolExecutor
+
+def analyze_file(filepath):
+    counts = Counter()
+    cmd = ["git", "blame", "-w", "-C", "-C", "-M", "--line-porcelain", "HEAD", "--", filepath]
+    proc = subprocess.run(cmd, capture_output=True)
+
+    for line in proc.stdout.splitlines():
+        if line.startswith(b"author "):
+            author = line[7:].decode("utf-8", errors="replace")
+            counts[author] += 1
+    return counts
+
+def main():
+    ls_cmd = ["git", "ls-tree", "-r", "--name-only", "-z", "HEAD"]
+    if len(sys.argv) > 1:
+        ls_cmd.extend(["--"] + sys.argv[1:])
+
+    raw_files = subprocess.run(ls_cmd, capture_output=True, check=True).stdout
+    files = [f for f in raw_files.split(b"\x00") if f]
+
+    total_counts = Counter()
+    with ProcessPoolExecutor() as executor:
+        for file_counts in executor.map(analyze_file, files):
+            total_counts.update(file_counts)
+
+    for author, count in total_counts.most_common():
+        print(f"{count:10d} {author}")
+
+if __name__ == "__main__":
+    main()

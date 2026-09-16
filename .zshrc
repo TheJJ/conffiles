@@ -1,6 +1,8 @@
 # JJ's zshrc
 # Copyright (c) 2011 - 2026 Jonas Jelten
 #
+# vim: set noet ts=4 sw=4 :
+#
 # Released under GPLv3 or later.
 #
 # this config is supposed to be _unpersonalized_!
@@ -752,14 +754,6 @@ function texformula() {
 	formula="$@"
 	pdflatex -output-directory=/tmp -jobname formula "\\def\\formula{$formula}\\documentclass[border=2pt]{standalone}\\usepackage{amsmath}\\usepackage{varwidth}\\begin{document}\\begin{varwidth}{\\linewidth}\\[ \\formula \\]\\end{varwidth}\\end{document}" || return 1
 	echo -e "formula written to:\n/tmp/formula.pdf"
-}
-
-function git-authors() {
-	git blame -w -M -C -C --line-porcelain "$1" | grep '^author ' | sort -f | uniq -ic | sort -h
-}
-
-function git-repo-authors() {
-	git ls-tree -r -z --name-only HEAD -- "$1" | xargs -0 -n1 git blame -w -M -C -C --line-porcelain HEAD | grep  "^author " | sort -f | uniq -ic | sort -h
 }
 
 function supernice {
