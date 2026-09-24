@@ -934,15 +934,15 @@ if hash fzf 2>/dev/null; then
 	if hash zoxide 2>/dev/null; then
 		zi() {
 			local dir
-			dir=$(zoxide query -l | fzf) && cd "$dir"
+			dir=$(zoxide query -l | fzf --scheme=history) && cd "$dir"
 		}
 		zil() {
 			local dir
-			dir=$(zoxide query -l | fzf --preview 'ls --color=always -lht {}') && cd "$dir"
+			dir=$(zoxide query -l | fzf --scheme=history --preview 'ls --color=always -lht {}') && cd "$dir"
 		}
 		zit() {
 			local dir
-			dir=$(zoxide query -l | fzf --preview 'tree -C -L2 {}') && cd "$dir"
+			dir=$(zoxide query -l | fzf --scheme=history --preview 'tree -C -L2 {}') && cd "$dir"
 		}
 
 		jump-dir-fuzzy-widget() {
